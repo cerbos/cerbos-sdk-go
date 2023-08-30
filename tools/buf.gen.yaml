@@ -1,0 +1,34 @@
+---
+version: v1
+managed:
+  enabled: true
+  go_package_prefix:
+    default: github.com/cerbos/cerbos-sdk-go/client/genpb
+    except:
+      - buf.build/googleapis/googleapis
+      - buf.build/grpc-ecosystem/grpc-gateway
+      - buf.build/envoyproxy/protoc-gen-validate
+plugins:
+  - name: go
+    out: client/genpb
+    opt: paths=source_relative
+    path: ["go", "run", "google.golang.org/protobuf/cmd/protoc-gen-go"]
+
+  - name: connect-go
+    out: client/genpb
+    opt: paths=source_relative
+    path: ["go", "run", "connectrpc.com/connect/cmd/protoc-gen-connect-go"]
+
+  - name: vtproto
+    out: client/genpb
+    opt:
+      - paths=source_relative
+      - features=marshal+unmarshal+size
+    path: ["go", "run", "github.com/planetscale/vtprotobuf/cmd/protoc-gen-go-vtproto"]
+
+  - name: validate
+    out: client/genpb
+    opt:
+      - paths=source_relative
+      - lang=go
+    path: ["go", "run", "github.com/envoyproxy/protoc-gen-validate"]
