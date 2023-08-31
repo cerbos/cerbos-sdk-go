@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/cerbos/cerbos-sdk-go"
+	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	policyv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/policy/v1"
 	requestv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/request/v1"
 	responsev1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/response/v1"

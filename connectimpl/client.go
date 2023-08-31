@@ -16,7 +16,7 @@ import (
 
 	"connectrpc.com/connect"
 	"connectrpc.com/otelconnect"
-	"github.com/cerbos/cerbos-sdk-go"
+	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	effectv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/effect/v1"
 	enginev1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/engine/v1"
 	requestv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/request/v1"
@@ -29,7 +29,10 @@ import (
 
 const minCompressSizeBytes = 1024
 
-var errPlaygroundRequiresTLS = errors.New("playground cannot be accessed over a plaintext connection: remove the WithPlaintext() option")
+var (
+	_                        cerbos.Client[*Client, PrincipalCtx] = (*Client)(nil)
+	errPlaygroundRequiresTLS                                      = errors.New("playground cannot be accessed over a plaintext connection: remove the WithPlaintext() option")
+)
 
 type config struct {
 	address            string

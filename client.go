@@ -1,56 +1,22 @@
 // Copyright 2021-2023 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-// Package client provides a client implementation to interact with a Cerbos instance and check access policies.
-package cerbos
+// Package cerbossdk provides client implementations to interact with the Cerbos API.
+package cerbossdk
 
-import (
-	"context"
+import "github.com/cerbos/cerbos-sdk-go/grpcimpl"
 
-	policyv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/policy/v1"
-	schemav1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/schema/v1"
-)
-
-// Client provides access to the Cerbos API.
-type Client[C any, P PrincipalContext] interface {
-	// IsAllowed checks access to a single resource by a principal and returns true if access is granted.
-	IsAllowed(ctx context.Context, principal *Principal, resource *Resource, action string) (bool, error)
-	// CheckResources checks access to a batch of resources of different kinds.
-	CheckResources(ctx context.Context, principal *Principal, resources *ResourceBatch) (*CheckResourcesResponse, error)
-	// ServerInfo retrieves server information.
-	ServerInfo(ctx context.Context) (*ServerInfo, error)
-	// With sets per-request options for the client.
-	With(opts ...RequestOpt) Client[C, P]
-	// PlanResources creates a query plan for performing the given action on a set of resources of the given kind.
-	PlanResources(ctx context.Context, principal *Principal, resource *Resource, action string) (*PlanResourcesResponse, error)
-	// WithPrincipal sets the principal to be used for subsequent API calls.
-	// WithPrincipal sets the principal to be used for subsequent API calls.
-	WithPrincipal(principal *Principal) P
+// NewClient returns a new client for the Cerbos API.
+func NewClient(address string, opts ...grpcimpl.Opt) (*grpcimpl.Client, error) {
+	return grpcimpl.New(address, opts...)
 }
 
-// PrincipalContext provides convenience methods to access the Cerbos API in the context of a single principal.
-type PrincipalContext interface {
-	// Principal returns the principal attached to this context.
-	Principal() *Principal
-	// IsAllowed checks access to a single resource by the principal and returns true if access is granted.
-	IsAllowed(ctx context.Context, resource *Resource, action string) (bool, error)
-	// CheckResources checks access to a batch of resources of different kinds.
-	CheckResources(ctx context.Context, resources *ResourceBatch) (*CheckResourcesResponse, error)
-	// PlanResources creates a query plan for performing the given action on a set of resources of the given kind.
-	PlanResources(ctx context.Context, resource *Resource, action string) (*PlanResourcesResponse, error)
+// NewAdminClient returns a new client for the Cerbos Admin API.
+func NewAdminClient(address string, opts ...grpcimpl.Opt) (*grpcimpl.AdminClient, error) {
+	return grpcimpl.NewAdminClient(address, opts...)
 }
 
-// AdminClient provides access to the Cerbos Admin API.
-type AdminClient interface {
-	AddOrUpdatePolicy(ctx context.Context, policies *PolicySet) error
-	AuditLogs(ctx context.Context, opts AuditLogOptions) (<-chan *AuditLogEntry, error)
-	ListPolicies(ctx context.Context, opts ...ListPoliciesOption) ([]string, error)
-	GetPolicy(ctx context.Context, ids ...string) ([]*policyv1.Policy, error)
-	DisablePolicy(ctx context.Context, ids ...string) (uint32, error)
-	EnablePolicy(ctx context.Context, ids ...string) (uint32, error)
-	AddOrUpdateSchema(ctx context.Context, schemas *SchemaSet) error
-	DeleteSchema(ctx context.Context, ids ...string) (uint32, error)
-	ListSchemas(ctx context.Context) ([]string, error)
-	GetSchema(ctx context.Context, ids ...string) ([]*schemav1.Schema, error)
-	ReloadStore(ctx context.Context, wait bool) error
+// NewAdminClient returns a new client for the Cerbos Admin API.
+func NewAdminClientWithCredentials(address, username, password string, opts ...grpcimpl.Opt) (*grpcimpl.AdminClient, error) {
+	return grpcimpl.NewAdminClientWithCredentials(address, username, password, opts...)
 }

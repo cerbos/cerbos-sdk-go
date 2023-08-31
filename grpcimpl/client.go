@@ -12,7 +12,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/cerbos/cerbos-sdk-go"
+	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	effectv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/effect/v1"
 	enginev1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/engine/v1"
 	requestv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/request/v1"
@@ -24,6 +24,8 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+var _ cerbos.Client[*Client, PrincipalCtx] = (*Client)(nil)
 
 type config struct {
 	address            string
