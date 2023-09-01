@@ -1,6 +1,9 @@
 set dotenv-load := true
 
 export TOOLS_BIN_DIR := join(env_var_or_default("XDG_CACHE_HOME", join(env_var("HOME") , ".cache")), "cerbos-sdk-go/bin")
+export CERBOS_TEST_CONTAINER_TAG := "dev"
+export CERBOS_TEST_DEBUG := "true"
+
 genpb_dir := join(justfile_directory(), "genpb")
 tools_mod_dir := join(justfile_directory(), "tools")
 
@@ -18,7 +21,10 @@ lint: _golangcilint
     @ "${TOOLS_BIN_DIR}/golangci-lint" run --fix
 
 test PKG='./...' TEST='.*': _gotestsum
-    @ "${TOOLS_BIN_DIR}/gotestsum" --format=dots-v2 --format-hide-empty-pkg -- -tags=tests,integration -failfast -count=1 -run='{{ TEST }}' '{{ PKG }}'
+    @ "${TOOLS_BIN_DIR}/gotestsum" --format-hide-empty-pkg -- -tags=tests,integration -failfast -v -count=1 -run='{{ TEST }}' '{{ PKG }}'
+
+tests: _gotestsum
+    @ "${TOOLS_BIN_DIR}/gotestsum" --format=dots-v2 --format-hide-empty-pkg -- -tags=tests,integration -failfast -count=1 ./...
 
 compile:
     @ go build -o /dev/null ./...

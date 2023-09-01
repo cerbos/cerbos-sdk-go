@@ -1,14 +1,15 @@
 // Copyright 2021-2023 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-//go:build tests || e2e
+//go:build tests
 
-package client
+package tests
 
 import (
 	"context"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -20,117 +21,59 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 	"google.golang.org/protobuf/types/known/structpb"
 
-	enginev1 "github.com/cerbos/cerbos-sdk-go/client/genpb/cerbos/engine/v1"
-	"github.com/cerbos/cerbos-sdk-go/internal/test"
+	"github.com/cerbos/cerbos-sdk-go/cerbos"
+	enginev1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/engine/v1"
 )
 
 const timeout = 30 * time.Second
 
-func RunE2ETests(addr string, opts ...Opt) func(*testing.T) {
-	c, err := New(addr, opts...)
-	if err != nil {
-		panic(err)
+func PathToTestDataDir(tb testing.TB, dir string) string {
+	tb.Helper()
+
+	_, currFile, _, ok := runtime.Caller(0)
+	if !ok {
+		tb.Error("Failed to detect testdata directory")
+		return ""
 	}
 
-	return TestGRPCClient(c)
+	return filepath.Join(filepath.Dir(currFile), "testdata", dir)
 }
 
-func TestGRPCClient(c Client) func(*testing.T) {
+func GenerateToken(t *testing.T, expiry time.Time) string {
+	t.Helper()
+
+	token := jwt.New()
+	require.NoError(t, token.Set(jwt.IssuerKey, "cerbos-test-suite"))
+	require.NoError(t, token.Set(jwt.AudienceKey, "cerbos-jwt-tests"))
+	require.NoError(t, token.Set(jwt.ExpirationKey, expiry))
+	require.NoError(t, token.Set("customString", "foobar"))
+	require.NoError(t, token.Set("customInt", 42)) //nolint:gomnd
+	require.NoError(t, token.Set("customArray", []string{"A", "B", "C"}))
+	require.NoError(t, token.Set("customMap", map[string]any{"A": "AA", "B": "BB", "C": "CC"}))
+
+	keyData, err := os.ReadFile(filepath.Join(PathToTestDataDir(t, "certs"), "signing_key.jwk"))
+	require.NoError(t, err)
+
+	keySet, err := jwk.ParseKey(keyData)
+	require.NoError(t, err)
+
+	tokenBytes, err := jwt.Sign(token, jwt.WithKey(jwa.ES384, keySet))
+	require.NoError(t, err)
+
+	return string(tokenBytes)
+}
+
+func TestClient[P cerbos.PrincipalContext, C cerbos.Client[C, P]](c cerbos.Client[C, P]) func(*testing.T) {
 	//nolint:thelper
 	return func(t *testing.T) {
 		token := GenerateToken(t, time.Now().Add(5*time.Minute)) //nolint:gomnd
 		c := c.With(
-			AuxDataJWT(token, ""),
-			IncludeMeta(true),
+			cerbos.AuxDataJWT(token, ""),
+			cerbos.IncludeMeta(true),
 		)
-		t.Run("CheckResourceSet", func(t *testing.T) {
-			ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-			defer cancelFunc()
-
-			have, err := c.CheckResourceSet(
-				ctx,
-				NewPrincipal("john").
-					WithRoles("employee").
-					WithPolicyVersion("20210210").
-					WithAttributes(map[string]any{
-						"department": "marketing",
-						"geography":  "GB",
-						"team":       "design",
-					}),
-				NewResourceSet("leave_request").
-					WithPolicyVersion("20210210").
-					AddResourceInstance("XX125", map[string]any{
-						"department": "marketing",
-						"geography":  "GB",
-						"id":         "XX125",
-						"owner":      "john",
-						"team":       "design",
-					}),
-				"view:public", "approve", "defer")
-
-			require.NoError(t, err)
-			require.True(t, have.IsAllowed("XX125", "view:public"))
-			require.False(t, have.IsAllowed("XX125", "approve"))
-			require.True(t, have.IsAllowed("XX125", "defer"))
-			require.NotNil(t, have.Meta, "no metadata found")
-		})
-
-		t.Run("CheckResourceBatch", func(t *testing.T) {
-			ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-			defer cancelFunc()
-
-			have, err := c.CheckResourceBatch(
-				ctx,
-				NewPrincipal("john").
-					WithRoles("employee").
-					WithPolicyVersion("20210210").
-					WithAttributes(map[string]any{
-						"department": "marketing",
-						"geography":  "GB",
-						"team":       "design",
-					}),
-				NewResourceBatch().
-					Add(
-						NewResource("leave_request", "XX125").
-							WithPolicyVersion("20210210").
-							WithAttributes(map[string]any{
-								"department": "marketing",
-								"geography":  "GB",
-								"id":         "XX125",
-								"owner":      "john",
-								"team":       "design",
-							}), "view:public", "defer").
-					Add(
-						NewResource("leave_request", "XX125").
-							WithPolicyVersion("20210210").
-							WithAttributes(map[string]any{
-								"department": "marketing",
-								"geography":  "GB",
-								"id":         "XX125",
-								"owner":      "john",
-								"team":       "design",
-							}), "approve").
-					Add(
-						NewResource("leave_request", "XX225").
-							WithPolicyVersion("20210210").
-							WithAttributes(map[string]any{
-								"department": "engineering",
-								"geography":  "GB",
-								"id":         "XX225",
-								"owner":      "mary",
-								"team":       "frontend",
-							}), "approve"),
-			)
-
-			require.NoError(t, err)
-			require.True(t, have.IsAllowed("XX125", "view:public"))
-			require.False(t, have.IsAllowed("XX125", "approve"))
-			require.True(t, have.IsAllowed("XX125", "defer"))
-			require.False(t, have.IsAllowed("XX225", "approve"))
-		})
 
 		t.Run("CheckResources", func(t *testing.T) {
-			principal := NewPrincipal("john").
+			principal := cerbos.NewPrincipal("john").
 				WithRoles("employee").
 				WithPolicyVersion("20210210").
 				WithAttributes(map[string]any{
@@ -139,9 +82,9 @@ func TestGRPCClient(c Client) func(*testing.T) {
 					"team":       "design",
 				})
 
-			resources := NewResourceBatch().
+			resources := cerbos.NewResourceBatch().
 				Add(
-					NewResource("leave_request", "XX125").
+					cerbos.NewResource("leave_request", "XX125").
 						WithPolicyVersion("20210210").
 						WithAttributes(map[string]any{
 							"department": "marketing",
@@ -151,7 +94,7 @@ func TestGRPCClient(c Client) func(*testing.T) {
 							"team":       "design",
 						}), "view:public", "defer").
 				Add(
-					NewResource("leave_request", "XX125").
+					cerbos.NewResource("leave_request", "XX125").
 						WithPolicyVersion("20210210").
 						WithAttributes(map[string]any{
 							"department": "marketing",
@@ -161,7 +104,7 @@ func TestGRPCClient(c Client) func(*testing.T) {
 							"team":       "design",
 						}), "approve").
 				Add(
-					NewResource("leave_request", "XX225").
+					cerbos.NewResource("leave_request", "XX225").
 						WithPolicyVersion("20210210").
 						WithAttributes(map[string]any{
 							"department": "engineering",
@@ -171,11 +114,11 @@ func TestGRPCClient(c Client) func(*testing.T) {
 							"team":       "frontend",
 						}), "approve")
 
-			check := func(t *testing.T, have *CheckResourcesResponse, err error) {
+			check := func(t *testing.T, have *cerbos.CheckResourcesResponse, err error) {
 				t.Helper()
 				require.NoError(t, err)
 
-				haveXX125 := have.GetResource("XX125", MatchResourceKind("leave_request"))
+				haveXX125 := have.GetResource("XX125", cerbos.MatchResourceKind("leave_request"))
 				require.NoError(t, haveXX125.Err())
 				require.True(t, haveXX125.IsAllowed("view:public"))
 				require.False(t, haveXX125.IsAllowed("approve"))
@@ -208,7 +151,7 @@ func TestGRPCClient(c Client) func(*testing.T) {
 		})
 
 		t.Run("CheckResourcesScoped", func(t *testing.T) {
-			principal := NewPrincipal("john").
+			principal := cerbos.NewPrincipal("john").
 				WithRoles("employee").
 				WithScope("acme.hr").
 				WithAttributes(map[string]any{
@@ -218,9 +161,9 @@ func TestGRPCClient(c Client) func(*testing.T) {
 					"ip_address": "10.20.5.5",
 				})
 
-			resources := NewResourceBatch().
+			resources := cerbos.NewResourceBatch().
 				Add(
-					NewResource("leave_request", "XX125").
+					cerbos.NewResource("leave_request", "XX125").
 						WithScope("acme.hr.uk").
 						WithAttributes(map[string]any{
 							"department": "marketing",
@@ -230,7 +173,7 @@ func TestGRPCClient(c Client) func(*testing.T) {
 							"team":       "design",
 						}), "view:public", "delete", "create").
 				Add(
-					NewResource("leave_request", "XX225").
+					cerbos.NewResource("leave_request", "XX225").
 						WithScope("acme.hr").
 						WithAttributes(map[string]any{
 							"department": "marketing",
@@ -240,18 +183,18 @@ func TestGRPCClient(c Client) func(*testing.T) {
 							"team":       "design",
 						}), "view:public", "delete", "create")
 
-			check := func(t *testing.T, have *CheckResourcesResponse, err error) {
+			check := func(t *testing.T, have *cerbos.CheckResourcesResponse, err error) {
 				t.Helper()
 				require.NoError(t, err)
 
-				haveXX125 := have.GetResource("XX125", MatchResourceKind("leave_request"))
+				haveXX125 := have.GetResource("XX125", cerbos.MatchResourceKind("leave_request"))
 				require.NoError(t, haveXX125.Err())
 				require.True(t, haveXX125.IsAllowed("view:public"))
 				require.True(t, haveXX125.IsAllowed("delete"))
 				require.True(t, haveXX125.IsAllowed("create"))
 				require.Equal(t, "acme.hr.uk", haveXX125.Resource.Scope)
 
-				haveXX225 := have.GetResource("XX225", MatchResourceKind("leave_request"))
+				haveXX225 := have.GetResource("XX225", cerbos.MatchResourceKind("leave_request"))
 				require.NoError(t, haveXX225.Err())
 				require.True(t, haveXX225.IsAllowed("view:public"))
 				require.False(t, haveXX225.IsAllowed("delete"))
@@ -277,7 +220,7 @@ func TestGRPCClient(c Client) func(*testing.T) {
 		})
 
 		t.Run("CheckResourcesOutput", func(t *testing.T) {
-			principal := NewPrincipal("john").
+			principal := cerbos.NewPrincipal("john").
 				WithRoles("employee").
 				WithAttributes(map[string]any{
 					"department": "marketing",
@@ -285,8 +228,8 @@ func TestGRPCClient(c Client) func(*testing.T) {
 					"team":       "design",
 				})
 
-			resources := NewResourceBatch().Add(
-				NewResource("equipment_request", "XX125").
+			resources := cerbos.NewResourceBatch().Add(
+				cerbos.NewResource("equipment_request", "XX125").
 					WithScope("acme").
 					WithAttributes(map[string]any{
 						"department": "marketing",
@@ -297,7 +240,7 @@ func TestGRPCClient(c Client) func(*testing.T) {
 					}), "view:public", "approve", "create",
 			)
 
-			check := func(t *testing.T, have *CheckResourcesResponse, err error) {
+			check := func(t *testing.T, have *cerbos.CheckResourcesResponse, err error) {
 				t.Helper()
 				require.NoError(t, err)
 
@@ -349,7 +292,7 @@ func TestGRPCClient(c Client) func(*testing.T) {
 		})
 
 		t.Run("IsAllowed", func(t *testing.T) {
-			principal := NewPrincipal("john").
+			principal := cerbos.NewPrincipal("john").
 				WithRoles("employee").
 				WithPolicyVersion("20210210").
 				WithAttributes(map[string]any{
@@ -358,7 +301,7 @@ func TestGRPCClient(c Client) func(*testing.T) {
 					"team":       "design",
 				})
 
-			resource := NewResource("leave_request", "XX125").
+			resource := cerbos.NewResource("leave_request", "XX125").
 				WithPolicyVersion("20210210").
 				WithAttributes(map[string]any{
 					"department": "marketing",
@@ -387,8 +330,8 @@ func TestGRPCClient(c Client) func(*testing.T) {
 			})
 		})
 
-		t.Run("ResourcesQueryPlan", func(t *testing.T) {
-			principal := NewPrincipal("maggie").
+		t.Run("PlanResources", func(t *testing.T) {
+			principal := cerbos.NewPrincipal("maggie").
 				WithRoles("manager").
 				WithAttr("geography", "US").
 				WithAttr("department", "marketing").
@@ -396,13 +339,13 @@ func TestGRPCClient(c Client) func(*testing.T) {
 				WithAttr("managed_geographies", "US").
 				WithAttr("reader", false)
 
-			resource := NewResource("leave_request", "").
+			resource := cerbos.NewResource("leave_request", "").
 				WithPolicyVersion("20210210").
 				WithAttr("geography", "US")
 
-			cc := c.With(IncludeMeta(true))
+			cc := c.With(cerbos.IncludeMeta(true))
 
-			check := func(t *testing.T, have *PlanResourcesResponse, err error) {
+			check := func(t *testing.T, have *cerbos.PlanResourcesResponse, err error) {
 				t.Helper()
 				is := require.New(t)
 
@@ -433,28 +376,4 @@ func TestGRPCClient(c Client) func(*testing.T) {
 			})
 		})
 	}
-}
-
-func GenerateToken(t *testing.T, expiry time.Time) string {
-	t.Helper()
-
-	token := jwt.New()
-	require.NoError(t, token.Set(jwt.IssuerKey, "cerbos-test-suite"))
-	require.NoError(t, token.Set(jwt.AudienceKey, "cerbos-jwt-tests"))
-	require.NoError(t, token.Set(jwt.ExpirationKey, expiry))
-	require.NoError(t, token.Set("customString", "foobar"))
-	require.NoError(t, token.Set("customInt", 42)) //nolint:gomnd
-	require.NoError(t, token.Set("customArray", []string{"A", "B", "C"}))
-	require.NoError(t, token.Set("customMap", map[string]any{"A": "AA", "B": "BB", "C": "CC"}))
-
-	keyData, err := os.ReadFile(filepath.Join(test.PathToDir(t, "auxdata"), "signing_key.jwk"))
-	require.NoError(t, err)
-
-	keySet, err := jwk.ParseKey(keyData)
-	require.NoError(t, err)
-
-	tokenBytes, err := jwt.Sign(token, jwt.WithKey(jwa.ES384, keySet))
-	require.NoError(t, err)
-
-	return string(tokenBytes)
 }
