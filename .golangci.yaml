@@ -2,7 +2,7 @@
 run:
   timeout: 300s
   skip-dirs:
-    - "^client/genpb/"
+    - "^genpb/"
     - "^hack/"
     - "^tools/"
   build-tags:
