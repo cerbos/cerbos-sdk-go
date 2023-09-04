@@ -18,7 +18,7 @@ import (
 	requestv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/request/v1"
 	svcv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/svc/v1"
 	"github.com/cerbos/cerbos-sdk-go/internal"
-	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
+	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/retry"
 	"github.com/rs/xid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

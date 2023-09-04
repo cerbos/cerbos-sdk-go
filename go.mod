@@ -9,7 +9,7 @@ require (
 	github.com/envoyproxy/protoc-gen-validate v1.0.2
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.5.9
-	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.1
 	github.com/hashicorp/go-retryablehttp v0.7.4
 	github.com/jdxcode/netrc v1.0.0

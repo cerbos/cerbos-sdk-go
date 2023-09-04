@@ -8,6 +8,7 @@ package grpcimpl_test
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -117,7 +118,13 @@ func TestClient(t *testing.T) {
 					require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
 				*/
 
-				addr := fmt.Sprintf("unix://%s", filepath.Join(tempDir, "grpc.sock"))
+				socketPath := filepath.Join(tempDir, "grpc.sock")
+				require.Eventually(t, func() bool {
+					_, err := os.Stat(socketPath)
+					return err == nil
+				}, 1*time.Minute, 100*time.Millisecond)
+
+				addr := fmt.Sprintf("unix://%s", socketPath)
 				c, err := grpcimpl.New(addr, tc.opts...)
 				require.NoError(t, err)
 
