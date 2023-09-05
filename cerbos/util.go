@@ -1,7 +1,7 @@
 // Copyright 2021-2023 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-package internal
+package cerbos
 
 import (
 	"context"
@@ -16,7 +16,7 @@ func BatchAdminClientCall(ctx context.Context, retrieveFn func(context.Context, 
 	var total uint32
 	for idx := range ids {
 		if idx%MaxIDPerReq == 0 {
-			idxEnd := MinInt(idx+MaxIDPerReq, len(ids))
+			idxEnd := minInt(idx+MaxIDPerReq, len(ids))
 			var err error
 			affected, err := retrieveFn(ctx, ids[idx:idxEnd]...)
 			if err != nil {
@@ -36,7 +36,7 @@ func BatchAdminClientCall2[T []*schemav1.Schema | []*policyv1.Policy | []string]
 ) error {
 	for idx := range ids {
 		if idx%MaxIDPerReq == 0 {
-			idxEnd := MinInt(idx+MaxIDPerReq, len(ids))
+			idxEnd := minInt(idx+MaxIDPerReq, len(ids))
 			var err error
 			r, err := retrieveFn(ctx, ids[idx:idxEnd]...)
 			if err != nil {
@@ -52,7 +52,7 @@ func BatchAdminClientCall2[T []*schemav1.Schema | []*policyv1.Policy | []string]
 	return nil
 }
 
-func MinInt(a, b int) int {
+func minInt(a, b int) int {
 	if a < b {
 		return a
 	}
