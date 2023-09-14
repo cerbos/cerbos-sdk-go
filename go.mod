@@ -1,10 +1,10 @@
 module github.com/cerbos/cerbos-sdk-go
 
-go 1.21.1
+go 1.20
 
 require (
 	github.com/cenkalti/backoff/v4 v4.2.1
-	github.com/cerbos/cerbos/api/genpb v0.0.0-20230914050616-d4c39c9b507b
+	github.com/cerbos/cerbos/api/genpb v0.0.0-20230914104512-0d63f1e32f77
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.5.9
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0
