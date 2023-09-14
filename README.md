@@ -14,7 +14,7 @@ See Go docs for more information.
 
 
 ```go
-c, err := grpcimpl.New("unix:/var/sock/cerbos", grpcimpl.WithTLSCACert("/path/to/ca.crt"))
+c, err := cerbos.New("unix:/var/sock/cerbos", cerbos.WithTLSCACert("/path/to/ca.crt"))
 if err != nil {
     log.Fatalf("Failed to create client: %v", err)
 }
@@ -38,7 +38,6 @@ This project supersedes the Cerbos Go client available at `github.com/cerbos/cer
 
 Migrating most of the existing code should be just a matter of renaming the package imports.
 
-- The stable client implementation has moved from `github.com/cerbos/cerbos/client` to `github.com/cerbos/cerbos-sdk-go/grpcimpl`
-- All model objects such as `Principal` and `Resource` have moved to `github.com/cerbos/cerbos-sdk-go/cerbos`
+- Change import paths from `github.com/cerbos/cerbos/client` to `github.com/cerbos/cerbos-sdk-go/cerbos`. Optionally, alias the new import as `client "github.com/cerbos/cerbos-sdk-go/cerbos` to avoid having to change package references in code.
 - Deprecated RPCs (`CheckResourceSet`, `CheckResourceBatch`) have been removed from the new client implementation
-- The process for starting a Cerbos test server has changed in order to avoid pulling in dependencies of the Cerbos project. Use the `NewCerbosServerLauncher` function from `github.com/cerbos/cerbos-sdk-go/testutil` to create a launcher and call the `Launch()` method to start a Cerbos container.
+- The process for starting a Cerbos test server has changed in order to avoid pulling in dependencies of the Cerbos project. Use the `NewCerbosServerLauncher` function from `github.com/cerbos/cerbos-sdk-go/testutil` to create a launcher and call the `Launch()` method to start a Cerbos container. Refer to Go docs for details.
