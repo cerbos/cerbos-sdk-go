@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
-	effectv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/effect/v1"
-	policyv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/policy/v1"
+	effectv1 "github.com/cerbos/cerbos/api/genpb/cerbos/effect/v1"
+	policyv1 "github.com/cerbos/cerbos/api/genpb/cerbos/policy/v1"
 )
 
 const (

@@ -1,7 +1,7 @@
 // Copyright 2021-2023 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-package grpcimpl
+package cerbos
 
 import (
 	"context"
@@ -13,13 +13,12 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/cerbos/cerbos-sdk-go/cerbos"
-	policyv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/policy/v1"
-	requestv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/request/v1"
-	responsev1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/response/v1"
-	schemav1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/schema/v1"
-	svcv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/svc/v1"
 	"github.com/cerbos/cerbos-sdk-go/internal"
+	policyv1 "github.com/cerbos/cerbos/api/genpb/cerbos/policy/v1"
+	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
+	responsev1 "github.com/cerbos/cerbos/api/genpb/cerbos/response/v1"
+	schemav1 "github.com/cerbos/cerbos/api/genpb/cerbos/schema/v1"
+	svcv1 "github.com/cerbos/cerbos/api/genpb/cerbos/svc/v1"
 )
 
 const (
@@ -35,12 +34,12 @@ const (
 // Note that Unix domain socket connections cannot fallback to netrc and require either the
 // environment variables to be defined or the credentials to provided explicitly via the
 // NewAdminClientWithCredentials function.
-func NewAdminClient(address string, opts ...Opt) (*AdminClient, error) {
+func NewAdminClient(address string, opts ...Opt) (*GRPCAdminClient, error) {
 	return NewAdminClientWithCredentials(address, "", "", opts...)
 }
 
 // NewAdminClientWithCredentials creates a new admin client using credentials explicitly passed as arguments.
-func NewAdminClientWithCredentials(address, username, password string, opts ...Opt) (*AdminClient, error) {
+func NewAdminClientWithCredentials(address, username, password string, opts ...Opt) (*GRPCAdminClient, error) {
 	// TODO: handle this in call site
 	target, user, pass, err := internal.LoadBasicAuthData(internal.OSEnvironment{}, address, username, password)
 	if err != nil {
@@ -57,15 +56,15 @@ func NewAdminClientWithCredentials(address, username, password string, opts ...O
 		basicAuth = basicAuth.Insecure()
 	}
 
-	return &AdminClient{client: svcv1.NewCerbosAdminServiceClient(grpcConn), creds: basicAuth}, nil
+	return &GRPCAdminClient{client: svcv1.NewCerbosAdminServiceClient(grpcConn), creds: basicAuth}, nil
 }
 
-type AdminClient struct {
+type GRPCAdminClient struct {
 	client svcv1.CerbosAdminServiceClient
 	creds  credentials.PerRPCCredentials
 }
 
-func (c *AdminClient) AddOrUpdatePolicy(ctx context.Context, policies *cerbos.PolicySet) error {
+func (c *GRPCAdminClient) AddOrUpdatePolicy(ctx context.Context, policies *PolicySet) error {
 	if err := policies.Validate(); err != nil {
 		return err
 	}
@@ -90,8 +89,8 @@ type recvFn func() (*responsev1.ListAuditLogEntriesResponse, error)
 
 // collectLogs collects logs from the receiver function and passes to the channel
 // it will return an error if the channel type is not accepted.
-func collectLogs(receiver recvFn) (<-chan *cerbos.AuditLogEntry, error) {
-	ch := make(chan *cerbos.AuditLogEntry)
+func collectLogs(receiver recvFn) (<-chan *AuditLogEntry, error) {
+	ch := make(chan *AuditLogEntry)
 
 	go func() {
 		defer close(ch)
@@ -103,18 +102,18 @@ func collectLogs(receiver recvFn) (<-chan *cerbos.AuditLogEntry, error) {
 					return
 				}
 
-				ch <- cerbos.NewAuditLogEntry(nil, nil, err)
+				ch <- NewAuditLogEntry(nil, nil, err)
 				return
 			}
 
-			ch <- cerbos.NewAuditLogEntry(entry.GetAccessLogEntry(), entry.GetDecisionLogEntry(), nil)
+			ch <- NewAuditLogEntry(entry.GetAccessLogEntry(), entry.GetDecisionLogEntry(), nil)
 		}
 	}()
 
 	return ch, nil
 }
 
-func (c *AdminClient) AuditLogs(ctx context.Context, opts cerbos.AuditLogOptions) (<-chan *cerbos.AuditLogEntry, error) {
+func (c *GRPCAdminClient) AuditLogs(ctx context.Context, opts AuditLogOptions) (<-chan *AuditLogEntry, error) {
 	resp, err := c.auditLogs(ctx, opts)
 	if err != nil {
 		return nil, err
@@ -123,12 +122,12 @@ func (c *AdminClient) AuditLogs(ctx context.Context, opts cerbos.AuditLogOptions
 	return collectLogs(resp.Recv)
 }
 
-func (c *AdminClient) auditLogs(ctx context.Context, opts cerbos.AuditLogOptions) (svcv1.CerbosAdminService_ListAuditLogEntriesClient, error) {
+func (c *GRPCAdminClient) auditLogs(ctx context.Context, opts AuditLogOptions) (svcv1.CerbosAdminService_ListAuditLogEntriesClient, error) {
 	var req *requestv1.ListAuditLogEntriesRequest
 	switch opts.Type {
-	case cerbos.AccessLogs:
+	case AccessLogs:
 		req = &requestv1.ListAuditLogEntriesRequest{Kind: requestv1.ListAuditLogEntriesRequest_KIND_ACCESS}
-	case cerbos.DecisionLogs:
+	case DecisionLogs:
 		req = &requestv1.ListAuditLogEntriesRequest{Kind: requestv1.ListAuditLogEntriesRequest_KIND_DECISION}
 	default:
 		return nil, errors.New("incorrect audit log type")
@@ -160,7 +159,7 @@ func (c *AdminClient) auditLogs(ctx context.Context, opts cerbos.AuditLogOptions
 	return resp, nil
 }
 
-func (c *AdminClient) ListPolicies(ctx context.Context, opts ...cerbos.ListPoliciesOption) ([]string, error) {
+func (c *GRPCAdminClient) ListPolicies(ctx context.Context, opts ...ListPoliciesOption) ([]string, error) {
 	req := &requestv1.ListPoliciesRequest{}
 	for _, opt := range opts {
 		opt(req)
@@ -177,7 +176,7 @@ func (c *AdminClient) ListPolicies(ctx context.Context, opts ...cerbos.ListPolic
 	return p.PolicyIds, nil
 }
 
-func (c *AdminClient) GetPolicy(ctx context.Context, ids ...string) ([]*policyv1.Policy, error) {
+func (c *GRPCAdminClient) GetPolicy(ctx context.Context, ids ...string) ([]*policyv1.Policy, error) {
 	req := &requestv1.GetPolicyRequest{
 		Id: ids,
 	}
@@ -193,7 +192,7 @@ func (c *AdminClient) GetPolicy(ctx context.Context, ids ...string) ([]*policyv1
 	return res.Policies, nil
 }
 
-func (c *AdminClient) DisablePolicy(ctx context.Context, ids ...string) (uint32, error) {
+func (c *GRPCAdminClient) DisablePolicy(ctx context.Context, ids ...string) (uint32, error) {
 	req := &requestv1.DisablePolicyRequest{
 		Id: ids,
 	}
@@ -209,7 +208,7 @@ func (c *AdminClient) DisablePolicy(ctx context.Context, ids ...string) (uint32,
 	return resp.DisabledPolicies, nil
 }
 
-func (c *AdminClient) EnablePolicy(ctx context.Context, ids ...string) (uint32, error) {
+func (c *GRPCAdminClient) EnablePolicy(ctx context.Context, ids ...string) (uint32, error) {
 	req := &requestv1.EnablePolicyRequest{
 		Id: ids,
 	}
@@ -225,7 +224,7 @@ func (c *AdminClient) EnablePolicy(ctx context.Context, ids ...string) (uint32, 
 	return resp.EnabledPolicies, nil
 }
 
-func (c *AdminClient) AddOrUpdateSchema(ctx context.Context, schemas *cerbos.SchemaSet) error {
+func (c *GRPCAdminClient) AddOrUpdateSchema(ctx context.Context, schemas *SchemaSet) error {
 	all := schemas.GetSchemas()
 	for bs := 0; bs < len(all); bs += addSchemaBatchSize {
 		be := bs + addSchemaBatchSize
@@ -242,7 +241,7 @@ func (c *AdminClient) AddOrUpdateSchema(ctx context.Context, schemas *cerbos.Sch
 	return nil
 }
 
-func (c *AdminClient) DeleteSchema(ctx context.Context, ids ...string) (uint32, error) {
+func (c *GRPCAdminClient) DeleteSchema(ctx context.Context, ids ...string) (uint32, error) {
 	req := &requestv1.DeleteSchemaRequest{
 		Id: ids,
 	}
@@ -258,7 +257,7 @@ func (c *AdminClient) DeleteSchema(ctx context.Context, ids ...string) (uint32, 
 	return resp.DeletedSchemas, nil
 }
 
-func (c *AdminClient) ListSchemas(ctx context.Context) ([]string, error) {
+func (c *GRPCAdminClient) ListSchemas(ctx context.Context) ([]string, error) {
 	req := &requestv1.ListSchemasRequest{}
 	if err := req.Validate(); err != nil {
 		return nil, fmt.Errorf("could not validate list schemas request: %w", err)
@@ -272,7 +271,7 @@ func (c *AdminClient) ListSchemas(ctx context.Context) ([]string, error) {
 	return s.SchemaIds, nil
 }
 
-func (c *AdminClient) GetSchema(ctx context.Context, ids ...string) ([]*schemav1.Schema, error) {
+func (c *GRPCAdminClient) GetSchema(ctx context.Context, ids ...string) ([]*schemav1.Schema, error) {
 	req := &requestv1.GetSchemaRequest{
 		Id: ids,
 	}
@@ -288,7 +287,7 @@ func (c *AdminClient) GetSchema(ctx context.Context, ids ...string) ([]*schemav1
 	return res.Schemas, nil
 }
 
-func (c *AdminClient) ReloadStore(ctx context.Context, wait bool) error {
+func (c *GRPCAdminClient) ReloadStore(ctx context.Context, wait bool) error {
 	req := &requestv1.ReloadStoreRequest{
 		Wait: wait,
 	}

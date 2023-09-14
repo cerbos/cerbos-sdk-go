@@ -4,18 +4,10 @@ export TOOLS_BIN_DIR := join(env_var_or_default("XDG_CACHE_HOME", join(env_var("
 export CERBOS_TEST_CONTAINER_TAG := "dev"
 export CERBOS_TEST_DEBUG := "true"
 
-genpb_dir := join(justfile_directory(), "genpb")
 tools_mod_dir := join(justfile_directory(), "tools")
 
 default:
     @ just --list
-
-generate-protos: _buf
-    #!/usr/bin/env bash
-    set -euo pipefail
-    rm -rf {{ genpb_dir }}
-    cd {{ tools_mod_dir }} # Needed to let Buf read the plugin versions from go.mod
-    "${TOOLS_BIN_DIR}/buf" generate --template=buf.gen.yaml --output=.. buf.build/cerbos/cerbos-api
 
 lint: _golangcilint
     @ "${TOOLS_BIN_DIR}/golangci-lint" run --fix
@@ -28,8 +20,6 @@ tests: _gotestsum
 
 compile:
     @ go build -o /dev/null ./...
-
-_buf: (_install "buf" "github.com/bufbuild/buf" "cmd/buf")
 
 _gotestsum: (_install "gotestsum" "gotest.tools/gotestsum")
 

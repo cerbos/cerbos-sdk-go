@@ -3,7 +3,7 @@
 
 package internal
 
-import requestv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/request/v1"
+import requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
 
 type ReqOpt struct {
 	AuxData     *requestv1.AuxData

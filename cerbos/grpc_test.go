@@ -3,7 +3,7 @@
 
 //go:build tests
 
-package grpcimpl_test
+package cerbos_test
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/cerbos/cerbos-sdk-go/grpcimpl"
+	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	"github.com/cerbos/cerbos-sdk-go/internal/tests"
 	"github.com/cerbos/cerbos-sdk-go/testutil"
 )
@@ -25,7 +25,7 @@ const (
 	readyTimeout   = 5 * time.Second
 )
 
-func TestClient(t *testing.T) {
+func TestGRPCClient(t *testing.T) {
 	launcher, err := testutil.NewCerbosServerLauncher()
 	require.NoError(t, err)
 
@@ -37,19 +37,19 @@ func TestClient(t *testing.T) {
 		name         string
 		tls          bool
 		confFilePath string
-		opts         []grpcimpl.Opt
+		opts         []cerbos.Opt
 	}{
 		{
 			name:         "with_tls",
 			tls:          true,
 			confFilePath: filepath.Join(confDir, "tcp_with_tls.yaml"),
-			opts:         []grpcimpl.Opt{grpcimpl.WithTLSInsecure(), grpcimpl.WithConnectTimeout(connectTimeout)},
+			opts:         []cerbos.Opt{cerbos.WithTLSInsecure(), cerbos.WithConnectTimeout(connectTimeout)},
 		},
 		{
 			name:         "without_tls",
 			tls:          false,
 			confFilePath: filepath.Join(confDir, "tcp_without_tls.yaml"),
-			opts:         []grpcimpl.Opt{grpcimpl.WithPlaintext(), grpcimpl.WithConnectTimeout(connectTimeout)},
+			opts:         []cerbos.Opt{cerbos.WithPlaintext(), cerbos.WithConnectTimeout(connectTimeout)},
 		},
 	}
 
@@ -85,10 +85,10 @@ func TestClient(t *testing.T) {
 					},
 				}
 				for _, port := range ports {
-					c, err := grpcimpl.New(port.addr, tc.opts...)
+					c, err := cerbos.New(port.addr, tc.opts...)
 					require.NoError(t, err)
 
-					t.Run(port.name, tests.TestClient[grpcimpl.PrincipalCtx, *grpcimpl.Client](c))
+					t.Run(port.name, cerbos.TestClient[cerbos.PrincipalCtx, *cerbos.GRPCClient](c))
 				}
 			})
 
@@ -125,10 +125,10 @@ func TestClient(t *testing.T) {
 				}, 1*time.Minute, 100*time.Millisecond)
 
 				addr := fmt.Sprintf("unix://%s", socketPath)
-				c, err := grpcimpl.New(addr, tc.opts...)
+				c, err := cerbos.New(addr, tc.opts...)
 				require.NoError(t, err)
 
-				t.Run("grpc", tests.TestClient[grpcimpl.PrincipalCtx, *grpcimpl.Client](c))
+				t.Run("grpc", cerbos.TestClient[cerbos.PrincipalCtx, *cerbos.GRPCClient](c))
 			})
 		})
 	}

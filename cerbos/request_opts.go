@@ -4,8 +4,8 @@
 package cerbos
 
 import (
-	requestv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/request/v1"
 	"github.com/cerbos/cerbos-sdk-go/internal"
+	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
 )
 
 // RequestOpt defines per-request options.

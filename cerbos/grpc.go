@@ -1,7 +1,7 @@
 // Copyright 2021-2023 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-package grpcimpl
+package cerbos
 
 import (
 	"context"
@@ -12,12 +12,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/cerbos/cerbos-sdk-go/cerbos"
-	effectv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/effect/v1"
-	enginev1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/engine/v1"
-	requestv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/request/v1"
-	svcv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/svc/v1"
 	"github.com/cerbos/cerbos-sdk-go/internal"
+	effectv1 "github.com/cerbos/cerbos/api/genpb/cerbos/effect/v1"
+	enginev1 "github.com/cerbos/cerbos/api/genpb/cerbos/engine/v1"
+	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
+	svcv1 "github.com/cerbos/cerbos/api/genpb/cerbos/svc/v1"
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/retry"
 	"github.com/rs/xid"
 	"google.golang.org/grpc"
@@ -25,7 +24,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-var _ cerbos.Client[*Client, PrincipalCtx] = (*Client)(nil)
+var _ Client[*GRPCClient, PrincipalCtx] = (*GRPCClient)(nil)
 
 type config struct {
 	address            string
@@ -134,13 +133,13 @@ func WithUnaryInterceptors(interceptors ...grpc.UnaryClientInterceptor) Opt {
 }
 
 // New creates a new Cerbos client.
-func New(address string, opts ...Opt) (*Client, error) {
+func New(address string, opts ...Opt) (*GRPCClient, error) {
 	grpcConn, _, err := mkConn(address, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Client{stub: svcv1.NewCerbosServiceClient(grpcConn)}, nil
+	return &GRPCClient{stub: svcv1.NewCerbosServiceClient(grpcConn)}, nil
 }
 
 func mkConn(address string, opts ...Opt) (*grpc.ClientConn, *config, error) {
@@ -263,12 +262,12 @@ func mkTLSConfig(conf *config) (*tls.Config, error) {
 	return tlsConf, nil
 }
 
-type Client struct {
+type GRPCClient struct {
 	stub svcv1.CerbosServiceClient
 	opts *internal.ReqOpt
 }
 
-func (c *Client) PlanResources(ctx context.Context, principal *cerbos.Principal, resource *cerbos.Resource, action string) (*cerbos.PlanResourcesResponse, error) {
+func (c *GRPCClient) PlanResources(ctx context.Context, principal *Principal, resource *Resource, action string) (*PlanResourcesResponse, error) {
 	if err := internal.IsValid(principal); err != nil {
 		return nil, fmt.Errorf("invalid principal: %w", err)
 	}
@@ -307,10 +306,10 @@ func (c *Client) PlanResources(ctx context.Context, principal *cerbos.Principal,
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
 
-	return &cerbos.PlanResourcesResponse{PlanResourcesResponse: result}, nil
+	return &PlanResourcesResponse{PlanResourcesResponse: result}, nil
 }
 
-func (c *Client) CheckResources(ctx context.Context, principal *cerbos.Principal, resourceBatch *cerbos.ResourceBatch) (*cerbos.CheckResourcesResponse, error) {
+func (c *GRPCClient) CheckResources(ctx context.Context, principal *Principal, resourceBatch *ResourceBatch) (*CheckResourcesResponse, error) {
 	if err := internal.IsValid(principal); err != nil {
 		return nil, fmt.Errorf("invalid principal: %w", err)
 	}
@@ -336,10 +335,10 @@ func (c *Client) CheckResources(ctx context.Context, principal *cerbos.Principal
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
 
-	return &cerbos.CheckResourcesResponse{CheckResourcesResponse: result}, nil
+	return &CheckResourcesResponse{CheckResourcesResponse: result}, nil
 }
 
-func (c *Client) IsAllowed(ctx context.Context, principal *cerbos.Principal, resource *cerbos.Resource, action string) (bool, error) {
+func (c *GRPCClient) IsAllowed(ctx context.Context, principal *Principal, resource *Resource, action string) (bool, error) {
 	if err := internal.IsValid(principal); err != nil {
 		return false, fmt.Errorf("invalid principal: %w", err)
 	}
@@ -374,46 +373,46 @@ func (c *Client) IsAllowed(ctx context.Context, principal *cerbos.Principal, res
 	return result.Results[0].Actions[action] == effectv1.Effect_EFFECT_ALLOW, nil
 }
 
-func (c *Client) ServerInfo(ctx context.Context) (*cerbos.ServerInfo, error) {
+func (c *GRPCClient) ServerInfo(ctx context.Context) (*ServerInfo, error) {
 	resp, err := c.stub.ServerInfo(ctx, &requestv1.ServerInfoRequest{})
 	if err != nil {
 		return nil, err
 	}
-	return &cerbos.ServerInfo{
+	return &ServerInfo{
 		ServerInfoResponse: resp,
 	}, nil
 }
 
-func (c *Client) With(reqOpts ...cerbos.RequestOpt) *Client {
+func (c *GRPCClient) With(reqOpts ...RequestOpt) *GRPCClient {
 	opts := &internal.ReqOpt{}
 	for _, ro := range reqOpts {
 		ro(opts)
 	}
 
-	return &Client{opts: opts, stub: c.stub}
+	return &GRPCClient{opts: opts, stub: c.stub}
 }
 
-func (c *Client) WithPrincipal(p *cerbos.Principal) PrincipalCtx {
+func (c *GRPCClient) WithPrincipal(p *Principal) PrincipalCtx {
 	return PrincipalCtx{client: c, principal: p}
 }
 
 type PrincipalCtx struct {
-	client    *Client
-	principal *cerbos.Principal
+	client    *GRPCClient
+	principal *Principal
 }
 
-func (pc PrincipalCtx) Principal() *cerbos.Principal {
+func (pc PrincipalCtx) Principal() *Principal {
 	return pc.principal
 }
 
-func (pc PrincipalCtx) IsAllowed(ctx context.Context, resource *cerbos.Resource, action string) (bool, error) {
+func (pc PrincipalCtx) IsAllowed(ctx context.Context, resource *Resource, action string) (bool, error) {
 	return pc.client.IsAllowed(ctx, pc.principal, resource, action)
 }
 
-func (pc PrincipalCtx) CheckResources(ctx context.Context, batch *cerbos.ResourceBatch) (*cerbos.CheckResourcesResponse, error) {
+func (pc PrincipalCtx) CheckResources(ctx context.Context, batch *ResourceBatch) (*CheckResourcesResponse, error) {
 	return pc.client.CheckResources(ctx, pc.principal, batch)
 }
 
-func (pc PrincipalCtx) PlanResources(ctx context.Context, resource *cerbos.Resource, action string) (*cerbos.PlanResourcesResponse, error) {
+func (pc PrincipalCtx) PlanResources(ctx context.Context, resource *Resource, action string) (*PlanResourcesResponse, error) {
 	return pc.client.PlanResources(ctx, pc.principal, resource, action)
 }

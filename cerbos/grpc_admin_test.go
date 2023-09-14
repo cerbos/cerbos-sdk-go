@@ -3,7 +3,7 @@
 
 //go:build tests
 
-package grpcimpl
+package cerbos
 
 import (
 	"context"
@@ -17,12 +17,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 
-	"github.com/cerbos/cerbos-sdk-go/cerbos"
-	auditv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/audit/v1"
-	responsev1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/response/v1"
-	svcv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/svc/v1"
 	"github.com/cerbos/cerbos-sdk-go/internal/tests"
 	"github.com/cerbos/cerbos-sdk-go/testutil"
+	auditv1 "github.com/cerbos/cerbos/api/genpb/cerbos/audit/v1"
+	responsev1 "github.com/cerbos/cerbos/api/genpb/cerbos/response/v1"
+	svcv1 "github.com/cerbos/cerbos/api/genpb/cerbos/svc/v1"
 )
 
 const (
@@ -76,10 +75,10 @@ func TestCollectLogs(t *testing.T) {
 
 func TestAuditLogs(t *testing.T) {
 	t.Run("should fail on invalid log options", func(t *testing.T) {
-		c := AdminClient{client: svcv1.NewCerbosAdminServiceClient(&grpc.ClientConn{})}
+		c := &GRPCAdminClient{client: svcv1.NewCerbosAdminServiceClient(&grpc.ClientConn{})}
 
-		_, err := c.AuditLogs(context.Background(), cerbos.AuditLogOptions{
-			Type: cerbos.AccessLogs,
+		_, err := c.AuditLogs(context.Background(), AuditLogOptions{
+			Type: AccessLogs,
 			Tail: 10000,
 		})
 
@@ -87,10 +86,10 @@ func TestAuditLogs(t *testing.T) {
 	})
 
 	t.Run("should fail if log type is different", func(t *testing.T) {
-		c := AdminClient{client: svcv1.NewCerbosAdminServiceClient(&grpc.ClientConn{})}
+		c := &GRPCAdminClient{client: svcv1.NewCerbosAdminServiceClient(&grpc.ClientConn{})}
 
-		_, err := c.AuditLogs(context.Background(), cerbos.AuditLogOptions{
-			Type: cerbos.AuditLogType(100),
+		_, err := c.AuditLogs(context.Background(), AuditLogOptions{
+			Type: AuditLogType(100),
 			Tail: 10000,
 		})
 
@@ -149,7 +148,7 @@ func TestAdminClient(t *testing.T) {
 	}
 
 	t.Run("AddOrUpdatePolicy", func(t *testing.T) {
-		ps := cerbos.NewPolicySet()
+		ps := NewPolicySet()
 		for _, p := range policies {
 			_, err := ps.AddPolicyFromFileWithErr(filepath.Join(policyDir, p))
 			require.NoError(t, err, "Failed to add %s", p)
@@ -162,7 +161,7 @@ func TestAdminClient(t *testing.T) {
 	t.Run("ListPolicies", func(t *testing.T) {
 		testCases := []struct {
 			name    string
-			options []cerbos.ListPoliciesOption
+			options []ListPoliciesOption
 			want    map[string]string
 		}{
 			{
@@ -171,7 +170,7 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "NameRegexp",
-				options: []cerbos.ListPoliciesOption{cerbos.WithNameRegexp("leave_req")},
+				options: []ListPoliciesOption{WithNameRegexp("leave_req")},
 				want: map[string]string{
 					"resource.leave_request.v20210210":           "",
 					"resource.leave_request.vdefault":            "",
@@ -182,7 +181,7 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "ScopeRegexp",
-				options: []cerbos.ListPoliciesOption{cerbos.WithScopeRegexp("acme")},
+				options: []ListPoliciesOption{WithScopeRegexp("acme")},
 				want: map[string]string{
 					"principal.donald_duck.vdefault/acme":        "",
 					"principal.donald_duck.vdefault/acme.hr":     "",
@@ -193,14 +192,14 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "VersionRegexp",
-				options: []cerbos.ListPoliciesOption{cerbos.WithVersionRegexp(`\d+`)},
+				options: []ListPoliciesOption{WithVersionRegexp(`\d+`)},
 				want: map[string]string{
 					"resource.leave_request.v20210210": "",
 				},
 			},
 			{
 				name:    "AllRegexp",
-				options: []cerbos.ListPoliciesOption{cerbos.WithNameRegexp(`.*`), cerbos.WithScopeRegexp(`.*`), cerbos.WithVersionRegexp("def")},
+				options: []ListPoliciesOption{WithNameRegexp(`.*`), WithScopeRegexp(`.*`), WithVersionRegexp("def")},
 				want: map[string]string{
 					"principal.donald_duck.vdefault":             "",
 					"principal.donald_duck.vdefault/acme":        "",
@@ -227,7 +226,7 @@ func TestAdminClient(t *testing.T) {
 	})
 
 	t.Run("AddOrUpdateSchema", func(t *testing.T) {
-		ss := cerbos.NewSchemaSet()
+		ss := NewSchemaSet()
 		for k, s := range schemas {
 			_, err := ss.AddSchemaFromFileWithIDAndErr(filepath.Join(policyDir, s), k)
 			require.NoError(t, err, "Failed to add %s", s)

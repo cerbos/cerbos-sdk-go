@@ -6,7 +6,7 @@ package internal
 import (
 	"fmt"
 
-	policyv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/policy/v1"
+	policyv1 "github.com/cerbos/cerbos/api/genpb/cerbos/policy/v1"
 	"go.uber.org/multierr"
 )
 

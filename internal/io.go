@@ -12,8 +12,8 @@ import (
 	"io/fs"
 	"unicode"
 
-	policyv1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/policy/v1"
-	schemav1 "github.com/cerbos/cerbos-sdk-go/genpb/cerbos/schema/v1"
+	policyv1 "github.com/cerbos/cerbos/api/genpb/cerbos/policy/v1"
+	schemav1 "github.com/cerbos/cerbos/api/genpb/cerbos/schema/v1"
 	"github.com/ghodss/yaml"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"

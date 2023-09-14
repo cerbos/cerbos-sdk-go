@@ -1,20 +1,19 @@
 // Copyright 2021-2023 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-package cerbossdk_test
+package cerbos_test
 
 import (
 	"context"
 	"log"
 
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
-	"github.com/cerbos/cerbos-sdk-go/grpcimpl"
 )
 
 // ExampleNew demonstrates how to instantiate a new client and make a request.
 func ExampleNew() {
 	// A client that connects to Cerbos over a Unix domain socket using a CA certificate to validate the server TLS certificates.
-	c, err := grpcimpl.New("unix:/var/sock/cerbos", grpcimpl.WithTLSCACert("/path/to/ca.crt"))
+	c, err := cerbos.New("unix:/var/sock/cerbos", cerbos.WithTLSCACert("/path/to/ca.crt"))
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -34,7 +33,7 @@ func ExampleNew() {
 
 // ExampleClient_CheckResources demonstrates how to make a CheckResources API request.
 func ExampleClient_CheckResources() {
-	c, err := grpcimpl.New("dns:///cerbos.ns.svc.cluster.local:3593", grpcimpl.WithTLSCACert("/path/to/ca.crt"))
+	c, err := cerbos.New("dns:///cerbos.ns.svc.cluster.local:3593", cerbos.WithTLSCACert("/path/to/ca.crt"))
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -84,7 +83,7 @@ func ExampleClient_CheckResources() {
 // ExampleNewAdminClient demonstrates how to instantiate a new admin client and make a request.
 func ExampleNewAdminClient() {
 	// Create an admin client using the credentials stored in environment variables or netrc.
-	ac, err := grpcimpl.NewAdminClient("10.1.2.3:3593", grpcimpl.WithTLSCACert("/path/to/ca.crt"))
+	ac, err := cerbos.NewAdminClient("10.1.2.3:3593", cerbos.WithTLSCACert("/path/to/ca.crt"))
 	if err != nil {
 		log.Fatalf("Failed to create admin client: %v", err)
 	}
