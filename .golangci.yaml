@@ -1,0 +1,108 @@
+---
+run:
+  timeout: 300s
+  skip-dirs:
+    - "^genpb/"
+    - "^hack/"
+    - "^tools/"
+  build-tags:
+    - tests
+
+linters-settings:
+  exhaustive:
+    default-signifies-exhaustive: true
+
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/cerbos/cerbos-sdk-go)
+      - blank
+      - dot
+    skip-generated: true
+    custom-order: true
+
+  gofumpt:
+    extra-rules: true
+
+  goheader:
+    values:
+      const:
+        COMPANY: Zenauth Ltd.
+    template: |-
+      Copyright {{ YEAR-RANGE }} {{ COMPANY }}
+      SPDX-License-Identifier: Apache-2.0
+
+  govet:
+    enable-all: true
+    disable:
+      - shadow
+
+  nolintlint:
+    allow-unused: false
+    allow-leading-space: false
+    require-specific: true
+
+  tagliatelle:
+    case:
+      rules:
+        json: goCamel
+        yaml: goCamel
+        xml: goCamel
+        bson: goCamel
+
+linters:
+  enable:
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - dupl
+    - durationcheck
+    - errorlint
+    - exhaustive
+    - exportloopref
+    - forbidigo
+    - forcetypeassert
+    - goconst
+    - gocritic
+    - godot
+    - gofumpt
+    - goimports
+    - goheader
+    - gomnd
+    - gomoddirectives
+    - gosec
+    - govet
+    - importas
+    - makezero
+    - misspell
+    - nakedret
+    - nestif
+    - nilerr
+    - noctx
+    - nolintlint
+    - prealloc
+    - predeclared
+    - promlinter
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - tagliatelle
+    - tenv
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - wastedassign
+    - whitespace
+
+issues:
+  max-same-issues: 30
+
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - forcetypeassert
+        - goconst
+        - gomnd
+        - govet
