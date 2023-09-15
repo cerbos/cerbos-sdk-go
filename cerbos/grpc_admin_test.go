@@ -105,7 +105,7 @@ func TestAdminClient(t *testing.T) {
 	confFile := filepath.Join(tests.PathToTestDataDir(t, "configs"), "tcp_with_tls.yaml")
 	policyDir := tests.PathToTestDataDir(t, "policies")
 
-	s, err := launcher.Launch(&testutil.LaunchConf{
+	s, err := launcher.Launch(testutil.LaunchConf{
 		ConfFilePath: confFile,
 		AdditionalMounts: []string{
 			fmt.Sprintf("%s:/certs", certsDir),

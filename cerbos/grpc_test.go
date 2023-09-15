@@ -57,7 +57,7 @@ func TestGRPCClient(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Run("tcp", func(t *testing.T) {
-				s, err := launcher.Launch(&testutil.LaunchConf{
+				s, err := launcher.Launch(testutil.LaunchConf{
 					ConfFilePath: tc.confFilePath,
 					PolicyDir:    policyDir,
 					AdditionalMounts: []string{
@@ -94,7 +94,7 @@ func TestGRPCClient(t *testing.T) {
 
 			t.Run("uds", func(t *testing.T) {
 				tempDir := t.TempDir()
-				s, err := launcher.Launch(&testutil.LaunchConf{
+				s, err := launcher.Launch(testutil.LaunchConf{
 					ConfFilePath: tc.confFilePath,
 					PolicyDir:    policyDir,
 					AdditionalMounts: []string{

@@ -125,7 +125,7 @@ func NewCerbosServerLauncherFromImage(repo, tag string) (*CerbosServerLauncher, 
 	return &CerbosServerLauncher{pool: pool, repo: repo, tag: tag}, nil
 }
 
-func (csl *CerbosServerLauncher) Launch(conf *LaunchConf) (*CerbosServerInstance, error) {
+func (csl *CerbosServerLauncher) Launch(conf LaunchConf) (*CerbosServerInstance, error) {
 	options := &dockertest.RunOptions{
 		Repository: csl.repo,
 		Tag:        csl.tag,
@@ -209,4 +209,19 @@ func envOrDefault(envVarName, defaultVal string) string {
 	}
 
 	return val
+}
+
+// LaunchCerbosServer is a utility method to start a Cerbos server and wait for it be ready.
+func LaunchCerbosServer(ctx context.Context, launchConf LaunchConf) (*CerbosServerInstance, error) {
+	launcher, err := NewCerbosServerLauncher()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create launcher: %w", err)
+	}
+
+	server, err := launcher.Launch(launchConf)
+	if err != nil {
+		return nil, fmt.Errorf("failed to launch server: %w", err)
+	}
+
+	return server, server.WaitForReady(ctx)
 }
