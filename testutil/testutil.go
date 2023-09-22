@@ -102,6 +102,7 @@ type LaunchConf struct {
 	PolicyDirMountPoint string
 	AdditionalMounts    []string
 	Cmd                 []string
+	Env                 []string
 }
 
 // NewCerbosServerLauncher creates a launcher for Cerbos containers.
@@ -130,7 +131,7 @@ func (csl *CerbosServerLauncher) Launch(conf LaunchConf) (*CerbosServerInstance,
 		Repository: csl.repo,
 		Tag:        csl.tag,
 		Cmd:        conf.Cmd,
-		Env:        []string{"CERBOS_NO_TELEMETRY=1"},
+		Env:        append([]string{"CERBOS_NO_TELEMETRY=1"}, conf.Env...),
 	}
 
 	if conf.ConfFilePath != "" {
