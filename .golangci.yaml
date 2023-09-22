@@ -106,3 +106,7 @@ issues:
         - goconst
         - gomnd
         - govet
+    - path: example_test\.go
+      linters:
+        - gocritic
+        - errcheck

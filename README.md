@@ -1,4 +1,4 @@
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cerbos/cerbos-sdk-go?color=green&logo=github&sort=semver) [![Go Reference](https://pkg.go.dev/badge/github.com/cerbos/cerbos-sdk-go/client.svg)](https://pkg.go.dev/github.com/cerbos/cerbos-sdk-go)
+[![Go Reference](https://pkg.go.dev/badge/github.com/cerbos/cerbos-sdk-go/client.svg)](https://pkg.go.dev/github.com/cerbos/cerbos-sdk-go)
 
 # Cerbos Client SDK for Go
 
