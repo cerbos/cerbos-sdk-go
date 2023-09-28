@@ -9,17 +9,17 @@ import (
 	"fmt"
 	"io"
 
+	policyv1 "github.com/cerbos/cerbos/api/genpb/cerbos/policy/v1"
+	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
+	responsev1 "github.com/cerbos/cerbos/api/genpb/cerbos/response/v1"
+	schemav1 "github.com/cerbos/cerbos/api/genpb/cerbos/schema/v1"
+	svcv1 "github.com/cerbos/cerbos/api/genpb/cerbos/svc/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/cerbos/cerbos-sdk-go/internal"
 	"github.com/cerbos/cerbos-sdk-go/internal/validator"
-	policyv1 "github.com/cerbos/cerbos/api/genpb/cerbos/policy/v1"
-	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
-	responsev1 "github.com/cerbos/cerbos/api/genpb/cerbos/response/v1"
-	schemav1 "github.com/cerbos/cerbos/api/genpb/cerbos/schema/v1"
-	svcv1 "github.com/cerbos/cerbos/api/genpb/cerbos/svc/v1"
 )
 
 const (
@@ -55,6 +55,10 @@ func NewAdminClientWithCredentials(address, username, password string, opts ...O
 	basicAuth := newBasicAuthCredentials(user, pass)
 	if conf.plaintext {
 		basicAuth = basicAuth.Insecure()
+	}
+
+	if err := validator.Init(); err != nil {
+		return nil, fmt.Errorf("failed to initialize validator: %w", err)
 	}
 
 	return &GRPCAdminClient{client: svcv1.NewCerbosAdminServiceClient(grpcConn), creds: basicAuth}, nil

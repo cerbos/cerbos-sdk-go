@@ -12,7 +12,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/cerbos/cerbos-sdk-go/internal"
 	effectv1 "github.com/cerbos/cerbos/api/genpb/cerbos/effect/v1"
 	enginev1 "github.com/cerbos/cerbos/api/genpb/cerbos/engine/v1"
 	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
@@ -22,6 +21,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/cerbos/cerbos-sdk-go/internal"
+	"github.com/cerbos/cerbos-sdk-go/internal/validator"
 )
 
 var _ Client[*GRPCClient, PrincipalCtx] = (*GRPCClient)(nil)
@@ -137,6 +139,10 @@ func New(address string, opts ...Opt) (*GRPCClient, error) {
 	grpcConn, _, err := mkConn(address, opts...)
 	if err != nil {
 		return nil, err
+	}
+
+	if err := validator.Init(); err != nil {
+		return nil, fmt.Errorf("failed to initialize validator: %w", err)
 	}
 
 	return &GRPCClient{stub: svcv1.NewCerbosServiceClient(grpcConn)}, nil
