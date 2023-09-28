@@ -6,8 +6,10 @@ package internal
 import (
 	"fmt"
 
-	policyv1 "github.com/cerbos/cerbos/api/genpb/cerbos/policy/v1"
 	"go.uber.org/multierr"
+
+	"github.com/cerbos/cerbos-sdk-go/internal/validator"
+	policyv1 "github.com/cerbos/cerbos/api/genpb/cerbos/policy/v1"
 )
 
 type Validatable interface {
@@ -24,7 +26,7 @@ func IsValid[T Validatable](obj T) error {
 }
 
 func ValidatePolicy(p *policyv1.Policy) error {
-	if err := p.Validate(); err != nil {
+	if err := validator.Validate(p); err != nil {
 		return err
 	}
 

@@ -14,6 +14,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/cerbos/cerbos-sdk-go/internal"
+	"github.com/cerbos/cerbos-sdk-go/internal/validator"
 	policyv1 "github.com/cerbos/cerbos/api/genpb/cerbos/policy/v1"
 	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
 	responsev1 "github.com/cerbos/cerbos/api/genpb/cerbos/response/v1"
@@ -147,7 +148,7 @@ func (c *GRPCAdminClient) auditLogs(ctx context.Context, opts AuditLogOptions) (
 		req.Filter = &requestv1.ListAuditLogEntriesRequest_Lookup{Lookup: opts.Lookup}
 	}
 
-	if err := req.Validate(); err != nil {
+	if err := validator.Validate(req); err != nil {
 		return nil, err
 	}
 
@@ -164,7 +165,7 @@ func (c *GRPCAdminClient) ListPolicies(ctx context.Context, opts ...ListPolicies
 	for _, opt := range opts {
 		opt(req)
 	}
-	if err := req.Validate(); err != nil {
+	if err := validator.Validate(req); err != nil {
 		return nil, fmt.Errorf("could not validate list policies request: %w", err)
 	}
 
@@ -180,7 +181,7 @@ func (c *GRPCAdminClient) GetPolicy(ctx context.Context, ids ...string) ([]*poli
 	req := &requestv1.GetPolicyRequest{
 		Id: ids,
 	}
-	if err := req.Validate(); err != nil {
+	if err := validator.Validate(req); err != nil {
 		return nil, fmt.Errorf("could not validate get policy request: %w", err)
 	}
 
@@ -196,7 +197,7 @@ func (c *GRPCAdminClient) DisablePolicy(ctx context.Context, ids ...string) (uin
 	req := &requestv1.DisablePolicyRequest{
 		Id: ids,
 	}
-	if err := req.Validate(); err != nil {
+	if err := validator.Validate(req); err != nil {
 		return 0, fmt.Errorf("could not validate disable policy request: %w", err)
 	}
 
@@ -212,7 +213,7 @@ func (c *GRPCAdminClient) EnablePolicy(ctx context.Context, ids ...string) (uint
 	req := &requestv1.EnablePolicyRequest{
 		Id: ids,
 	}
-	if err := req.Validate(); err != nil {
+	if err := validator.Validate(req); err != nil {
 		return 0, fmt.Errorf("could not validate enable policy request: %w", err)
 	}
 
@@ -245,7 +246,7 @@ func (c *GRPCAdminClient) DeleteSchema(ctx context.Context, ids ...string) (uint
 	req := &requestv1.DeleteSchemaRequest{
 		Id: ids,
 	}
-	if err := req.Validate(); err != nil {
+	if err := validator.Validate(req); err != nil {
 		return 0, fmt.Errorf("could not validate delete schema request: %w", err)
 	}
 
@@ -259,7 +260,7 @@ func (c *GRPCAdminClient) DeleteSchema(ctx context.Context, ids ...string) (uint
 
 func (c *GRPCAdminClient) ListSchemas(ctx context.Context) ([]string, error) {
 	req := &requestv1.ListSchemasRequest{}
-	if err := req.Validate(); err != nil {
+	if err := validator.Validate(req); err != nil {
 		return nil, fmt.Errorf("could not validate list schemas request: %w", err)
 	}
 
@@ -275,7 +276,7 @@ func (c *GRPCAdminClient) GetSchema(ctx context.Context, ids ...string) ([]*sche
 	req := &requestv1.GetSchemaRequest{
 		Id: ids,
 	}
-	if err := req.Validate(); err != nil {
+	if err := validator.Validate(req); err != nil {
 		return nil, fmt.Errorf("could not validate get schema request: %w", err)
 	}
 
@@ -291,7 +292,7 @@ func (c *GRPCAdminClient) ReloadStore(ctx context.Context, wait bool) error {
 	req := &requestv1.ReloadStoreRequest{
 		Wait: wait,
 	}
-	if err := req.Validate(); err != nil {
+	if err := validator.Validate(req); err != nil {
 		return fmt.Errorf("could not validate reload store request: %w", err)
 	}
 
