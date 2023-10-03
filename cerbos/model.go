@@ -12,11 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"go.uber.org/multierr"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/types/known/structpb"
-
-	"github.com/cerbos/cerbos-sdk-go/internal"
 	auditv1 "github.com/cerbos/cerbos/api/genpb/cerbos/audit/v1"
 	effectv1 "github.com/cerbos/cerbos/api/genpb/cerbos/effect/v1"
 	enginev1 "github.com/cerbos/cerbos/api/genpb/cerbos/engine/v1"
@@ -24,6 +19,11 @@ import (
 	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
 	responsev1 "github.com/cerbos/cerbos/api/genpb/cerbos/response/v1"
 	schemav1 "github.com/cerbos/cerbos/api/genpb/cerbos/schema/v1"
+	"go.uber.org/multierr"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/types/known/structpb"
+
+	"github.com/cerbos/cerbos-sdk-go/internal"
 )
 
 const apiVersion = "api.cerbos.dev/v1"
@@ -123,7 +123,7 @@ func (p *Principal) Validate() error {
 		return p.err
 	}
 
-	return p.Obj.Validate()
+	return internal.Validate(p.Obj)
 }
 
 // Resource is a single resource instance.
@@ -212,7 +212,7 @@ func (r *Resource) Validate() error {
 		return r.err
 	}
 
-	return r.Obj.Validate()
+	return internal.Validate(r.Obj)
 }
 
 // ResourceBatch is a container for a batch of heterogeneous resources.
@@ -237,7 +237,7 @@ func (rb *ResourceBatch) Add(resource *Resource, actions ...string) *ResourceBat
 		Resource: resource.Obj,
 	}
 
-	if err := entry.Validate(); err != nil {
+	if err := internal.Validate(entry); err != nil {
 		rb.err = multierr.Append(rb.err, fmt.Errorf("invalid resource '%s': %w", resource.Obj.Id, err))
 		return rb
 	}
@@ -263,7 +263,7 @@ func (rb *ResourceBatch) Validate() error {
 
 	var errList error
 	for _, entry := range rb.Batch {
-		if err := entry.Validate(); err != nil {
+		if err := internal.Validate(entry); err != nil {
 			errList = multierr.Append(errList, err)
 		}
 	}
@@ -687,7 +687,7 @@ func (s *Schema) AddIgnoredActions(actions ...string) *Schema {
 }
 
 func (s *Schema) Validate() error {
-	return s.Obj.Validate()
+	return internal.Validate(s.Obj)
 }
 
 func (s *Schema) build() *policyv1.Schemas_Schema {
@@ -849,7 +849,7 @@ func (rr *ResourceRule) Err() error {
 
 // Validate checks whether the resource rule is valid.
 func (rr *ResourceRule) Validate() error {
-	return rr.Obj.Validate()
+	return internal.Validate(rr.Obj)
 }
 
 // PrincipalPolicy is a builder for principal policies.
@@ -990,7 +990,7 @@ func (pr *PrincipalRule) Err() error {
 
 // Validate checks whether the rule is valid.
 func (pr *PrincipalRule) Validate() error {
-	return pr.Obj.Validate()
+	return internal.Validate(pr.Obj)
 }
 
 // DerivedRoles is a builder for derived roles.

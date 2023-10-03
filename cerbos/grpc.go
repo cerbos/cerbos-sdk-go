@@ -12,7 +12,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/cerbos/cerbos-sdk-go/internal"
 	effectv1 "github.com/cerbos/cerbos/api/genpb/cerbos/effect/v1"
 	enginev1 "github.com/cerbos/cerbos/api/genpb/cerbos/engine/v1"
 	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
@@ -22,6 +21,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/cerbos/cerbos-sdk-go/internal"
 )
 
 var _ Client[*GRPCClient, PrincipalCtx] = (*GRPCClient)(nil)
