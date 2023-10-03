@@ -23,7 +23,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/cerbos/cerbos-sdk-go/internal"
-	"github.com/cerbos/cerbos-sdk-go/internal/validator"
 )
 
 var _ Client[*GRPCClient, PrincipalCtx] = (*GRPCClient)(nil)
@@ -139,10 +138,6 @@ func New(address string, opts ...Opt) (*GRPCClient, error) {
 	grpcConn, _, err := mkConn(address, opts...)
 	if err != nil {
 		return nil, err
-	}
-
-	if err := validator.Init(); err != nil {
-		return nil, fmt.Errorf("failed to initialize validator: %w", err)
 	}
 
 	return &GRPCClient{stub: svcv1.NewCerbosServiceClient(grpcConn)}, nil
