@@ -3,9 +3,9 @@ module github.com/cerbos/cerbos-sdk-go
 go 1.20
 
 require (
-	github.com/bufbuild/protovalidate-go v0.3.1
+	github.com/bufbuild/protovalidate-go v0.3.3
 	github.com/cenkalti/backoff/v4 v4.2.1
-	github.com/cerbos/cerbos/api/genpb v0.0.0-20230925081347-341baa486365
+	github.com/cerbos/cerbos/api/genpb v0.0.0-20231005154708-56f7683cab97
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.5.9
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.1
@@ -32,12 +32,11 @@ require (
 	github.com/docker/docker v23.0.4+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/envoyproxy/protoc-gen-validate v1.0.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/cel-go v0.17.6 // indirect
+	github.com/google/cel-go v0.18.1 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0 // indirect
 	github.com/imdario/mergo v0.3.15 // indirect
