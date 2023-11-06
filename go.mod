@@ -3,14 +3,14 @@ module github.com/cerbos/cerbos-sdk-go
 go 1.20
 
 require (
-	github.com/bufbuild/protovalidate-go v0.3.4
+	github.com/bufbuild/protovalidate-go v0.4.0
 	github.com/cenkalti/backoff/v4 v4.2.1
-	github.com/cerbos/cerbos/api/genpb v0.0.0-20231026063842-f134903b8ddb
+	github.com/cerbos/cerbos/api/genpb v0.0.0-20231106142156-5e254ae12eb0
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.1
 	github.com/jdxcode/netrc v1.0.0
-	github.com/lestrrat-go/jwx/v2 v2.0.15
+	github.com/lestrrat-go/jwx/v2 v2.0.16
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/rs/xid v1.5.0
 	github.com/stretchr/testify v1.8.4
@@ -20,7 +20,7 @@ require (
 )
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.31.0-20230914171853-63dfe56cc2c4.1 // indirect
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.31.0-20231030212536-12f9cba37c9d.2 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
@@ -67,9 +67,9 @@ require (
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
-	google.golang.org/genproto v0.0.0-20231012201019-e917dd12ba7a // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20231016165738-49dd2c1f3d0b // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20231012201019-e917dd12ba7a // indirect
+	google.golang.org/genproto v0.0.0-20231016165738-49dd2c1f3d0b // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20231030173426-d783a09b4405 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20231016165738-49dd2c1f3d0b // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
