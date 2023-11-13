@@ -12,15 +12,17 @@ import (
 	"os"
 	"time"
 
-	effectv1 "github.com/cerbos/cerbos/api/genpb/cerbos/effect/v1"
-	enginev1 "github.com/cerbos/cerbos/api/genpb/cerbos/engine/v1"
-	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
-	svcv1 "github.com/cerbos/cerbos/api/genpb/cerbos/svc/v1"
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/retry"
 	"github.com/rs/xid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/stats"
+
+	effectv1 "github.com/cerbos/cerbos/api/genpb/cerbos/effect/v1"
+	enginev1 "github.com/cerbos/cerbos/api/genpb/cerbos/engine/v1"
+	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
+	svcv1 "github.com/cerbos/cerbos/api/genpb/cerbos/svc/v1"
 
 	"github.com/cerbos/cerbos-sdk-go/internal"
 )
@@ -42,6 +44,7 @@ type config struct {
 	maxRetries         uint
 	plaintext          bool
 	tlsInsecure        bool
+	statsHandler       stats.Handler
 }
 
 type Opt func(*config)
@@ -133,6 +136,13 @@ func WithUnaryInterceptors(interceptors ...grpc.UnaryClientInterceptor) Opt {
 	}
 }
 
+// WithStatsHandler sets the gRPC stats handler for the connection.
+func WithStatsHandler(handler stats.Handler) Opt {
+	return func(c *config) {
+		c.statsHandler = handler
+	}
+}
+
 // New creates a new Cerbos client.
 func New(address string, opts ...Opt) (*GRPCClient, error) {
 	grpcConn, _, err := mkConn(address, opts...)
@@ -171,6 +181,10 @@ func mkConn(address string, opts ...Opt) (*grpc.ClientConn, *config, error) {
 
 func mkDialOpts(conf *config) ([]grpc.DialOption, error) {
 	dialOpts := []grpc.DialOption{grpc.WithUserAgent(conf.userAgent)}
+
+	if conf.statsHandler != nil {
+		dialOpts = append(dialOpts, grpc.WithStatsHandler(conf.statsHandler))
+	}
 
 	if conf.connectTimeout > 0 {
 		dialOpts = append(dialOpts, grpc.WithConnectParams(grpc.ConnectParams{MinConnectTimeout: conf.connectTimeout}))
