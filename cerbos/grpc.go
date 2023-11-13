@@ -30,6 +30,7 @@ import (
 var _ Client[*GRPCClient, PrincipalCtx] = (*GRPCClient)(nil)
 
 type config struct {
+	statsHandler       stats.Handler
 	address            string
 	tlsAuthority       string
 	tlsCACert          string
@@ -44,7 +45,6 @@ type config struct {
 	maxRetries         uint
 	plaintext          bool
 	tlsInsecure        bool
-	statsHandler       stats.Handler
 }
 
 type Opt func(*config)
