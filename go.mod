@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/bufbuild/protovalidate-go v0.4.2
 	github.com/cenkalti/backoff/v4 v4.2.1
-	github.com/cerbos/cerbos/api/genpb v0.0.0-20231116171151-7dd5d0c8f5b8
+	github.com/cerbos/cerbos/api/genpb v0.0.0-20231123140427-ce425d92a037
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.1
