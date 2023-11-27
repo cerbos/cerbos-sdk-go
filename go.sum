@@ -13,8 +13,8 @@ github.com/bufbuild/protovalidate-go v0.4.2 h1:rh34FFVIJ2pQ/vPnkiQK+Y5pMQ6W4POmH
 github.com/bufbuild/protovalidate-go v0.4.2/go.mod h1:+p5FXfOjSEgLz5WBDTOMPMdQPXqALEERbJZU7huDCtA=
 github.com/cenkalti/backoff/v4 v4.2.1 h1:y4OZtCnogmCPw98Zjyt5a6+QwPLGkiQsYW5oUqylYbM=
 github.com/cenkalti/backoff/v4 v4.2.1/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
-github.com/cerbos/cerbos/api/genpb v0.0.0-20231116171151-7dd5d0c8f5b8 h1:RApAJvacGsQQqN8dcOYFR3K0tRDFyI2uucdo5/B0Je8=
-github.com/cerbos/cerbos/api/genpb v0.0.0-20231116171151-7dd5d0c8f5b8/go.mod h1:JpCoBGE4L7ulmSwVvtfnxepzh3CA16C06Eo6wp1TZCk=
+github.com/cerbos/cerbos/api/genpb v0.0.0-20231123140427-ce425d92a037 h1:++YhXFcjnsZnItDEQM8yJUtY+HY9OnF4UNBw5E0oDyQ=
+github.com/cerbos/cerbos/api/genpb v0.0.0-20231123140427-ce425d92a037/go.mod h1:JpCoBGE4L7ulmSwVvtfnxepzh3CA16C06Eo6wp1TZCk=
 github.com/checkpoint-restore/go-criu/v5 v5.3.0/go.mod h1:E/eQpaFtUKGOOSEBZgmKAcn+zUUwWxqcaKZlF54wK8E=
 github.com/cilium/ebpf v0.7.0/go.mod h1:/oI2+1shJiTGAMgl6/RgJr36Eo1jzrRcAWbcXO2usCA=
 github.com/containerd/console v1.0.3/go.mod h1:7LqA/THxQ86k76b8c/EMSiaJ3h1eZkMkXar0TQ1gf3U=
