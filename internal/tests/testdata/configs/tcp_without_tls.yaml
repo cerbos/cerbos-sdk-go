@@ -18,6 +18,7 @@ auxData:
 audit:
   enabled: true
   backend: "file"
+  includeMetadataKeys: ["wibble"]
   file:
     path: stdout
 
