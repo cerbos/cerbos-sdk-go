@@ -9,14 +9,16 @@ import (
 	"fmt"
 	"io"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	policyv1 "github.com/cerbos/cerbos/api/genpb/cerbos/policy/v1"
 	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
 	responsev1 "github.com/cerbos/cerbos/api/genpb/cerbos/response/v1"
 	schemav1 "github.com/cerbos/cerbos/api/genpb/cerbos/schema/v1"
 	svcv1 "github.com/cerbos/cerbos/api/genpb/cerbos/svc/v1"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/cerbos/cerbos-sdk-go/internal"
 )
@@ -60,8 +62,17 @@ func NewAdminClientWithCredentials(address, username, password string, opts ...O
 }
 
 type GRPCAdminClient struct {
-	client svcv1.CerbosAdminServiceClient
-	creds  credentials.PerRPCCredentials
+	client  svcv1.CerbosAdminServiceClient
+	creds   credentials.PerRPCCredentials
+	headers []string
+}
+
+func (c *GRPCAdminClient) WithHeaders(keyValues ...string) *GRPCAdminClient {
+	return &GRPCAdminClient{
+		client:  c.client,
+		creds:   c.creds,
+		headers: keyValues,
+	}
 }
 
 func (c *GRPCAdminClient) AddOrUpdatePolicy(ctx context.Context, policies *PolicySet) error {
@@ -77,7 +88,7 @@ func (c *GRPCAdminClient) AddOrUpdatePolicy(ctx context.Context, policies *Polic
 		}
 
 		req := &requestv1.AddOrUpdatePolicyRequest{Policies: all[bs:be]}
-		if _, err := c.client.AddOrUpdatePolicy(ctx, req, grpc.PerRPCCredentials(c.creds)); err != nil {
+		if _, err := c.client.AddOrUpdatePolicy(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds)); err != nil {
 			return fmt.Errorf("failed to send batch [%d,%d): %w", bs, be, err)
 		}
 	}
@@ -151,7 +162,7 @@ func (c *GRPCAdminClient) auditLogs(ctx context.Context, opts AuditLogOptions) (
 		return nil, err
 	}
 
-	resp, err := c.client.ListAuditLogEntries(ctx, req, grpc.PerRPCCredentials(c.creds))
+	resp, err := c.client.ListAuditLogEntries(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds))
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +179,7 @@ func (c *GRPCAdminClient) ListPolicies(ctx context.Context, opts ...ListPolicies
 		return nil, fmt.Errorf("could not validate list policies request: %w", err)
 	}
 
-	p, err := c.client.ListPolicies(ctx, req, grpc.PerRPCCredentials(c.creds))
+	p, err := c.client.ListPolicies(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds))
 	if err != nil {
 		return nil, fmt.Errorf("could not list policies: %w", err)
 	}
@@ -184,7 +195,7 @@ func (c *GRPCAdminClient) GetPolicy(ctx context.Context, ids ...string) ([]*poli
 		return nil, fmt.Errorf("could not validate get policy request: %w", err)
 	}
 
-	res, err := c.client.GetPolicy(ctx, req, grpc.PerRPCCredentials(c.creds))
+	res, err := c.client.GetPolicy(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds))
 	if err != nil {
 		return nil, fmt.Errorf("could not get policy: %w", err)
 	}
@@ -200,7 +211,7 @@ func (c *GRPCAdminClient) DisablePolicy(ctx context.Context, ids ...string) (uin
 		return 0, fmt.Errorf("could not validate disable policy request: %w", err)
 	}
 
-	resp, err := c.client.DisablePolicy(ctx, req, grpc.PerRPCCredentials(c.creds))
+	resp, err := c.client.DisablePolicy(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds))
 	if err != nil {
 		return 0, fmt.Errorf("could not disable policy: %w", err)
 	}
@@ -216,7 +227,7 @@ func (c *GRPCAdminClient) EnablePolicy(ctx context.Context, ids ...string) (uint
 		return 0, fmt.Errorf("could not validate enable policy request: %w", err)
 	}
 
-	resp, err := c.client.EnablePolicy(ctx, req, grpc.PerRPCCredentials(c.creds))
+	resp, err := c.client.EnablePolicy(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds))
 	if err != nil {
 		return 0, fmt.Errorf("could not enable policy: %w", err)
 	}
@@ -233,7 +244,7 @@ func (c *GRPCAdminClient) AddOrUpdateSchema(ctx context.Context, schemas *Schema
 		}
 
 		req := &requestv1.AddOrUpdateSchemaRequest{Schemas: all[bs:be]}
-		if _, err := c.client.AddOrUpdateSchema(ctx, req, grpc.PerRPCCredentials(c.creds)); err != nil {
+		if _, err := c.client.AddOrUpdateSchema(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds)); err != nil {
 			return fmt.Errorf("failed to send batch [%d,%d): %w", bs, be, err)
 		}
 	}
@@ -249,7 +260,7 @@ func (c *GRPCAdminClient) DeleteSchema(ctx context.Context, ids ...string) (uint
 		return 0, fmt.Errorf("could not validate delete schema request: %w", err)
 	}
 
-	resp, err := c.client.DeleteSchema(ctx, req, grpc.PerRPCCredentials(c.creds))
+	resp, err := c.client.DeleteSchema(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds))
 	if err != nil {
 		return 0, fmt.Errorf("could not delete schema: %w", err)
 	}
@@ -263,7 +274,7 @@ func (c *GRPCAdminClient) ListSchemas(ctx context.Context) ([]string, error) {
 		return nil, fmt.Errorf("could not validate list schemas request: %w", err)
 	}
 
-	s, err := c.client.ListSchemas(ctx, req, grpc.PerRPCCredentials(c.creds))
+	s, err := c.client.ListSchemas(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds))
 	if err != nil {
 		return nil, fmt.Errorf("could not list schemas: %w", err)
 	}
@@ -279,7 +290,7 @@ func (c *GRPCAdminClient) GetSchema(ctx context.Context, ids ...string) ([]*sche
 		return nil, fmt.Errorf("could not validate get schema request: %w", err)
 	}
 
-	res, err := c.client.GetSchema(ctx, req, grpc.PerRPCCredentials(c.creds))
+	res, err := c.client.GetSchema(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds))
 	if err != nil {
 		return nil, fmt.Errorf("could not get schema: %w", err)
 	}
@@ -295,7 +306,7 @@ func (c *GRPCAdminClient) ReloadStore(ctx context.Context, wait bool) error {
 		return fmt.Errorf("could not validate reload store request: %w", err)
 	}
 
-	_, err := c.client.ReloadStore(ctx, req, grpc.PerRPCCredentials(c.creds))
+	_, err := c.client.ReloadStore(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds))
 	if err != nil {
 		return fmt.Errorf("could not reload store: %w", err)
 	}

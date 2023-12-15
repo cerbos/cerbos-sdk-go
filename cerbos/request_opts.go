@@ -4,6 +4,8 @@
 package cerbos
 
 import (
+	"google.golang.org/grpc/metadata"
+
 	"github.com/cerbos/cerbos-sdk-go/internal"
 	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
 )
@@ -31,5 +33,13 @@ func AuxDataJWT(token, keySetID string) RequestOpt {
 func IncludeMeta(f bool) RequestOpt {
 	return func(opt *internal.ReqOpt) {
 		opt.IncludeMeta = f
+	}
+}
+
+// Headers sets the gRPC header metadata for each request.
+// Input should be a list of key-value pairs.
+func Headers(keyValues ...string) RequestOpt {
+	return func(opt *internal.ReqOpt) {
+		opt.Metadata = metadata.Pairs(keyValues...)
 	}
 }

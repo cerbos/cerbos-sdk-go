@@ -10,12 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cerbos/cerbos-sdk-go/internal/tests"
-	enginev1 "github.com/cerbos/cerbos/api/genpb/cerbos/engine/v1"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/testing/protocmp"
 	"google.golang.org/protobuf/types/known/structpb"
+
+	"github.com/cerbos/cerbos-sdk-go/internal/tests"
+	enginev1 "github.com/cerbos/cerbos/api/genpb/cerbos/engine/v1"
 )
 
 const timeout = 30 * time.Second
@@ -27,6 +28,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 		c := c.With(
 			AuxDataJWT(token, ""),
 			IncludeMeta(true),
+			Headers("wibble", "wobble"),
 		)
 
 		t.Run("CheckResources", func(t *testing.T) {

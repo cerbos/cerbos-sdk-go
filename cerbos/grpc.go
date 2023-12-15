@@ -316,7 +316,7 @@ func (c *GRPCClient) PlanResources(ctx context.Context, principal *Principal, re
 		req.IncludeMeta = c.opts.IncludeMeta
 	}
 
-	result, err := c.stub.PlanResources(ctx, req)
+	result, err := c.stub.PlanResources(c.opts.Context(ctx), req)
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
@@ -345,7 +345,7 @@ func (c *GRPCClient) CheckResources(ctx context.Context, principal *Principal, r
 		req.IncludeMeta = c.opts.IncludeMeta
 	}
 
-	result, err := c.stub.CheckResources(ctx, req)
+	result, err := c.stub.CheckResources(c.opts.Context(ctx), req)
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
@@ -376,7 +376,7 @@ func (c *GRPCClient) IsAllowed(ctx context.Context, principal *Principal, resour
 		req.IncludeMeta = c.opts.IncludeMeta
 	}
 
-	result, err := c.stub.CheckResources(ctx, req)
+	result, err := c.stub.CheckResources(c.opts.Context(ctx), req)
 	if err != nil {
 		return false, fmt.Errorf("request failed: %w", err)
 	}
@@ -389,7 +389,7 @@ func (c *GRPCClient) IsAllowed(ctx context.Context, principal *Principal, resour
 }
 
 func (c *GRPCClient) ServerInfo(ctx context.Context) (*ServerInfo, error) {
-	resp, err := c.stub.ServerInfo(ctx, &requestv1.ServerInfoRequest{})
+	resp, err := c.stub.ServerInfo(c.opts.Context(ctx), &requestv1.ServerInfoRequest{})
 	if err != nil {
 		return nil, err
 	}
