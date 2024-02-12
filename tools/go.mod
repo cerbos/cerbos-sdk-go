@@ -2,8 +2,6 @@ module github.com/cerbos/cerbos-sdk-go/tools
 
 go 1.21
 
-toolchain go1.22.0
-
 require (
 	github.com/golangci/golangci-lint v1.56.1
 	gotest.tools/gotestsum v1.11.0
