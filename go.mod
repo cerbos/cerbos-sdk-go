@@ -3,7 +3,7 @@ module github.com/cerbos/cerbos-sdk-go
 go 1.20
 
 require (
-	github.com/bufbuild/protovalidate-go v0.5.2
+	github.com/bufbuild/protovalidate-go v0.6.0
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/cerbos/cerbos/api/genpb v0.34.0
 	github.com/ghodss/yaml v1.0.0
@@ -13,14 +13,14 @@ require (
 	github.com/lestrrat-go/jwx/v2 v2.0.20
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/rs/xid v1.5.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	go.uber.org/multierr v1.11.0
 	google.golang.org/grpc v1.62.0
 	google.golang.org/protobuf v1.32.0
 )
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.32.0-20240212200630-3014d81c3a48.1 // indirect
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.32.0-20240221180331-f05a6f4403ce.1 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
@@ -36,7 +36,7 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/cel-go v0.19.0 // indirect
+	github.com/google/cel-go v0.20.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 // indirect
 	github.com/imdario/mergo v0.3.15 // indirect
