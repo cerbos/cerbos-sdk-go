@@ -1212,7 +1212,8 @@ type PlanResourcesResponse struct {
 }
 
 type (
-	ListPoliciesOption func(*requestv1.ListPoliciesRequest)
+	ListPoliciesOption    func(*requestv1.ListPoliciesRequest)
+	InspectPoliciesOption func(*requestv1.InspectPoliciesRequest)
 )
 
 func WithIncludeDisabled() ListPoliciesOption {
@@ -1235,6 +1236,30 @@ func WithScopeRegexp(re string) ListPoliciesOption {
 
 func WithVersionRegexp(v string) ListPoliciesOption {
 	return func(request *requestv1.ListPoliciesRequest) {
+		request.VersionRegexp = v
+	}
+}
+
+func InspectPoliciesWithIncludeDisabled() InspectPoliciesOption {
+	return func(request *requestv1.InspectPoliciesRequest) {
+		request.IncludeDisabled = true
+	}
+}
+
+func InspectPoliciesWithNameRegexp(re string) InspectPoliciesOption {
+	return func(request *requestv1.InspectPoliciesRequest) {
+		request.NameRegexp = re
+	}
+}
+
+func InspectPoliciesWithScopeRegexp(re string) InspectPoliciesOption {
+	return func(request *requestv1.InspectPoliciesRequest) {
+		request.ScopeRegexp = re
+	}
+}
+
+func InspectPoliciesWithVersionRegexp(v string) InspectPoliciesOption {
+	return func(request *requestv1.InspectPoliciesRequest) {
 		request.VersionRegexp = v
 	}
 }

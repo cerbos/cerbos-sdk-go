@@ -7,6 +7,7 @@ import (
 	"context"
 
 	policyv1 "github.com/cerbos/cerbos/api/genpb/cerbos/policy/v1"
+	responsev1 "github.com/cerbos/cerbos/api/genpb/cerbos/response/v1"
 	schemav1 "github.com/cerbos/cerbos/api/genpb/cerbos/schema/v1"
 )
 
@@ -44,6 +45,7 @@ type AdminClient interface {
 	AddOrUpdatePolicy(ctx context.Context, policies *PolicySet) error
 	AuditLogs(ctx context.Context, opts AuditLogOptions) (<-chan *AuditLogEntry, error)
 	ListPolicies(ctx context.Context, opts ...ListPoliciesOption) ([]string, error)
+	InspectPolicies(ctx context.Context, opts ...InspectPoliciesOption) (*responsev1.InspectPoliciesResponse, error)
 	GetPolicy(ctx context.Context, ids ...string) ([]*policyv1.Policy, error)
 	DisablePolicy(ctx context.Context, ids ...string) (uint32, error)
 	EnablePolicy(ctx context.Context, ids ...string) (uint32, error)

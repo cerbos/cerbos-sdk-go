@@ -225,6 +225,87 @@ func TestAdminClient(t *testing.T) {
 		}
 	})
 
+	t.Run("InspectPolicies", func(t *testing.T) {
+		testCases := []struct {
+			name    string
+			options []InspectPoliciesOption
+			want    map[string][]string
+		}{
+			{
+				name: "NoFilter",
+				want: map[string][]string{
+					"principal.donald_duck.vdefault":             {"*"},
+					"principal.donald_duck.vdefault/acme":        {"*"},
+					"principal.donald_duck.vdefault/acme.hr":     {"view:*"},
+					"resource.leave_request.v20210210":           {"*", "approve", "create", "defer", "delete", "remind", "view", "view:*", "view:public"},
+					"resource.leave_request.vdefault":            {"*"},
+					"resource.leave_request.vdefault/acme":       {"create", "view:public"},
+					"resource.leave_request.vdefault/acme.hr":    {"approve", "defer", "delete", "view:*"},
+					"resource.leave_request.vdefault/acme.hr.uk": {"defer", "delete"},
+				},
+			},
+			{
+				name:    "NameRegexp",
+				options: []InspectPoliciesOption{InspectPoliciesWithNameRegexp("leave_req")},
+				want: map[string][]string{
+					"resource.leave_request.v20210210":           {"*", "approve", "create", "defer", "delete", "remind", "view", "view:*", "view:public"},
+					"resource.leave_request.vdefault":            {"*"},
+					"resource.leave_request.vdefault/acme":       {"create", "view:public"},
+					"resource.leave_request.vdefault/acme.hr":    {"approve", "defer", "delete", "view:*"},
+					"resource.leave_request.vdefault/acme.hr.uk": {"defer", "delete"},
+				},
+			},
+			{
+				name:    "ScopeRegexp",
+				options: []InspectPoliciesOption{InspectPoliciesWithScopeRegexp("acme")},
+				want: map[string][]string{
+					"principal.donald_duck.vdefault/acme":        {"*"},
+					"principal.donald_duck.vdefault/acme.hr":     {"view:*"},
+					"resource.leave_request.vdefault/acme":       {"create", "view:public"},
+					"resource.leave_request.vdefault/acme.hr":    {"approve", "defer", "delete", "view:*"},
+					"resource.leave_request.vdefault/acme.hr.uk": {"defer", "delete"},
+				},
+			},
+			{
+				name:    "VersionRegexp",
+				options: []InspectPoliciesOption{InspectPoliciesWithVersionRegexp(`\d+`)},
+				want: map[string][]string{
+					"resource.leave_request.v20210210": {"*", "approve", "create", "defer", "delete", "remind", "view", "view:*", "view:public"},
+				},
+			},
+			{
+				name:    "AllRegexp",
+				options: []InspectPoliciesOption{InspectPoliciesWithNameRegexp(`.*`), InspectPoliciesWithScopeRegexp(`.*`), InspectPoliciesWithVersionRegexp("def")},
+				want: map[string][]string{
+					"principal.donald_duck.vdefault":             {"*"},
+					"principal.donald_duck.vdefault/acme":        {"*"},
+					"principal.donald_duck.vdefault/acme.hr":     {"view:*"},
+					"resource.leave_request.vdefault":            {"*"},
+					"resource.leave_request.vdefault/acme":       {"create", "view:public"},
+					"resource.leave_request.vdefault/acme.hr":    {"approve", "defer", "delete", "view:*"},
+					"resource.leave_request.vdefault/acme.hr.uk": {"defer", "delete"},
+				},
+			},
+		}
+
+		for _, tc := range testCases {
+			tc := tc
+			t.Run(tc.name, func(t *testing.T) {
+				have, err := ac.InspectPolicies(context.Background(), tc.options...)
+				require.NoError(t, err)
+				require.NotNil(t, have)
+				require.NotNil(t, have.Results)
+				for fqn, actions := range tc.want {
+					t.Run(fqn, func(t *testing.T) {
+						require.NotNil(t, have.Results[fqn])
+						require.Len(t, have.Results[fqn].Actions, len(actions))
+						require.ElementsMatch(t, have.Results[fqn].Actions, actions)
+					})
+				}
+			})
+		}
+	})
+
 	t.Run("AddOrUpdateSchema", func(t *testing.T) {
 		ss := NewSchemaSet()
 		for k, s := range schemas {

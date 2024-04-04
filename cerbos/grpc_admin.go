@@ -187,6 +187,23 @@ func (c *GRPCAdminClient) ListPolicies(ctx context.Context, opts ...ListPolicies
 	return p.PolicyIds, nil
 }
 
+func (c *GRPCAdminClient) InspectPolicies(ctx context.Context, opts ...InspectPoliciesOption) (*responsev1.InspectPoliciesResponse, error) {
+	req := &requestv1.InspectPoliciesRequest{}
+	for _, opt := range opts {
+		opt(req)
+	}
+	if err := internal.Validate(req); err != nil {
+		return nil, fmt.Errorf("could not validate get inspect policies request: %w", err)
+	}
+
+	resp, err := c.client.InspectPolicies(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds))
+	if err != nil {
+		return nil, fmt.Errorf("could not inspect policies: %w", err)
+	}
+
+	return resp, nil
+}
+
 func (c *GRPCAdminClient) GetPolicy(ctx context.Context, ids ...string) ([]*policyv1.Policy, error) {
 	req := &requestv1.GetPolicyRequest{
 		Id: ids,
