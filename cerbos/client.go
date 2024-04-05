@@ -44,8 +44,8 @@ type PrincipalContext interface {
 type AdminClient interface {
 	AddOrUpdatePolicy(ctx context.Context, policies *PolicySet) error
 	AuditLogs(ctx context.Context, opts AuditLogOptions) (<-chan *AuditLogEntry, error)
-	ListPolicies(ctx context.Context, opts ...ListPoliciesOption) ([]string, error)
-	InspectPolicies(ctx context.Context, opts ...InspectPoliciesOption) (*responsev1.InspectPoliciesResponse, error)
+	ListPolicies(ctx context.Context, opts ...FilterOption) ([]string, error)
+	InspectPolicies(ctx context.Context, opts ...FilterOption) (*responsev1.InspectPoliciesResponse, error)
 	GetPolicy(ctx context.Context, ids ...string) ([]*policyv1.Policy, error)
 	DisablePolicy(ctx context.Context, ids ...string) (uint32, error)
 	EnablePolicy(ctx context.Context, ids ...string) (uint32, error)

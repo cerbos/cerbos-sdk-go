@@ -161,7 +161,7 @@ func TestAdminClient(t *testing.T) {
 	t.Run("ListPolicies", func(t *testing.T) {
 		testCases := []struct {
 			name    string
-			options []ListPoliciesOption
+			options []FilterOption
 			want    map[string]string
 		}{
 			{
@@ -170,7 +170,7 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "NameRegexp",
-				options: []ListPoliciesOption{WithNameRegexp("leave_req")},
+				options: []FilterOption{WithNameRegexp("leave_req")},
 				want: map[string]string{
 					"resource.leave_request.v20210210":           "",
 					"resource.leave_request.vdefault":            "",
@@ -181,7 +181,7 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "ScopeRegexp",
-				options: []ListPoliciesOption{WithScopeRegexp("acme")},
+				options: []FilterOption{WithScopeRegexp("acme")},
 				want: map[string]string{
 					"principal.donald_duck.vdefault/acme":        "",
 					"principal.donald_duck.vdefault/acme.hr":     "",
@@ -192,14 +192,14 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "VersionRegexp",
-				options: []ListPoliciesOption{WithVersionRegexp(`\d+`)},
+				options: []FilterOption{WithVersionRegexp(`\d+`)},
 				want: map[string]string{
 					"resource.leave_request.v20210210": "",
 				},
 			},
 			{
 				name:    "AllRegexp",
-				options: []ListPoliciesOption{WithNameRegexp(`.*`), WithScopeRegexp(`.*`), WithVersionRegexp("def")},
+				options: []FilterOption{WithNameRegexp(`.*`), WithScopeRegexp(`.*`), WithVersionRegexp("def")},
 				want: map[string]string{
 					"principal.donald_duck.vdefault":             "",
 					"principal.donald_duck.vdefault/acme":        "",
@@ -228,7 +228,7 @@ func TestAdminClient(t *testing.T) {
 	t.Run("InspectPolicies", func(t *testing.T) {
 		testCases := []struct {
 			name    string
-			options []InspectPoliciesOption
+			options []FilterOption
 			want    map[string][]string
 		}{
 			{
@@ -246,7 +246,7 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "NameRegexp",
-				options: []InspectPoliciesOption{InspectPoliciesWithNameRegexp("leave_req")},
+				options: []FilterOption{WithNameRegexp("leave_req")},
 				want: map[string][]string{
 					"resource.leave_request.v20210210":           {"*", "approve", "create", "defer", "delete", "remind", "view", "view:*", "view:public"},
 					"resource.leave_request.vdefault":            {"*"},
@@ -257,7 +257,7 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "ScopeRegexp",
-				options: []InspectPoliciesOption{InspectPoliciesWithScopeRegexp("acme")},
+				options: []FilterOption{WithScopeRegexp("acme")},
 				want: map[string][]string{
 					"principal.donald_duck.vdefault/acme":        {"*"},
 					"principal.donald_duck.vdefault/acme.hr":     {"view:*"},
@@ -268,14 +268,14 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "VersionRegexp",
-				options: []InspectPoliciesOption{InspectPoliciesWithVersionRegexp(`\d+`)},
+				options: []FilterOption{WithVersionRegexp(`\d+`)},
 				want: map[string][]string{
 					"resource.leave_request.v20210210": {"*", "approve", "create", "defer", "delete", "remind", "view", "view:*", "view:public"},
 				},
 			},
 			{
 				name:    "AllRegexp",
-				options: []InspectPoliciesOption{InspectPoliciesWithNameRegexp(`.*`), InspectPoliciesWithScopeRegexp(`.*`), InspectPoliciesWithVersionRegexp("def")},
+				options: []FilterOption{WithNameRegexp(`.*`), WithScopeRegexp(`.*`), WithVersionRegexp("def")},
 				want: map[string][]string{
 					"principal.donald_duck.vdefault":             {"*"},
 					"principal.donald_duck.vdefault/acme":        {"*"},

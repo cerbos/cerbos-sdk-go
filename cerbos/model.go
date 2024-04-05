@@ -1212,54 +1212,39 @@ type PlanResourcesResponse struct {
 }
 
 type (
-	ListPoliciesOption    func(*requestv1.ListPoliciesRequest)
-	InspectPoliciesOption func(*requestv1.InspectPoliciesRequest)
+	FilterOptions struct {
+		NameRegexp      string
+		ScopeRegexp     string
+		VersionRegexp   string
+		IncludeDisabled bool
+	}
+	// FilterOption allows filtering policies while calling InspectPolicies and ListPolicies.
+	FilterOption func(*FilterOptions)
+	// ListPoliciesOption allows filtering policies while calling ListPolicies
+	// Deprecated: ListPoliciesOption is deprecated, use FilterOption instead.
+	ListPoliciesOption FilterOption
 )
 
-func WithIncludeDisabled() ListPoliciesOption {
-	return func(request *requestv1.ListPoliciesRequest) {
-		request.IncludeDisabled = true
+func WithIncludeDisabled() FilterOption {
+	return func(fo *FilterOptions) {
+		fo.IncludeDisabled = true
 	}
 }
 
-func WithNameRegexp(re string) ListPoliciesOption {
-	return func(request *requestv1.ListPoliciesRequest) {
-		request.NameRegexp = re
+func WithNameRegexp(re string) FilterOption {
+	return func(fo *FilterOptions) {
+		fo.NameRegexp = re
 	}
 }
 
-func WithScopeRegexp(re string) ListPoliciesOption {
-	return func(request *requestv1.ListPoliciesRequest) {
-		request.ScopeRegexp = re
+func WithScopeRegexp(re string) FilterOption {
+	return func(fo *FilterOptions) {
+		fo.ScopeRegexp = re
 	}
 }
 
-func WithVersionRegexp(v string) ListPoliciesOption {
-	return func(request *requestv1.ListPoliciesRequest) {
-		request.VersionRegexp = v
-	}
-}
-
-func InspectPoliciesWithIncludeDisabled() InspectPoliciesOption {
-	return func(request *requestv1.InspectPoliciesRequest) {
-		request.IncludeDisabled = true
-	}
-}
-
-func InspectPoliciesWithNameRegexp(re string) InspectPoliciesOption {
-	return func(request *requestv1.InspectPoliciesRequest) {
-		request.NameRegexp = re
-	}
-}
-
-func InspectPoliciesWithScopeRegexp(re string) InspectPoliciesOption {
-	return func(request *requestv1.InspectPoliciesRequest) {
-		request.ScopeRegexp = re
-	}
-}
-
-func InspectPoliciesWithVersionRegexp(v string) InspectPoliciesOption {
-	return func(request *requestv1.InspectPoliciesRequest) {
-		request.VersionRegexp = v
+func WithVersionRegexp(v string) FilterOption {
+	return func(fo *FilterOptions) {
+		fo.VersionRegexp = v
 	}
 }
