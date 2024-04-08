@@ -1222,7 +1222,7 @@ type (
 	FilterOption func(*FilterOptions)
 	// ListPoliciesOption allows filtering policies while calling ListPolicies
 	// Deprecated: ListPoliciesOption is deprecated, use FilterOption instead.
-	ListPoliciesOption FilterOption
+	ListPoliciesOption = FilterOption
 )
 
 func WithIncludeDisabled() FilterOption {
