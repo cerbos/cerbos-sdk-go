@@ -170,10 +170,16 @@ func (c *GRPCAdminClient) auditLogs(ctx context.Context, opts AuditLogOptions) (
 	return resp, nil
 }
 
-func (c *GRPCAdminClient) ListPolicies(ctx context.Context, opts ...ListPoliciesOption) ([]string, error) {
-	req := &requestv1.ListPoliciesRequest{}
+func (c *GRPCAdminClient) ListPolicies(ctx context.Context, opts ...FilterOption) ([]string, error) {
+	options := &FilterOptions{}
 	for _, opt := range opts {
-		opt(req)
+		opt(options)
+	}
+	req := &requestv1.ListPoliciesRequest{
+		IncludeDisabled: options.IncludeDisabled,
+		NameRegexp:      options.NameRegexp,
+		ScopeRegexp:     options.ScopeRegexp,
+		VersionRegexp:   options.VersionRegexp,
 	}
 	if err := internal.Validate(req); err != nil {
 		return nil, fmt.Errorf("could not validate list policies request: %w", err)
@@ -185,6 +191,29 @@ func (c *GRPCAdminClient) ListPolicies(ctx context.Context, opts ...ListPolicies
 	}
 
 	return p.PolicyIds, nil
+}
+
+func (c *GRPCAdminClient) InspectPolicies(ctx context.Context, opts ...FilterOption) (*responsev1.InspectPoliciesResponse, error) {
+	options := &FilterOptions{}
+	for _, opt := range opts {
+		opt(options)
+	}
+	req := &requestv1.InspectPoliciesRequest{
+		IncludeDisabled: options.IncludeDisabled,
+		NameRegexp:      options.NameRegexp,
+		ScopeRegexp:     options.ScopeRegexp,
+		VersionRegexp:   options.VersionRegexp,
+	}
+	if err := internal.Validate(req); err != nil {
+		return nil, fmt.Errorf("could not validate get inspect policies request: %w", err)
+	}
+
+	resp, err := c.client.InspectPolicies(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds))
+	if err != nil {
+		return nil, fmt.Errorf("could not inspect policies: %w", err)
+	}
+
+	return resp, nil
 }
 
 func (c *GRPCAdminClient) GetPolicy(ctx context.Context, ids ...string) ([]*policyv1.Policy, error) {

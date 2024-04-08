@@ -161,7 +161,7 @@ func TestAdminClient(t *testing.T) {
 	t.Run("ListPolicies", func(t *testing.T) {
 		testCases := []struct {
 			name    string
-			options []ListPoliciesOption
+			options []FilterOption
 			want    map[string]string
 		}{
 			{
@@ -170,7 +170,7 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "NameRegexp",
-				options: []ListPoliciesOption{WithNameRegexp("leave_req")},
+				options: []FilterOption{WithNameRegexp("leave_req")},
 				want: map[string]string{
 					"resource.leave_request.v20210210":           "",
 					"resource.leave_request.vdefault":            "",
@@ -181,7 +181,7 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "ScopeRegexp",
-				options: []ListPoliciesOption{WithScopeRegexp("acme")},
+				options: []FilterOption{WithScopeRegexp("acme")},
 				want: map[string]string{
 					"principal.donald_duck.vdefault/acme":        "",
 					"principal.donald_duck.vdefault/acme.hr":     "",
@@ -192,14 +192,14 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "VersionRegexp",
-				options: []ListPoliciesOption{WithVersionRegexp(`\d+`)},
+				options: []FilterOption{WithVersionRegexp(`\d+`)},
 				want: map[string]string{
 					"resource.leave_request.v20210210": "",
 				},
 			},
 			{
 				name:    "AllRegexp",
-				options: []ListPoliciesOption{WithNameRegexp(`.*`), WithScopeRegexp(`.*`), WithVersionRegexp("def")},
+				options: []FilterOption{WithNameRegexp(`.*`), WithScopeRegexp(`.*`), WithVersionRegexp("def")},
 				want: map[string]string{
 					"principal.donald_duck.vdefault":             "",
 					"principal.donald_duck.vdefault/acme":        "",
@@ -220,6 +220,87 @@ func TestAdminClient(t *testing.T) {
 				require.Len(t, have, len(tc.want))
 				for _, hp := range have {
 					require.Contains(t, tc.want, hp, "Policy %s does not exist in list", hp)
+				}
+			})
+		}
+	})
+
+	t.Run("InspectPolicies", func(t *testing.T) {
+		testCases := []struct {
+			name    string
+			options []FilterOption
+			want    map[string][]string
+		}{
+			{
+				name: "NoFilter",
+				want: map[string][]string{
+					"principal.donald_duck.vdefault":             {"*"},
+					"principal.donald_duck.vdefault/acme":        {"*"},
+					"principal.donald_duck.vdefault/acme.hr":     {"view:*"},
+					"resource.leave_request.v20210210":           {"*", "approve", "create", "defer", "delete", "remind", "view", "view:*", "view:public"},
+					"resource.leave_request.vdefault":            {"*"},
+					"resource.leave_request.vdefault/acme":       {"create", "view:public"},
+					"resource.leave_request.vdefault/acme.hr":    {"approve", "defer", "delete", "view:*"},
+					"resource.leave_request.vdefault/acme.hr.uk": {"defer", "delete"},
+				},
+			},
+			{
+				name:    "NameRegexp",
+				options: []FilterOption{WithNameRegexp("leave_req")},
+				want: map[string][]string{
+					"resource.leave_request.v20210210":           {"*", "approve", "create", "defer", "delete", "remind", "view", "view:*", "view:public"},
+					"resource.leave_request.vdefault":            {"*"},
+					"resource.leave_request.vdefault/acme":       {"create", "view:public"},
+					"resource.leave_request.vdefault/acme.hr":    {"approve", "defer", "delete", "view:*"},
+					"resource.leave_request.vdefault/acme.hr.uk": {"defer", "delete"},
+				},
+			},
+			{
+				name:    "ScopeRegexp",
+				options: []FilterOption{WithScopeRegexp("acme")},
+				want: map[string][]string{
+					"principal.donald_duck.vdefault/acme":        {"*"},
+					"principal.donald_duck.vdefault/acme.hr":     {"view:*"},
+					"resource.leave_request.vdefault/acme":       {"create", "view:public"},
+					"resource.leave_request.vdefault/acme.hr":    {"approve", "defer", "delete", "view:*"},
+					"resource.leave_request.vdefault/acme.hr.uk": {"defer", "delete"},
+				},
+			},
+			{
+				name:    "VersionRegexp",
+				options: []FilterOption{WithVersionRegexp(`\d+`)},
+				want: map[string][]string{
+					"resource.leave_request.v20210210": {"*", "approve", "create", "defer", "delete", "remind", "view", "view:*", "view:public"},
+				},
+			},
+			{
+				name:    "AllRegexp",
+				options: []FilterOption{WithNameRegexp(`.*`), WithScopeRegexp(`.*`), WithVersionRegexp("def")},
+				want: map[string][]string{
+					"principal.donald_duck.vdefault":             {"*"},
+					"principal.donald_duck.vdefault/acme":        {"*"},
+					"principal.donald_duck.vdefault/acme.hr":     {"view:*"},
+					"resource.leave_request.vdefault":            {"*"},
+					"resource.leave_request.vdefault/acme":       {"create", "view:public"},
+					"resource.leave_request.vdefault/acme.hr":    {"approve", "defer", "delete", "view:*"},
+					"resource.leave_request.vdefault/acme.hr.uk": {"defer", "delete"},
+				},
+			},
+		}
+
+		for _, tc := range testCases {
+			tc := tc
+			t.Run(tc.name, func(t *testing.T) {
+				have, err := ac.InspectPolicies(context.Background(), tc.options...)
+				require.NoError(t, err)
+				require.NotNil(t, have)
+				require.NotNil(t, have.Results)
+				for fqn, actions := range tc.want {
+					t.Run(fqn, func(t *testing.T) {
+						require.NotNil(t, have.Results[fqn])
+						require.Len(t, have.Results[fqn].Actions, len(actions))
+						require.ElementsMatch(t, have.Results[fqn].Actions, actions)
+					})
 				}
 			})
 		}
