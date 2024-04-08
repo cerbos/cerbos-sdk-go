@@ -171,7 +171,7 @@ func mkConn(address string, opts ...Opt) (*grpc.ClientConn, *config, error) {
 		return nil, nil, err
 	}
 
-	grpcConn, err := grpc.Dial(conf.address, dialOpts...)
+	grpcConn, err := grpc.NewClient(conf.address, dialOpts...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to dial gRPC: %w", err)
 	}
