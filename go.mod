@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/bufbuild/protovalidate-go v0.6.1
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/cerbos/cerbos/api/genpb v0.34.1-0.20240404120519-19d38a48998f
+	github.com/cerbos/cerbos/api/genpb v0.35.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0
@@ -15,7 +15,7 @@ require (
 	github.com/rs/xid v1.5.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/multierr v1.11.0
-	google.golang.org/grpc v1.63.0
+	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.33.0
 )
 
