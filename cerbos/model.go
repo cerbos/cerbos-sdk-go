@@ -1216,6 +1216,7 @@ type (
 		NameRegexp      string
 		ScopeRegexp     string
 		VersionRegexp   string
+		PolicyIDs       []string
 		IncludeDisabled bool
 	}
 	// FilterOption allows filtering policies while calling InspectPolicies and ListPolicies.
@@ -1246,5 +1247,11 @@ func WithScopeRegexp(re string) FilterOption {
 func WithVersionRegexp(v string) FilterOption {
 	return func(fo *FilterOptions) {
 		fo.VersionRegexp = v
+	}
+}
+
+func WithPolicyID(id ...string) FilterOption {
+	return func(fo *FilterOptions) {
+		fo.PolicyIDs = id
 	}
 }
