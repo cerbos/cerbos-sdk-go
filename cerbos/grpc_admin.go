@@ -176,6 +176,7 @@ func (c *GRPCAdminClient) ListPolicies(ctx context.Context, opts ...FilterOption
 		opt(options)
 	}
 	req := &requestv1.ListPoliciesRequest{
+		PolicyId:        options.PolicyIDs,
 		IncludeDisabled: options.IncludeDisabled,
 		NameRegexp:      options.NameRegexp,
 		ScopeRegexp:     options.ScopeRegexp,
@@ -199,6 +200,7 @@ func (c *GRPCAdminClient) InspectPolicies(ctx context.Context, opts ...FilterOpt
 		opt(options)
 	}
 	req := &requestv1.InspectPoliciesRequest{
+		PolicyId:        options.PolicyIDs,
 		IncludeDisabled: options.IncludeDisabled,
 		NameRegexp:      options.NameRegexp,
 		ScopeRegexp:     options.ScopeRegexp,

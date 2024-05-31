@@ -286,6 +286,15 @@ func TestAdminClient(t *testing.T) {
 					"resource.leave_request.vdefault/acme.hr.uk": {"defer", "delete"},
 				},
 			},
+			{
+				name: "PolicyIDs",
+				options: []FilterOption{
+					WithPolicyID("resource.leave_request.v20210210"),
+				},
+				want: map[string][]string{
+					"resource.leave_request.v20210210": {"*", "approve", "create", "defer", "delete", "remind", "view", "view:*", "view:public"},
+				},
+			},
 		}
 
 		for _, tc := range testCases {
