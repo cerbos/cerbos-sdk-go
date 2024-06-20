@@ -113,8 +113,10 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 				defer cancelFunc()
 
-				have, err := c.With(RequestIDGenerator(func(_ context.Context) string { return "foo" })).CheckResources(ctx, principal, resources)
-				check(t, have, err)
+				have, err := c.With(RequestIDGenerator(func(_ context.Context) string {
+					return "foo"
+				})).CheckResources(ctx, principal, resources)
+				require.NoError(t, err)
 				require.Equal(t, "foo", have.GetRequestId())
 			})
 		})
@@ -351,8 +353,10 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 				defer cancelFunc()
 
-				have, err := cc.With(RequestIDGenerator(func(_ context.Context) string { return "foo" })).PlanResources(ctx, principal, resource, "approve")
-				check(t, have, err)
+				have, err := cc.With(RequestIDGenerator(func(_ context.Context) string {
+					return "foo"
+				})).PlanResources(ctx, principal, resource, "approve")
+				require.NoError(t, err)
 				require.Equal(t, "foo", have.GetRequestId())
 			})
 		})
