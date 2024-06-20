@@ -38,7 +38,7 @@ func GenerateToken(t *testing.T, expiry time.Time) string {
 	require.NoError(t, token.Set(jwt.AudienceKey, "cerbos-jwt-tests"))
 	require.NoError(t, token.Set(jwt.ExpirationKey, expiry))
 	require.NoError(t, token.Set("customString", "foobar"))
-	require.NoError(t, token.Set("customInt", 42)) //nolint:gomnd
+	require.NoError(t, token.Set("customInt", 42)) //nolint:mnd
 	require.NoError(t, token.Set("customArray", []string{"A", "B", "C"}))
 	require.NoError(t, token.Set("customMap", map[string]any{"A": "AA", "B": "BB", "C": "CC"}))
 
