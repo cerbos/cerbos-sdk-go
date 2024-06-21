@@ -9,12 +9,14 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
+	"github.com/rs/xid"
 )
 
 type ReqOpt struct {
-	AuxData     *requestv1.AuxData
-	Metadata    metadata.MD
-	IncludeMeta bool
+	AuxData            *requestv1.AuxData
+	Metadata           metadata.MD
+	RequestIDGenerator func(context.Context) string
+	IncludeMeta        bool
 }
 
 func (o *ReqOpt) Context(ctx context.Context) context.Context {
@@ -23,4 +25,13 @@ func (o *ReqOpt) Context(ctx context.Context) context.Context {
 	}
 
 	return metadata.NewOutgoingContext(ctx, o.Metadata)
+}
+
+func (o *ReqOpt) RequestID(ctx context.Context) string {
+	if o != nil && o.RequestIDGenerator != nil {
+		return o.RequestIDGenerator(ctx)
+	}
+
+	reqID := xid.New()
+	return reqID.String()
 }

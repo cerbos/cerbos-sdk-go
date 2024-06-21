@@ -24,7 +24,7 @@ const timeout = 30 * time.Second
 func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testing.T) {
 	//nolint:thelper
 	return func(t *testing.T) {
-		token := tests.GenerateToken(t, time.Now().Add(5*time.Minute)) //nolint:gomnd
+		token := tests.GenerateToken(t, time.Now().Add(5*time.Minute)) //nolint:mnd
 		c := c.With(
 			AuxDataJWT(token, ""),
 			IncludeMeta(true),
@@ -76,6 +76,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			check := func(t *testing.T, have *CheckResourcesResponse, err error) {
 				t.Helper()
 				require.NoError(t, err)
+				require.NotEmpty(t, have.GetRequestId())
 
 				haveXX125 := have.GetResource("XX125", MatchResourceKind("leave_request"))
 				require.NoError(t, haveXX125.Err())
@@ -106,6 +107,17 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 				check(t, have, err)
 
 				require.NotNil(t, have.Results[0].Meta, "no metadata found in the result")
+			})
+
+			t.Run("TestRequestIDGenerator", func(t *testing.T) {
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
+				defer cancelFunc()
+
+				have, err := c.With(RequestIDGenerator(func(_ context.Context) string {
+					return "foo"
+				})).CheckResources(ctx, principal, resources)
+				require.NoError(t, err)
+				require.Equal(t, "foo", have.GetRequestId())
 			})
 		})
 
@@ -145,6 +157,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			check := func(t *testing.T, have *CheckResourcesResponse, err error) {
 				t.Helper()
 				require.NoError(t, err)
+				require.NotEmpty(t, have.GetRequestId())
 
 				haveXX125 := have.GetResource("XX125", MatchResourceKind("leave_request"))
 				require.NoError(t, haveXX125.Err())
@@ -202,6 +215,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			check := func(t *testing.T, have *CheckResourcesResponse, err error) {
 				t.Helper()
 				require.NoError(t, err)
+				require.NotEmpty(t, have.GetRequestId())
 
 				haveXX125 := have.GetResource("XX125")
 				require.NoError(t, haveXX125.Err())
@@ -307,6 +321,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			check := func(t *testing.T, have *PlanResourcesResponse, err error) {
 				t.Helper()
 				is := require.New(t)
+				require.NotEmpty(t, have.GetRequestId())
 
 				is.NoError(err)
 				is.Equal(enginev1.PlanResourcesFilter_KIND_CONDITIONAL, have.Filter.Kind, "Expected conditional filter")
@@ -332,6 +347,17 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 
 				have, err := cc.WithPrincipal(principal).PlanResources(ctx, resource, "approve")
 				check(t, have, err)
+			})
+
+			t.Run("TestRequestIDGenerator", func(t *testing.T) {
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
+				defer cancelFunc()
+
+				have, err := cc.With(RequestIDGenerator(func(_ context.Context) string {
+					return "foo"
+				})).PlanResources(ctx, principal, resource, "approve")
+				require.NoError(t, err)
+				require.Equal(t, "foo", have.GetRequestId())
 			})
 		})
 	}

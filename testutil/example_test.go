@@ -37,7 +37,7 @@ func ExampleLaunchCerbosServer() {
 
 	defer s.Stop()
 
-	c, err := cerbos.New(s.GRPCAddr(), cerbos.WithPlaintext())
+	c, err := cerbos.New("passthrough:///"+s.GRPCAddr(), cerbos.WithPlaintext())
 	if err != nil {
 		log.Fatalf("Failed to create Cerbos client: %v", err)
 	}

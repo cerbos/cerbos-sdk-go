@@ -77,11 +77,11 @@ func TestGRPCClient(t *testing.T) {
 				}{
 					{
 						name: "grpc",
-						addr: s.GRPCAddr(),
+						addr: "passthrough:///" + s.GRPCAddr(),
 					},
 					{
 						name: "http",
-						addr: s.HTTPAddr(),
+						addr: "passthrough:///" + s.HTTPAddr(),
 					},
 				}
 				for _, port := range ports {

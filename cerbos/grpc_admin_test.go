@@ -123,7 +123,7 @@ func TestAdminClient(t *testing.T) {
 	defer cancel()
 	require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
 
-	ac, err := NewAdminClientWithCredentials(s.GRPCAddr(), adminUsername, adminPassword, WithTLSInsecure(), WithConnectTimeout(connectTimeout))
+	ac, err := NewAdminClientWithCredentials("passthrough:///"+s.GRPCAddr(), adminUsername, adminPassword, WithTLSInsecure(), WithConnectTimeout(connectTimeout))
 	require.NoError(t, err)
 
 	policies := map[string]string{

@@ -13,7 +13,6 @@ import (
 	"time"
 
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/retry"
-	"github.com/rs/xid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -156,9 +155,9 @@ func New(address string, opts ...Opt) (*GRPCClient, error) {
 func mkConn(address string, opts ...Opt) (*grpc.ClientConn, *config, error) {
 	conf := &config{
 		address:        address,
-		connectTimeout: 30 * time.Second, //nolint:gomnd
-		maxRetries:     3,                //nolint:gomnd
-		retryTimeout:   2 * time.Second,  //nolint:gomnd
+		connectTimeout: 30 * time.Second, //nolint:mnd
+		maxRetries:     3,                //nolint:mnd
+		retryTimeout:   2 * time.Second,  //nolint:mnd
 		userAgent:      internal.UserAgent("grpc"),
 	}
 
@@ -298,9 +297,8 @@ func (c *GRPCClient) PlanResources(ctx context.Context, principal *Principal, re
 		return nil, fmt.Errorf("invalid resource: %w", err)
 	}
 
-	reqID := xid.New()
 	req := &requestv1.PlanResourcesRequest{
-		RequestId: reqID.String(),
+		RequestId: c.opts.RequestID(ctx),
 		Action:    action,
 		Principal: principal.Obj,
 		Resource: &enginev1.PlanResourcesInput_Resource{
@@ -333,9 +331,8 @@ func (c *GRPCClient) CheckResources(ctx context.Context, principal *Principal, r
 		return nil, fmt.Errorf("invalid resource batch; %w", err)
 	}
 
-	reqID := xid.New()
 	req := &requestv1.CheckResourcesRequest{
-		RequestId: reqID.String(),
+		RequestId: c.opts.RequestID(ctx),
 		Principal: principal.Obj,
 		Resources: resourceBatch.Batch,
 	}
@@ -362,9 +359,8 @@ func (c *GRPCClient) IsAllowed(ctx context.Context, principal *Principal, resour
 		return false, fmt.Errorf("invalid resource: %w", err)
 	}
 
-	reqID := xid.New()
 	req := &requestv1.CheckResourcesRequest{
-		RequestId: reqID.String(),
+		RequestId: c.opts.RequestID(ctx),
 		Principal: principal.Obj,
 		Resources: []*requestv1.CheckResourcesRequest_ResourceEntry{
 			{Actions: []string{action}, Resource: resource.Obj},
