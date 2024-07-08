@@ -1,9 +1,11 @@
 module github.com/cerbos/cerbos-sdk-go
 
-go 1.20
+go 1.21
+
+toolchain go1.22.5
 
 require (
-	github.com/bufbuild/protovalidate-go v0.6.2
+	github.com/bufbuild/protovalidate-go v0.6.3
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cerbos/cerbos/api/genpb v0.37.0
 	github.com/ghodss/yaml v1.0.0
@@ -15,7 +17,7 @@ require (
 	github.com/rs/xid v1.5.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/multierr v1.11.0
-	google.golang.org/grpc v1.64.0
+	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
 )
 
