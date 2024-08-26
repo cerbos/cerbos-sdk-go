@@ -14,7 +14,7 @@ require (
 	github.com/jdxcode/netrc v1.0.0
 	github.com/lestrrat-go/jwx/v2 v2.1.1
 	github.com/ory/dockertest/v3 v3.11.0
-	github.com/rs/xid v1.5.0
+	github.com/rs/xid v1.6.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/multierr v1.11.0
 	google.golang.org/grpc v1.65.0
