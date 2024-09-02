@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.23.0
 
 require (
-	github.com/bufbuild/protovalidate-go v0.6.4
+	github.com/bufbuild/protovalidate-go v0.6.5
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cerbos/cerbos/api/genpb v0.38.1
 	github.com/ghodss/yaml v1.0.0
@@ -17,7 +17,7 @@ require (
 	github.com/rs/xid v1.6.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/multierr v1.11.0
-	google.golang.org/grpc v1.65.0
+	google.golang.org/grpc v1.66.0
 	google.golang.org/protobuf v1.34.2
 )
 
@@ -52,7 +52,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/opencontainers/runc v1.1.13 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/planetscale/vtprotobuf v0.6.0 // indirect
+	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
