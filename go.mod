@@ -2,7 +2,7 @@ module github.com/cerbos/cerbos-sdk-go
 
 go 1.22
 
-toolchain go1.23.0
+toolchain go1.23.1
 
 require (
 	github.com/bufbuild/protovalidate-go v0.6.5
