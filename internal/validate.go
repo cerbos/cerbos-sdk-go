@@ -72,6 +72,8 @@ func ValidatePolicy(p *policyv1.Policy) error {
 		return validatePrincipalPolicy(pt.PrincipalPolicy)
 	case *policyv1.Policy_DerivedRoles:
 		return validateDerivedRoles(pt.DerivedRoles)
+	case *policyv1.Policy_ExportConstants:
+		return validateExportConstants(p)
 	case *policyv1.Policy_ExportVariables:
 		return validateExportVariables(p)
 	default:
@@ -153,6 +155,15 @@ func validateDerivedRoles(dr *policyv1.DerivedRoles) (err error) {
 	}
 
 	return
+}
+
+func validateExportConstants(p *policyv1.Policy) error {
+	//nolint:staticcheck
+	if len(p.Variables) > 0 {
+		return fmt.Errorf("export constants policies do not support the deprecated top-level variables field")
+	}
+
+	return nil
 }
 
 func validateExportVariables(p *policyv1.Policy) error {

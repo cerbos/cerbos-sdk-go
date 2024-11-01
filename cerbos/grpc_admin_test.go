@@ -130,6 +130,7 @@ func TestAdminClient(t *testing.T) {
 		"derived_roles.apatr_common_roles":           "derived_roles/common_roles.yaml",
 		"derived_roles.alpha":                        "derived_roles/derived_roles_01.yaml",
 		"derived_roles.beta":                         "derived_roles/derived_roles_02.yaml",
+		"export_constants.bazqux":                    "export_constants/export_constants_01.yaml",
 		"export_variables.foobar":                    "export_variables/export_variables_01.yaml",
 		"principal.donald_duck.vdefault":             "principal_policies/policy_02.yaml",
 		"principal.donald_duck.vdefault/acme":        "principal_policies/policy_02_acme.yaml",

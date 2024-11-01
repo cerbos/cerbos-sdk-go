@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	effectv1 "github.com/cerbos/cerbos/api/genpb/cerbos/effect/v1"
@@ -19,9 +20,12 @@ import (
 const (
 	actionApprove       = "approve"
 	actionCreate        = "create"
+	constantName        = "bar"
+	constantValue       = float64(9000)
 	id                  = "XX125"
 	kind                = "leave_request"
 	derivedRolesName    = "my_derived_roles"
+	exportConstantsName = "my_constants"
 	exportVariablesName = "my_variables"
 	ref                 = "cerbos:///principal.json"
 	roleName            = "employee_that_owns_the_record"
@@ -64,6 +68,11 @@ func TestBuilders(t *testing.T) {
 		dr := newDerivedRoles(t)
 		require.NoError(t, dr.Validate())
 		cmpDerivedRoles(t, dr)
+	})
+	t.Run("ExportConstants", func(t *testing.T) {
+		ec := newExportConstants(t)
+		require.NoError(t, ec.Validate())
+		cmpExportConstants(t, ec)
 	})
 	t.Run("ExportVariables", func(t *testing.T) {
 		ev := newExportVariables(t)
@@ -125,6 +134,13 @@ func cmpDerivedRoles(t *testing.T, dr *cerbos.DerivedRoles) {
 	}
 	require.Equal(t, []string{exportVariablesName}, dr.Obj.Variables.Import)
 	require.Equal(t, map[string]string{variableName: variableExpr}, dr.Obj.Variables.Local)
+}
+
+func cmpExportConstants(t *testing.T, ec *cerbos.ExportConstants) {
+	t.Helper()
+
+	require.Equal(t, exportConstantsName, ec.Obj.Name)
+	require.Equal(t, map[string]any{constantName: constantValue}, (&structpb.Struct{Fields: ec.Obj.Definitions}).AsMap())
 }
 
 func cmpExportVariables(t *testing.T, ev *cerbos.ExportVariables) {
@@ -242,9 +258,18 @@ func newDerivedRoles(t *testing.T) *cerbos.DerivedRoles {
 	t.Helper()
 
 	return cerbos.NewDerivedRoles(derivedRolesName).
+		WithConstantsImports(exportConstantsName).
+		WithConstant(constantName, constantValue).
 		WithVariablesImports(exportVariablesName).
 		WithVariable(variableName, variableExpr).
 		AddRole(roleName, roles)
+}
+
+func newExportConstants(t *testing.T) *cerbos.ExportConstants {
+	t.Helper()
+
+	return cerbos.NewExportConstants(exportConstantsName).
+		AddConstant(constantName, constantValue)
 }
 
 func newExportVariables(t *testing.T) *cerbos.ExportVariables {
@@ -280,6 +305,8 @@ func newPrincipalPolicy(t *testing.T) *cerbos.PrincipalPolicy {
 
 	return cerbos.NewPrincipalPolicy(principal, version).
 		WithScope(scope).
+		WithConstantsImports(exportConstantsName).
+		WithConstant(constantName, constantValue).
 		WithVariablesImports(exportVariablesName).
 		WithVariable(variableName, variableExpr).
 		AddPrincipalRules(
@@ -292,6 +319,8 @@ func newResourcePolicy(t *testing.T) *cerbos.ResourcePolicy {
 
 	return cerbos.NewResourcePolicy(resource, version).
 		WithScope(scope).
+		WithConstantsImports(exportConstantsName).
+		WithConstant(constantName, constantValue).
 		WithVariablesImports(exportVariablesName).
 		WithVariable(variableName, variableExpr)
 }
