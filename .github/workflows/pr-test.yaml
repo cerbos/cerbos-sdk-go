@@ -4,12 +4,14 @@ on:
   pull_request:
     branches:
       - main
+env:
+  GOTOOLCHAIN: local
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: ["1.21", "1.22"]
+        go: ["1.22", "1.23"]
     name: Test on Go ${{ matrix.go }}
     timeout-minutes: 10
     steps:
@@ -19,7 +21,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go}}
+          go-version: ${{ matrix.go }}
           check-latest: true
 
       - name: Install just
