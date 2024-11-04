@@ -23,23 +23,29 @@ func ToStructPB(v any) (*structpb.Value, error) {
 	vv := reflect.ValueOf(v)
 	switch vv.Kind() {
 	case reflect.Array, reflect.Slice:
-		arr := make([]any, vv.Len())
+		arr := make([]*structpb.Value, vv.Len())
 		for i := 0; i < vv.Len(); i++ {
 			el := vv.Index(i)
-			arr[i] = el.Interface()
+			arr[i], err = ToStructPB(el.Interface())
+			if err != nil {
+				return nil, err
+			}
 		}
 
-		return structpb.NewValue(arr)
+		return structpb.NewListValue(&structpb.ListValue{Values: arr}), nil
 	case reflect.Map:
 		if vv.Type().Key().Kind() == reflect.String {
-			m := make(map[string]any)
+			m := make(map[string]*structpb.Value)
 
 			iter := vv.MapRange()
 			for iter.Next() {
-				m[iter.Key().String()] = iter.Value().Interface()
+				m[iter.Key().String()], err = ToStructPB(iter.Value().Interface())
+				if err != nil {
+					return nil, err
+				}
 			}
 
-			return structpb.NewValue(m)
+			return structpb.NewStructValue(&structpb.Struct{Fields: m}), nil
 		}
 	default:
 		return nil, err
