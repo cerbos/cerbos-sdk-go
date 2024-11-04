@@ -214,7 +214,6 @@ func TestAdminClient(t *testing.T) {
 		}
 
 		for _, tc := range testCases {
-			tc := tc
 			t.Run(tc.name, func(t *testing.T) {
 				have, err := ac.ListPolicies(context.Background(), tc.options...)
 				require.NoError(t, err)
@@ -299,7 +298,6 @@ func TestAdminClient(t *testing.T) {
 		}
 
 		for _, tc := range testCases {
-			tc := tc
 			t.Run(tc.name, func(t *testing.T) {
 				have, err := ac.InspectPolicies(context.Background(), tc.options...)
 				require.NoError(t, err)

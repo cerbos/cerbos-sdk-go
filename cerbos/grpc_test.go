@@ -54,7 +54,6 @@ func TestGRPCClient(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Run("tcp", func(t *testing.T) {
 				s, err := launcher.Launch(testutil.LaunchConf{
