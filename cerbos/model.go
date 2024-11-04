@@ -773,12 +773,9 @@ func (rp *ResourcePolicy) WithConstantsImports(name ...string) *ResourcePolicy {
 }
 
 // WithConstant adds a constant definition for use in conditions.
-// Valid value types are those that can be converted to a [google.protobuf.Value].
-//
-// [google.protobuf.Value]: https://pkg.go.dev/google.golang.org/protobuf/types/known/structpb#NewValue
 func (rp *ResourcePolicy) WithConstant(name string, value any) *ResourcePolicy {
 	var err error
-	rp.Obj.Constants.Local[name], err = structpb.NewValue(value)
+	rp.Obj.Constants.Local[name], err = internal.ToStructPB(value)
 	rp.err = multierr.Append(rp.err, err)
 	return rp
 }
@@ -940,12 +937,9 @@ func (pp *PrincipalPolicy) WithConstantsImports(name ...string) *PrincipalPolicy
 }
 
 // WithConstant adds a constant definition for use in conditions.
-// Valid value types are those that can be converted to a [google.protobuf.Value].
-//
-// [google.protobuf.Value]: https://pkg.go.dev/google.golang.org/protobuf/types/known/structpb#NewValue
 func (pp *PrincipalPolicy) WithConstant(name string, value any) *PrincipalPolicy {
 	var err error
-	pp.Obj.Constants.Local[name], err = structpb.NewValue(value)
+	pp.Obj.Constants.Local[name], err = internal.ToStructPB(value)
 	pp.err = multierr.Append(pp.err, err)
 	return pp
 }
@@ -1084,12 +1078,9 @@ func (dr *DerivedRoles) WithConstantsImports(name ...string) *DerivedRoles {
 }
 
 // WithConstant adds a constant definition for use in conditions.
-// Valid value types are those that can be converted to a [google.protobuf.Value].
-//
-// [google.protobuf.Value]: https://pkg.go.dev/google.golang.org/protobuf/types/known/structpb#NewValue
 func (dr *DerivedRoles) WithConstant(name string, value any) *DerivedRoles {
 	var err error
-	dr.Obj.Constants.Local[name], err = structpb.NewValue(value)
+	dr.Obj.Constants.Local[name], err = internal.ToStructPB(value)
 	dr.err = multierr.Append(dr.err, err)
 	return dr
 }
@@ -1145,12 +1136,9 @@ func NewExportConstants(name string) *ExportConstants {
 }
 
 // AddConstant defines an exported constant with the given name to be the given value.
-// Valid value types are those that can be converted to a [google.protobuf.Value].
-//
-// [google.protobuf.Value]: https://pkg.go.dev/google.golang.org/protobuf/types/known/structpb#NewValue
 func (ec *ExportConstants) AddConstant(name string, value any) *ExportConstants {
 	var err error
-	ec.Obj.Definitions[name], err = structpb.NewValue(value)
+	ec.Obj.Definitions[name], err = internal.ToStructPB(value)
 	ec.err = multierr.Append(ec.err, err)
 	return ec
 }
