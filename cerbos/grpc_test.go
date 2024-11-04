@@ -93,6 +93,10 @@ func TestGRPCClient(t *testing.T) {
 			})
 
 			t.Run("uds", func(t *testing.T) {
+				if !osSupportsUDS {
+					t.Skip("Sharing a Unix domain socket over a Docker bind mount is not supported on this operating system")
+				}
+
 				tempDir := t.TempDir()
 				s, err := launcher.Launch(testutil.LaunchConf{
 					ConfFilePath: tc.confFilePath,

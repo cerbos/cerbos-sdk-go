@@ -41,4 +41,4 @@ Submitting pull requests
 Developing Cerbos Go SDK
 ------------------------
 
-We currently require Go 1.20.x for development. [Just](https://just.systems/man/en/chapter_1.html) is used for build tasks. Run `just` at the root of the directory to see the list of available targets.
+We currently require Go 1.22.x for development. [Just](https://just.systems/man/en/chapter_1.html) is used for build tasks. Run `just` at the root of the directory to see the list of available targets.
