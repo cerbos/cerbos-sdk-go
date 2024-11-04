@@ -517,6 +517,21 @@ func (ps *PolicySet) AddDerivedRoles(policies ...*DerivedRoles) *PolicySet {
 	return ps
 }
 
+// AddExportConstants adds the given exported constants to the set.
+func (ps *PolicySet) AddExportConstants(policies ...*ExportConstants) *PolicySet {
+	for _, p := range policies {
+		if p == nil {
+			continue
+		}
+
+		if err := ps.add(p); err != nil {
+			ps.err = multierr.Append(ps.err, fmt.Errorf("failed to add exported constants [%s]: %w", p.Obj.Name, err))
+		}
+	}
+
+	return ps
+}
+
 // AddExportVariables adds the given exported variables to the set.
 func (ps *PolicySet) AddExportVariables(policies ...*ExportVariables) *PolicySet {
 	for _, p := range policies {
@@ -706,6 +721,7 @@ func NewResourcePolicy(resource, version string) *ResourcePolicy {
 		Obj: &policyv1.ResourcePolicy{
 			Resource:  resource,
 			Version:   version,
+			Constants: &policyv1.Constants{Local: make(map[string]*structpb.Value)},
 			Variables: &policyv1.Variables{Local: make(map[string]string)},
 		},
 	}
@@ -747,6 +763,20 @@ func (rp *ResourcePolicy) AddResourceRules(rules ...*ResourceRule) *ResourcePoli
 		rp.Obj.Rules = append(rp.Obj.Rules, r.Obj)
 	}
 
+	return rp
+}
+
+// WithConstantsImports adds import statements for exported constants.
+func (rp *ResourcePolicy) WithConstantsImports(name ...string) *ResourcePolicy {
+	rp.Obj.Constants.Import = append(rp.Obj.Constants.Import, name...)
+	return rp
+}
+
+// WithConstant adds a constant definition for use in conditions.
+func (rp *ResourcePolicy) WithConstant(name string, value any) *ResourcePolicy {
+	var err error
+	rp.Obj.Constants.Local[name], err = internal.ToStructPB(value)
+	rp.err = multierr.Append(rp.err, err)
 	return rp
 }
 
@@ -864,6 +894,7 @@ func NewPrincipalPolicy(principal, version string) *PrincipalPolicy {
 		Obj: &policyv1.PrincipalPolicy{
 			Principal: principal,
 			Version:   version,
+			Constants: &policyv1.Constants{Local: make(map[string]*structpb.Value)},
 			Variables: &policyv1.Variables{Local: make(map[string]string)},
 		},
 	}
@@ -896,6 +927,20 @@ func (pp *PrincipalPolicy) WithScope(scope string) *PrincipalPolicy {
 // WithVersion sets the version of this policy.
 func (pp *PrincipalPolicy) WithVersion(version string) *PrincipalPolicy {
 	pp.Obj.Version = version
+	return pp
+}
+
+// WithConstantsImports adds import statements for exported constants.
+func (pp *PrincipalPolicy) WithConstantsImports(name ...string) *PrincipalPolicy {
+	pp.Obj.Constants.Import = append(pp.Obj.Constants.Import, name...)
+	return pp
+}
+
+// WithConstant adds a constant definition for use in conditions.
+func (pp *PrincipalPolicy) WithConstant(name string, value any) *PrincipalPolicy {
+	var err error
+	pp.Obj.Constants.Local[name], err = internal.ToStructPB(value)
+	pp.err = multierr.Append(pp.err, err)
 	return pp
 }
 
@@ -996,6 +1041,7 @@ func (pr *PrincipalRule) Validate() error {
 // DerivedRoles is a builder for derived roles.
 type DerivedRoles struct {
 	Obj *policyv1.DerivedRoles
+	err error
 }
 
 // NewDerivedRoles creates a new derived roles set with the given name.
@@ -1003,6 +1049,7 @@ func NewDerivedRoles(name string) *DerivedRoles {
 	return &DerivedRoles{
 		Obj: &policyv1.DerivedRoles{
 			Name:      name,
+			Constants: &policyv1.Constants{Local: make(map[string]*structpb.Value)},
 			Variables: &policyv1.Variables{Local: make(map[string]string)},
 		},
 	}
@@ -1024,6 +1071,20 @@ func (dr *DerivedRoles) addRoleDef(name string, parentRoles []string, comp *poli
 	return dr
 }
 
+// WithConstantsImports adds import statements for exported constants.
+func (dr *DerivedRoles) WithConstantsImports(name ...string) *DerivedRoles {
+	dr.Obj.Constants.Import = append(dr.Obj.Constants.Import, name...)
+	return dr
+}
+
+// WithConstant adds a constant definition for use in conditions.
+func (dr *DerivedRoles) WithConstant(name string, value any) *DerivedRoles {
+	var err error
+	dr.Obj.Constants.Local[name], err = internal.ToStructPB(value)
+	dr.err = multierr.Append(dr.err, err)
+	return dr
+}
+
 // WithVariablesImports adds import statements for exported variables.
 func (dr *DerivedRoles) WithVariablesImports(name ...string) *DerivedRoles {
 	dr.Obj.Variables.Import = append(dr.Obj.Variables.Import, name...)
@@ -1038,7 +1099,7 @@ func (dr *DerivedRoles) WithVariable(name, expr string) *DerivedRoles {
 
 // Err returns any errors accumulated during the construction of the derived roles.
 func (dr *DerivedRoles) Err() error {
-	return nil
+	return dr.err
 }
 
 // Validate checks whether the derived roles are valid.
@@ -1052,6 +1113,52 @@ func (dr *DerivedRoles) build() (*policyv1.Policy, error) {
 		ApiVersion: apiVersion,
 		PolicyType: &policyv1.Policy_DerivedRoles{
 			DerivedRoles: dr.Obj,
+		},
+	}
+
+	return p, internal.ValidatePolicy(p)
+}
+
+// ExportConstants is a builder for exported constants.
+type ExportConstants struct {
+	Obj *policyv1.ExportConstants
+	err error
+}
+
+// NewExportConstants creates a new exported constants set with the given name.
+func NewExportConstants(name string) *ExportConstants {
+	return &ExportConstants{
+		Obj: &policyv1.ExportConstants{
+			Name:        name,
+			Definitions: make(map[string]*structpb.Value),
+		},
+	}
+}
+
+// AddConstant defines an exported constant with the given name to be the given value.
+func (ec *ExportConstants) AddConstant(name string, value any) *ExportConstants {
+	var err error
+	ec.Obj.Definitions[name], err = internal.ToStructPB(value)
+	ec.err = multierr.Append(ec.err, err)
+	return ec
+}
+
+// Err returns any errors accumulated during the construction of the exported constants.
+func (ec *ExportConstants) Err() error {
+	return ec.err
+}
+
+// Validate checks whether the exported constants are valid.
+func (ec *ExportConstants) Validate() error {
+	_, err := ec.build()
+	return err
+}
+
+func (ec *ExportConstants) build() (*policyv1.Policy, error) {
+	p := &policyv1.Policy{
+		ApiVersion: apiVersion,
+		PolicyType: &policyv1.Policy_ExportConstants{
+			ExportConstants: ec.Obj,
 		},
 	}
 
