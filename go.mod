@@ -2,7 +2,7 @@ module github.com/cerbos/cerbos-sdk-go
 
 go 1.22.7
 
-toolchain go1.23.3
+toolchain go1.23.4
 
 require (
 	github.com/bufbuild/protovalidate-go v0.7.3
@@ -17,7 +17,7 @@ require (
 	github.com/rs/xid v1.6.0
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/multierr v1.11.0
-	google.golang.org/grpc v1.68.0
+	google.golang.org/grpc v1.68.1
 	google.golang.org/protobuf v1.35.2
 )
 
