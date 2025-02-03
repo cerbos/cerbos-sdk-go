@@ -5,7 +5,7 @@ go 1.22.7
 toolchain go1.23.5
 
 require (
-	github.com/bufbuild/protovalidate-go v0.8.2
+	github.com/bufbuild/protovalidate-go v0.9.1
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cerbos/cerbos/api/genpb v0.40.0
 	github.com/ghodss/yaml v1.0.0
@@ -22,8 +22,8 @@ require (
 )
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.1-20241127180247-a33202765966.1 // indirect
-	cel.dev/expr v0.19.0 // indirect
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.4-20250130201111-63bb56e20495.1 // indirect
+	cel.dev/expr v0.19.1 // indirect
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
@@ -39,7 +39,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.0.0 // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/google/cel-go v0.22.1 // indirect
+	github.com/google/cel-go v0.23.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.24.0 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
