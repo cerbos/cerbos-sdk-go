@@ -83,11 +83,11 @@ linters:
     - rowserrcheck
     - sqlclosecheck
     - tagliatelle
-    - tenv
     - thelper
     - tparallel
     - unconvert
     - unparam
+    - usetesting
     - wastedassign
     - whitespace
 
