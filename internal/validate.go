@@ -5,46 +5,16 @@ package internal
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/bufbuild/protovalidate-go"
 	"go.uber.org/multierr"
 	"google.golang.org/protobuf/proto"
 
-	enginev1 "github.com/cerbos/cerbos/api/genpb/cerbos/engine/v1"
 	policyv1 "github.com/cerbos/cerbos/api/genpb/cerbos/policy/v1"
-	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
-)
-
-var (
-	validateFn    func(proto.Message) error
-	validatorOnce sync.Once
 )
 
 func Validate[T proto.Message](obj T) error {
-	validatorOnce.Do(func() {
-		validator, err := protovalidate.New(
-			protovalidate.WithMessages(
-				&enginev1.Principal{},
-				&enginev1.Resource{},
-				&policyv1.Policy{},
-				&requestv1.CheckResourcesRequest{},
-				&requestv1.PlanResourcesRequest{},
-				&requestv1.AddOrUpdatePolicyRequest{},
-			),
-		)
-		if err != nil {
-			validateFn = func(_ proto.Message) error {
-				return fmt.Errorf("failed to initialize validator: %w", err)
-			}
-		} else {
-			validateFn = func(m proto.Message) error {
-				return validator.Validate(m)
-			}
-		}
-	})
-
-	return validateFn(obj)
+	return protovalidate.Validate(obj)
 }
 
 type Validatable interface {
