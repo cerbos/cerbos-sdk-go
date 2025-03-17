@@ -82,10 +82,7 @@ func (c *GRPCAdminClient) AddOrUpdatePolicy(ctx context.Context, policies *Polic
 
 	all := policies.GetPolicies()
 	for bs := 0; bs < len(all); bs += addPolicyBatchSize {
-		be := bs + addPolicyBatchSize
-		if be >= len(all) {
-			be = len(all)
-		}
+		be := min(bs+addPolicyBatchSize, len(all))
 
 		req := &requestv1.AddOrUpdatePolicyRequest{Policies: all[bs:be]}
 		if _, err := c.client.AddOrUpdatePolicy(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds)); err != nil {
@@ -269,10 +266,7 @@ func (c *GRPCAdminClient) EnablePolicy(ctx context.Context, ids ...string) (uint
 func (c *GRPCAdminClient) AddOrUpdateSchema(ctx context.Context, schemas *SchemaSet) error {
 	all := schemas.GetSchemas()
 	for bs := 0; bs < len(all); bs += addSchemaBatchSize {
-		be := bs + addSchemaBatchSize
-		if be >= len(all) {
-			be = len(all)
-		}
+		be := min(bs+addSchemaBatchSize, len(all))
 
 		req := &requestv1.AddOrUpdateSchemaRequest{Schemas: all[bs:be]}
 		if _, err := c.client.AddOrUpdateSchema(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds)); err != nil {

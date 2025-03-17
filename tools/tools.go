@@ -8,5 +8,6 @@ package tools
 
 import (
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
+	_ "golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize"
 	_ "gotest.tools/gotestsum"
 )

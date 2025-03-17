@@ -44,6 +44,12 @@ jobs:
           check-latest: true
           cache: false
 
+      - name: Install just
+        uses: extractions/setup-just@v2
+
+      - name: modernize
+        run: just lint-modernize
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6.5.1
         with:
