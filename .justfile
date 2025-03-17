@@ -9,8 +9,11 @@ tools_mod_dir := join(justfile_directory(), "tools")
 default:
     @ just --list
 
-lint: _golangcilint
+lint: lint-modernize _golangcilint
     @ "${TOOLS_BIN_DIR}/golangci-lint" run --fix
+
+lint-modernize: _modernize
+    @ GOFLAGS=-tags=tests,integration "${TOOLS_BIN_DIR}/modernize" -fix -test ./...
 
 test PKG='./...' TEST='.*': _gotestsum
     @ "${TOOLS_BIN_DIR}/gotestsum" --format-hide-empty-pkg -- -tags=tests,integration -failfast -v -count=1 -run='{{ TEST }}' '{{ PKG }}'
@@ -24,6 +27,8 @@ compile:
 _gotestsum: (_install "gotestsum" "gotest.tools/gotestsum")
 
 _golangcilint: (_install "golangci-lint" "github.com/golangci/golangci-lint" "cmd/golangci-lint")
+
+_modernize: (_install "modernize" "golang.org/x/tools/gopls" "internal/analysis/modernize/cmd/modernize")
 
 _install EXECUTABLE MODULE CMD_PKG="":
     #!/usr/bin/env bash
