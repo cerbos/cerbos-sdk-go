@@ -26,7 +26,7 @@ compile:
 
 _gotestsum: (_install "gotestsum" "gotest.tools/gotestsum")
 
-_golangcilint: (_install "golangci-lint" "github.com/golangci/golangci-lint" "cmd/golangci-lint")
+_golangcilint: (_install "golangci-lint" "github.com/golangci/golangci-lint/v2" "cmd/golangci-lint")
 
 _modernize: (_install "modernize" "golang.org/x/tools/gopls" "internal/analysis/modernize/cmd/modernize")
 
