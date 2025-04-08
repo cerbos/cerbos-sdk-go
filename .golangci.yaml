@@ -1,50 +1,11 @@
----
+version: "2"
+
 run:
-  timeout: 300s
   build-tags:
     - tests
 
-linters-settings:
-  exhaustive:
-    default-signifies-exhaustive: true
-
-  gci:
-    sections:
-      - standard
-      - default
-      - prefix(github.com/cerbos/cerbos-sdk-go)
-      - blank
-      - dot
-    skip-generated: true
-    custom-order: true
-
-  gofumpt:
-    extra-rules: true
-
-  goheader:
-    values:
-      const:
-        COMPANY: Zenauth Ltd.
-    template: |-
-      Copyright {{ YEAR-RANGE }} {{ COMPANY }}
-      SPDX-License-Identifier: Apache-2.0
-
-  govet:
-    enable-all: true
-    disable:
-      - shadow
-
-  nolintlint:
-    allow-unused: false
-    require-specific: true
-
-  tagliatelle:
-    case:
-      rules:
-        json: goCamel
-        yaml: goCamel
-        xml: goCamel
-        bson: goCamel
+issues:
+  max-same-issues: 30
 
 linters:
   enable:
@@ -61,12 +22,9 @@ linters:
     - goconst
     - gocritic
     - godot
-    - gofumpt
-    - goimports
     - goheader
     - gomoddirectives
     - gosec
-    - govet
     - importas
     - makezero
     - misspell
@@ -91,22 +49,90 @@ linters:
     - wastedassign
     - whitespace
 
-issues:
-  max-same-issues: 30
+  settings:
+    exhaustive:
+      default-signifies-exhaustive: true
 
-  exclude-dirs:
-    - "^genpb/"
-    - "^hack/"
-    - "^tools/"
+    goheader:
+      values:
+        const:
+          COMPANY: Zenauth Ltd.
+      template: |-
+        Copyright {{ YEAR-RANGE }} {{ COMPANY }}
+        SPDX-License-Identifier: Apache-2.0
 
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - forcetypeassert
-        - goconst
-        - gomnd
-        - govet
-    - path: example_test\.go
-      linters:
-        - gocritic
-        - errcheck
+    govet:
+      disable:
+        - shadow
+      enable-all: true
+
+    nolintlint:
+      require-specific: true
+      allow-unused: false
+
+    tagliatelle:
+      case:
+        rules:
+          bson: goCamel
+          json: goCamel
+          xml: goCamel
+          yaml: goCamel
+
+  exclusions:
+    generated: lax
+
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+
+    rules:
+      - linters:
+          - forcetypeassert
+          - goconst
+          - govet
+          - mnd
+        path: _test\.go
+
+      - linters:
+          - errcheck
+          - gocritic
+        path: example_test\.go
+
+    paths:
+      - ^genpb/
+      - ^hack/
+      - ^tools/
+      - third_party$
+      - builtin$
+      - examples$
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/cerbos/cerbos-sdk-go)
+        - blank
+        - dot
+      custom-order: true
+
+    gofumpt:
+      extra-rules: true
+
+  exclusions:
+    generated: lax
+
+    paths:
+      - ^genpb/
+      - ^hack/
+      - ^tools/
+      - third_party$
+      - builtin$
+      - examples$
