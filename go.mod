@@ -13,6 +13,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.1
 	github.com/jdxcode/netrc v1.0.0
 	github.com/lestrrat-go/jwx/v2 v2.1.4
+	github.com/lestrrat-go/jwx/v3 v3.0.0
 	github.com/ory/dockertest/v3 v3.12.0
 	github.com/rs/xid v1.6.0
 	github.com/stretchr/testify v1.10.0
