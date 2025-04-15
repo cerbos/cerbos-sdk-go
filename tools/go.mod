@@ -6,7 +6,6 @@ toolchain go1.24.2
 
 require (
 	github.com/golangci/golangci-lint/v2 v2.1.2
-	golang.org/x/tools/gopls v0.18.1
 	gotest.tools/gotestsum v1.12.1
 )
 
