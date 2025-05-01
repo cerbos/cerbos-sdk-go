@@ -6,6 +6,7 @@ package hub
 import (
 	"github.com/cerbos/cerbos-sdk-go/internal"
 	storev1 "github.com/cerbos/cloud-api/genpb/cerbos/cloud/store/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type ModifyFilesRequest struct {
@@ -70,15 +71,28 @@ func (mfr *ModifyFilesRequest) Validate() error {
 	return internal.Validate(mfr.Obj)
 }
 
+type ModifyFilesResponse struct {
+	*storev1.ModifyFilesResponse
+}
+
+func (mfr *ModifyFilesResponse) String() string {
+	return protojson.Format(mfr.ModifyFilesResponse)
+}
+
+func (mfr *ModifyFilesResponse) MarshalJSON() ([]byte, error) {
+	return protojson.Marshal(mfr.ModifyFilesResponse)
+}
+
 type ReplaceFilesRequest struct {
 	Obj *storev1.ReplaceFilesRequest
 }
 
-func NewReplaceFilesRequest(storeID, message string) *ReplaceFilesRequest {
+func NewReplaceFilesRequest(storeID, message string, zipData []byte) *ReplaceFilesRequest {
 	return &ReplaceFilesRequest{
 		Obj: &storev1.ReplaceFilesRequest{
-			StoreId:       storeID,
-			ChangeDetails: NewChangeDetails(message).Obj,
+			StoreId:        storeID,
+			ChangeDetails:  NewChangeDetails(message).Obj,
+			ZippedContents: zipData,
 		},
 	}
 }
@@ -96,17 +110,24 @@ func (rfr *ReplaceFilesRequest) OnlyIfVersionEquals(version int64) *ReplaceFiles
 	return rfr
 }
 
-func (rfr *ReplaceFilesRequest) WithZipData(zipData []byte) *ReplaceFilesRequest {
-	rfr.Obj.ZippedContents = zipData
-	return rfr
-}
-
 func (rfr *ReplaceFilesRequest) Proto() *storev1.ReplaceFilesRequest {
 	return rfr.Obj
 }
 
 func (rfr *ReplaceFilesRequest) Validate() error {
 	return internal.Validate(rfr.Obj)
+}
+
+type ReplaceFilesResponse struct {
+	*storev1.ReplaceFilesResponse
+}
+
+func (rfr *ReplaceFilesResponse) String() string {
+	return protojson.Format(rfr.ReplaceFilesResponse)
+}
+
+func (rfr *ReplaceFilesResponse) MarshalJSON() ([]byte, error) {
+	return protojson.Marshal(rfr.ReplaceFilesResponse)
 }
 
 type ChangeDetails struct {

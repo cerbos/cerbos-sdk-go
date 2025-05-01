@@ -31,6 +31,7 @@ type TestCase[REQ proto.Message, RESP proto.Message] struct {
 func TestStoreClient(t *testing.T) {
 	client, storeID := setup(t)
 
+	t.Run("ReplaceFiles", testReplaceFiles(client, storeID))
 	t.Run("ModifyFiles", testModifyFiles(client, storeID))
 }
 
@@ -53,14 +54,32 @@ func setup(t *testing.T) (*hub.StoreClient, string) {
 	return client.StoreClient(), storeID
 }
 
+func testReplaceFiles(client *hub.StoreClient, storeID string) func(*testing.T) {
+	return func(t *testing.T) {
+		t.Run("Success", func(t *testing.T) {
+			zippedData, err := hub.Zip(os.DirFS(filepath.Join("testdata", "modify_files")))
+			require.NoError(t, err)
+
+			req := hub.NewReplaceFilesRequest(storeID, "Replace", zippedData)
+			haveResp, err := client.ReplaceFilesLenient(context.Background(), req)
+			require.NoError(t, err)
+			if haveResp != nil {
+				require.True(t, haveResp.GetNewStoreVersion() > 0)
+			}
+		})
+	}
+}
+
 func testModifyFiles(client *hub.StoreClient, storeID string) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Run("Success", func(t *testing.T) {
 			req := hub.NewModifyFilesRequest(storeID, "Test modification")
 			addFilesToModifyRequest(t, filepath.Join("testdata", "modify_files", "success"), req)
-			haveVersion, err := client.ModifyFiles(context.Background(), req)
+			haveResp, err := client.ModifyFilesLenient(context.Background(), req)
 			require.NoError(t, err)
-			require.NotZero(t, haveVersion)
+			if haveResp != nil {
+				require.True(t, haveResp.GetNewStoreVersion() > 0)
+			}
 		})
 	}
 }
