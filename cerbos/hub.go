@@ -48,6 +48,7 @@ type HubClient struct {
 }
 
 // NewHubClient creates a client configured to interact with Cerbos Hub.
+// Supply credentials using CERBOS_HUB_CLIENT_ID and CERBOS_HUB_CLIENT_SECRET environment variables or using the WithHubCredentials option.
 func NewHubClient(opts ...HubOpt) (*HubClient, error) {
 	hubConf := &hubConfig{
 		apiEndpoint: "https://api.cerbos.cloud",
@@ -76,7 +77,7 @@ func NewHubClient(opts ...HubOpt) (*HubClient, error) {
 	}
 	baseConf.SetDefaults()
 
-	h, err := hub.Get(baseConf)
+	h, err := hub.New(baseConf)
 	if err != nil {
 		return nil, err
 	}

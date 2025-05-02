@@ -6,6 +6,7 @@ package cerbos
 import (
 	"context"
 
+	"github.com/cerbos/cerbos-sdk-go/cerbos/hub"
 	policyv1 "github.com/cerbos/cerbos/api/genpb/cerbos/policy/v1"
 	responsev1 "github.com/cerbos/cerbos/api/genpb/cerbos/response/v1"
 	schemav1 "github.com/cerbos/cerbos/api/genpb/cerbos/schema/v1"
@@ -55,3 +56,23 @@ type AdminClient interface {
 	GetSchema(ctx context.Context, ids ...string) ([]*schemav1.Schema, error)
 	ReloadStore(ctx context.Context, wait bool) error
 }
+
+// Hub provides access to Cerbos Hub APIs.
+type Hub[S HubStoreClient] interface {
+	StoreClient() S
+}
+
+// HubStoreClient provides access to the Cerbos Hub store API.
+type HubStoreClient interface {
+	ReplaceFiles(context.Context, *hub.ReplaceFilesRequest) (*hub.ReplaceFilesResponse, error)
+	ReplaceFilesLenient(context.Context, *hub.ReplaceFilesRequest) (*hub.ReplaceFilesResponse, error)
+	ModifyFiles(context.Context, *hub.ModifyFilesRequest) (*hub.ModifyFilesResponse, error)
+	ModifyFilesLenient(context.Context, *hub.ModifyFilesRequest) (*hub.ModifyFilesResponse, error)
+	ListFiles(context.Context, *hub.ListFilesRequest) (*hub.ListFilesResponse, error)
+	GetFiles(context.Context, *hub.GetFilesRequest) (*hub.GetFilesResponse, error)
+}
+
+var (
+	_ Hub[*hub.StoreClient] = (*HubClient)(nil)
+	_ HubStoreClient        = (*hub.StoreClient)(nil)
+)
