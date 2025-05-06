@@ -7,7 +7,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/bufbuild/protovalidate-go"
+	"buf.build/go/protovalidate"
 
 	"github.com/cerbos/cloud-api/store"
 )

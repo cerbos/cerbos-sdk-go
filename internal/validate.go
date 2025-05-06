@@ -6,7 +6,7 @@ package internal
 import (
 	"fmt"
 
-	"github.com/bufbuild/protovalidate-go"
+	"buf.build/go/protovalidate"
 	"go.uber.org/multierr"
 	"google.golang.org/protobuf/proto"
 
