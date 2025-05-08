@@ -77,7 +77,7 @@ func TestAuditLogs(t *testing.T) {
 	t.Run("should fail on invalid log options", func(t *testing.T) {
 		c := &GRPCAdminClient{client: svcv1.NewCerbosAdminServiceClient(&grpc.ClientConn{})}
 
-		_, err := c.AuditLogs(context.Background(), AuditLogOptions{
+		_, err := c.AuditLogs(t.Context(), AuditLogOptions{
 			Type: AccessLogs,
 			Tail: 10000,
 		})
@@ -88,7 +88,7 @@ func TestAuditLogs(t *testing.T) {
 	t.Run("should fail if log type is different", func(t *testing.T) {
 		c := &GRPCAdminClient{client: svcv1.NewCerbosAdminServiceClient(&grpc.ClientConn{})}
 
-		_, err := c.AuditLogs(context.Background(), AuditLogOptions{
+		_, err := c.AuditLogs(t.Context(), AuditLogOptions{
 			Type: AuditLogType(100),
 			Tail: 10000,
 		})
@@ -119,7 +119,7 @@ func TestAdminClient(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = s.Stop() })
 
-	ctx, cancel := context.WithTimeout(context.Background(), readyTimeout)
+	ctx, cancel := context.WithTimeout(t.Context(), readyTimeout)
 	defer cancel()
 	require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
 
@@ -155,7 +155,7 @@ func TestAdminClient(t *testing.T) {
 			require.NoError(t, err, "Failed to add %s", p)
 		}
 
-		err := ac.AddOrUpdatePolicy(context.Background(), ps)
+		err := ac.AddOrUpdatePolicy(t.Context(), ps)
 		require.NoError(t, err, "Failed to add or update policies")
 	})
 
@@ -215,7 +215,7 @@ func TestAdminClient(t *testing.T) {
 
 		for _, tc := range testCases {
 			t.Run(tc.name, func(t *testing.T) {
-				have, err := ac.ListPolicies(context.Background(), tc.options...)
+				have, err := ac.ListPolicies(t.Context(), tc.options...)
 				require.NoError(t, err)
 				require.Len(t, have, len(tc.want))
 				for _, hp := range have {
@@ -299,7 +299,7 @@ func TestAdminClient(t *testing.T) {
 
 		for _, tc := range testCases {
 			t.Run(tc.name, func(t *testing.T) {
-				have, err := ac.InspectPolicies(context.Background(), tc.options...)
+				have, err := ac.InspectPolicies(t.Context(), tc.options...)
 				require.NoError(t, err)
 				require.NotNil(t, have)
 				require.NotNil(t, have.Results)
@@ -321,12 +321,12 @@ func TestAdminClient(t *testing.T) {
 			require.NoError(t, err, "Failed to add %s", s)
 		}
 
-		err := ac.AddOrUpdateSchema(context.Background(), ss)
+		err := ac.AddOrUpdateSchema(t.Context(), ss)
 		require.NoError(t, err, "Failed to add or update schemas")
 	})
 
 	t.Run("ListSchemas", func(t *testing.T) {
-		have, err := ac.ListSchemas(context.Background())
+		have, err := ac.ListSchemas(t.Context())
 		require.NoError(t, err)
 		require.Len(t, have, len(schemas))
 		for _, hs := range have {

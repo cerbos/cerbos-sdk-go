@@ -66,7 +66,7 @@ func TestGRPCClient(t *testing.T) {
 				require.NoError(t, err)
 				t.Cleanup(func() { _ = s.Stop() })
 
-				ctx, cancel := context.WithTimeout(context.Background(), readyTimeout)
+				ctx, cancel := context.WithTimeout(t.Context(), readyTimeout)
 				defer cancel()
 				require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
 
