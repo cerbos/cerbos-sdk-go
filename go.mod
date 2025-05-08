@@ -1,14 +1,12 @@
 module github.com/cerbos/cerbos-sdk-go
 
-go 1.24
-
-toolchain go1.24.2
+go 1.23.4
 
 require (
 	buf.build/go/protovalidate v0.12.0
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cerbos/cerbos/api/genpb v0.43.0
-	github.com/cerbos/cloud-api v0.1.43
+	github.com/cerbos/cloud-api v0.1.44
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.1

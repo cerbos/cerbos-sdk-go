@@ -90,7 +90,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			}
 
 			t.Run("Direct", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(t.Context(), timeout)
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 				defer cancelFunc()
 
 				have, err := c.CheckResources(ctx, principal, resources)
@@ -100,7 +100,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			})
 
 			t.Run("WithPrincipal", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(t.Context(), timeout)
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 				defer cancelFunc()
 
 				have, err := c.WithPrincipal(principal).CheckResources(ctx, resources)
@@ -110,7 +110,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			})
 
 			t.Run("TestRequestIDGenerator", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(t.Context(), timeout)
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 				defer cancelFunc()
 
 				have, err := c.With(RequestIDGenerator(func(_ context.Context) string {
@@ -175,7 +175,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			}
 
 			t.Run("Direct", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(t.Context(), timeout)
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 				defer cancelFunc()
 
 				have, err := c.CheckResources(ctx, principal, resources)
@@ -183,7 +183,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			})
 
 			t.Run("WithPrincipal", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(t.Context(), timeout)
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 				defer cancelFunc()
 
 				have, err := c.WithPrincipal(principal).CheckResources(ctx, resources)
@@ -248,7 +248,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			}
 
 			t.Run("Direct", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(t.Context(), timeout)
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 				defer cancelFunc()
 
 				have, err := c.CheckResources(ctx, principal, resources)
@@ -256,7 +256,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			})
 
 			t.Run("WithPrincipal", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(t.Context(), timeout)
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 				defer cancelFunc()
 
 				have, err := c.WithPrincipal(principal).CheckResources(ctx, resources)
@@ -285,7 +285,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 				})
 
 			t.Run("Direct", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(t.Context(), timeout)
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 				defer cancelFunc()
 
 				have, err := c.IsAllowed(ctx, principal, resource, "defer")
@@ -294,7 +294,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			})
 
 			t.Run("WithPrincipal", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(t.Context(), timeout)
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 				defer cancelFunc()
 
 				have, err := c.WithPrincipal(principal).IsAllowed(ctx, resource, "defer")
@@ -334,7 +334,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			}
 
 			t.Run("Direct", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(t.Context(), timeout)
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 				defer cancelFunc()
 
 				have, err := cc.PlanResources(ctx, principal, resource, "approve")
@@ -342,7 +342,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			})
 
 			t.Run("WithPrincipal", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(t.Context(), timeout)
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 				defer cancelFunc()
 
 				have, err := cc.WithPrincipal(principal).PlanResources(ctx, resource, "approve")
@@ -350,7 +350,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			})
 
 			t.Run("TestRequestIDGenerator", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(t.Context(), timeout)
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 				defer cancelFunc()
 
 				have, err := cc.With(RequestIDGenerator(func(_ context.Context) string {

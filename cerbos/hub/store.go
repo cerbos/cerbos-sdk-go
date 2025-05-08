@@ -65,7 +65,7 @@ func (sc *StoreClient) ReplaceFilesLenient(ctx context.Context, req *ReplaceFile
 	resp, err := sc.ReplaceFiles(ctx, req)
 	if err != nil {
 		rpcErr := new(StoreRPCError)
-		if errors.As(err, rpcErr) && rpcErr.Kind == store.RPCErrorOperaionDiscarded {
+		if errors.As(err, rpcErr) && rpcErr.Kind == store.RPCErrorOperationDiscarded {
 			return nil, nil
 		}
 	}
@@ -94,7 +94,7 @@ func (sc *StoreClient) ModifyFilesLenient(ctx context.Context, req *ModifyFilesR
 	resp, err := sc.ModifyFiles(ctx, req)
 	if err != nil {
 		rpcErr := new(StoreRPCError)
-		if errors.As(err, rpcErr) && rpcErr.Kind == store.RPCErrorOperaionDiscarded {
+		if errors.As(err, rpcErr) && rpcErr.Kind == store.RPCErrorOperationDiscarded {
 			return nil, nil
 		}
 	}
