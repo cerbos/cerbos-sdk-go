@@ -9,14 +9,14 @@ require (
 	github.com/cerbos/cloud-api v0.1.44
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.1
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.2
 	github.com/jdxcode/netrc v1.0.0
-	github.com/lestrrat-go/jwx/v3 v3.0.0
+	github.com/lestrrat-go/jwx/v3 v3.0.1
 	github.com/ory/dockertest/v3 v3.12.0
 	github.com/rs/xid v1.6.0
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/multierr v1.11.0
-	google.golang.org/grpc v1.71.1
+	google.golang.org/grpc v1.72.0
 	google.golang.org/protobuf v1.36.6
 )
 
@@ -49,9 +49,9 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
-	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
+	github.com/lestrrat-go/blackmagic v1.0.3 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
-	github.com/lestrrat-go/httprc/v3 v3.0.0-beta1 // indirect
+	github.com/lestrrat-go/httprc/v3 v3.0.0-beta2 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
