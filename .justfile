@@ -43,7 +43,7 @@ _install EXECUTABLE MODULE CMD_PKG="":
       if [[ "{{ EXECUTABLE }}" == "golangci-lint" ]]; then
         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$TOOLS_BIN_DIR"
       else
-        GOBIN="$TOOLS_BIN_DIR" go install {{ if CMD_PKG != "" { MODULE + "/" + CMD_PKG } else { MODULE } }}
+        GOBIN="$TOOLS_BIN_DIR" GOWORK=off go install {{ if CMD_PKG != "" { MODULE + "/" + CMD_PKG } else { MODULE } }}
       fi
       ln -s "$BINARY" "$SYMLINK"
     fi
