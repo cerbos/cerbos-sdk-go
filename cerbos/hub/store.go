@@ -9,6 +9,7 @@ import (
 
 	"buf.build/go/protovalidate"
 
+	storev1 "github.com/cerbos/cloud-api/genpb/cerbos/cloud/store/v1"
 	"github.com/cerbos/cloud-api/store"
 )
 
@@ -60,13 +61,13 @@ func (sc *StoreClient) ReplaceFiles(ctx context.Context, req *ReplaceFilesReques
 }
 
 // ReplaceFilesLenient overwrites the store so that it only contains the valid files included in the request.
-// This method ignores the error from the backend when the call doesn't make a discernible change to the store to create a new version. The returned response would be nil in that case.
+// This method ignores the error from the backend when the call doesn't make a discernible change to the store to create a new version.
 func (sc *StoreClient) ReplaceFilesLenient(ctx context.Context, req *ReplaceFilesRequest) (*ReplaceFilesResponse, error) {
 	resp, err := sc.ReplaceFiles(ctx, req)
 	if err != nil {
 		rpcErr := new(StoreRPCError)
 		if errors.As(err, rpcErr) && rpcErr.Kind == store.RPCErrorOperationDiscarded {
-			return nil, nil
+			return &ReplaceFilesResponse{ReplaceFilesResponse: &storev1.ReplaceFilesResponse{NewStoreVersion: rpcErr.CurrentStoreVersion}}, nil
 		}
 	}
 
@@ -89,13 +90,13 @@ func (sc *StoreClient) ModifyFiles(ctx context.Context, req *ModifyFilesRequest)
 }
 
 // ModifyFilesLenient applies the given set of file modifications to the remote store.
-// This method ignores the error from the backend when the call doesn't make a discernible change to the store to create a new version. The returned response would be nil in that case.
+// This method ignores the error from the backend when the call doesn't make a discernible change to the store to create a new version.
 func (sc *StoreClient) ModifyFilesLenient(ctx context.Context, req *ModifyFilesRequest) (*ModifyFilesResponse, error) {
 	resp, err := sc.ModifyFiles(ctx, req)
 	if err != nil {
 		rpcErr := new(StoreRPCError)
 		if errors.As(err, rpcErr) && rpcErr.Kind == store.RPCErrorOperationDiscarded {
-			return nil, nil
+			return &ModifyFilesResponse{ModifyFilesResponse: &storev1.ModifyFilesResponse{NewStoreVersion: rpcErr.CurrentStoreVersion}}, nil
 		}
 	}
 

@@ -120,9 +120,7 @@ func resetStore(t *testing.T, storeID string, storeClient *hub.StoreClient) {
 	req := hub.NewReplaceFilesRequest(storeID, "Replace", zippedData)
 	haveResp, err := storeClient.ReplaceFilesLenient(context.Background(), req)
 	require.NoError(t, err)
-	if haveResp != nil {
-		require.True(t, haveResp.GetNewStoreVersion() > 0)
-	}
+	require.True(t, haveResp.GetNewStoreVersion() > 0)
 
 	haveFilesList, err := storeClient.ListFiles(context.Background(), hub.NewListFilesRequest(storeID))
 	require.NoError(t, err)
