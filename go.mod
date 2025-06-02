@@ -5,8 +5,8 @@ go 1.23.4
 require (
 	buf.build/go/protovalidate v0.12.0
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/cerbos/cerbos/api/genpb v0.43.1-0.20250526040459-1fa3df6faf2f
-	github.com/cerbos/cloud-api v0.1.45
+	github.com/cerbos/cerbos/api/genpb v0.43.1-0.20250529080023-666976c05768
+	github.com/cerbos/cloud-api v0.1.46
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.2
