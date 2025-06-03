@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/cerbos/cerbos-sdk-go/internal"
-	"github.com/jdxcode/netrc"
+	"github.com/jdx/go-netrc"
 	"github.com/stretchr/testify/require"
 )
 
