@@ -2,7 +2,7 @@ module github.com/cerbos/cerbos-sdk-go/tools
 
 go 1.23.4
 
-toolchain go1.24.3
+toolchain go1.24.4
 
 require (
 	github.com/golangci/golangci-lint/v2 v2.1.6
