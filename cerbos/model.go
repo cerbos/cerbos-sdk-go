@@ -1318,6 +1318,15 @@ type PlanResourcesResponse struct {
 	*responsev1.PlanResourcesResponse
 }
 
+func (prr *PlanResourcesResponse) GetAction() string {
+	actions := prr.GetActions()
+	if len(actions) == 1 {
+		return actions[0]
+	}
+
+	return ""
+}
+
 type (
 	FilterOptions struct {
 		NameRegexp      string

@@ -359,6 +359,21 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 				require.NoError(t, err)
 				require.Equal(t, "foo", have.GetRequestId())
 			})
+
+			t.Run("MultipleActions", func(t *testing.T) {
+				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
+				defer cancelFunc()
+
+				have, err := cc.PlanResources(ctx, principal, resource, "approve", "view")
+				require.NoError(t, err)
+				require.NotEmpty(t, have.GetRequestId())
+
+				require.Equal(t, enginev1.PlanResourcesFilter_KIND_CONDITIONAL, have.Filter.Kind, "Expected conditional filter")
+				expression := have.Filter.Condition.GetExpression()
+				require.NotNil(t, expression)
+				require.Equal(t, "and", expression.Operator)
+				require.Equal(t, "eq", expression.GetOperands()[0].GetExpression().GetOperator())
+			})
 		})
 	}
 }

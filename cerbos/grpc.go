@@ -281,7 +281,7 @@ type GRPCClient struct {
 	opts *internal.ReqOpt
 }
 
-func (c *GRPCClient) PlanResources(ctx context.Context, principal *Principal, resource *Resource, action string) (*PlanResourcesResponse, error) {
+func (c *GRPCClient) PlanResources(ctx context.Context, principal *Principal, resource *Resource, actions ...string) (*PlanResourcesResponse, error) {
 	if err := internal.IsValid(principal); err != nil {
 		return nil, fmt.Errorf("invalid principal: %w", err)
 	}
@@ -299,7 +299,7 @@ func (c *GRPCClient) PlanResources(ctx context.Context, principal *Principal, re
 
 	req := &requestv1.PlanResourcesRequest{
 		RequestId: c.opts.RequestID(ctx),
-		Action:    action,
+		Actions:   actions,
 		Principal: principal.Obj,
 		Resource: &enginev1.PlanResourcesInput_Resource{
 			Kind:          resource.Obj.Kind,
@@ -424,6 +424,6 @@ func (pc PrincipalCtx) CheckResources(ctx context.Context, batch *ResourceBatch)
 	return pc.client.CheckResources(ctx, pc.principal, batch)
 }
 
-func (pc PrincipalCtx) PlanResources(ctx context.Context, resource *Resource, action string) (*PlanResourcesResponse, error) {
-	return pc.client.PlanResources(ctx, pc.principal, resource, action)
+func (pc PrincipalCtx) PlanResources(ctx context.Context, resource *Resource, actions ...string) (*PlanResourcesResponse, error) {
+	return pc.client.PlanResources(ctx, pc.principal, resource, actions...)
 }
