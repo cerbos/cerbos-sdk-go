@@ -23,7 +23,7 @@ type Client[C any, P PrincipalContext] interface {
 	// With sets per-request options for the client.
 	With(opts ...RequestOpt) C
 	// PlanResources creates a query plan for performing the given action on a set of resources of the given kind.
-	PlanResources(ctx context.Context, principal *Principal, resource *Resource, action string) (*PlanResourcesResponse, error)
+	PlanResources(ctx context.Context, principal *Principal, resource *Resource, actions ...string) (*PlanResourcesResponse, error)
 	// WithPrincipal sets the principal to be used for subsequent API calls.
 	// WithPrincipal sets the principal to be used for subsequent API calls.
 	WithPrincipal(principal *Principal) P
@@ -38,7 +38,7 @@ type PrincipalContext interface {
 	// CheckResources checks access to a batch of resources of different kinds.
 	CheckResources(ctx context.Context, resources *ResourceBatch) (*CheckResourcesResponse, error)
 	// PlanResources creates a query plan for performing the given action on a set of resources of the given kind.
-	PlanResources(ctx context.Context, resource *Resource, action string) (*PlanResourcesResponse, error)
+	PlanResources(ctx context.Context, resource *Resource, actions ...string) (*PlanResourcesResponse, error)
 }
 
 // AdminClient provides access to the Cerbos Admin API.
