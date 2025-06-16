@@ -87,14 +87,23 @@ type ReplaceFilesRequest struct {
 	obj *storev1.ReplaceFilesRequest
 }
 
-func NewReplaceFilesRequest(storeID, message string, zipData []byte) *ReplaceFilesRequest {
+func NewReplaceFilesRequest(storeID, message string) *ReplaceFilesRequest {
 	return &ReplaceFilesRequest{
 		obj: &storev1.ReplaceFilesRequest{
-			StoreId:        storeID,
-			ChangeDetails:  NewChangeDetails(message).obj,
-			ZippedContents: zipData,
+			StoreId:       storeID,
+			ChangeDetails: NewChangeDetails(message).obj,
 		},
 	}
+}
+
+func (rfr *ReplaceFilesRequest) WithFiles(files ...*storev1.File) *ReplaceFilesRequest {
+	rfr.obj.Contents = &storev1.ReplaceFilesRequest_Files_{Files: &storev1.ReplaceFilesRequest_Files{Files: files}}
+	return rfr
+}
+
+func (rfr *ReplaceFilesRequest) WithZippedContents(zippedContents []byte) *ReplaceFilesRequest {
+	rfr.obj.Contents = &storev1.ReplaceFilesRequest_ZippedContents{ZippedContents: zippedContents}
+	return rfr
 }
 
 func (rfr *ReplaceFilesRequest) WithChangeDetails(cd *ChangeDetails) *ReplaceFilesRequest {
