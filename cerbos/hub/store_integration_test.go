@@ -12,12 +12,14 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	"github.com/cerbos/cerbos-sdk-go/cerbos/hub"
+	storev1 "github.com/cerbos/cloud-api/genpb/cerbos/cloud/store/v1"
 	"github.com/cerbos/cloud-api/store"
 )
 
@@ -131,58 +133,144 @@ func testReplaceFiles(client *hub.StoreClient, storeID string) func(*testing.T) 
 	return func(t *testing.T) {
 		resetStore(t, storeID, client)
 
-		t.Run("InvalidRequest", func(t *testing.T) {
-			_, err := client.ReplaceFiles(context.Background(), hub.NewReplaceFilesRequest(storeID, "Replace").WithZippedContents([]byte("zip")))
-			verr := new(hub.InvalidRequestError)
-			require.ErrorAs(t, err, verr)
-		})
+		testCases := []string{"Zipped", "Unzipped"}
+		for _, kind := range testCases {
+			t.Run(kind, func(t *testing.T) {
+				t.Run("OperationDiscarded", func(t *testing.T) {
+					req := hub.NewReplaceFilesRequest(storeID, "Replace")
+					fsys := os.DirFS(filepath.Join("testdata", "replace_files", "success"))
+					if kind == "Zipped" {
+						zippedData, err := hub.Zip(fsys)
+						require.NoError(t, err)
+						req = req.WithZippedContents(zippedData)
+					} else {
+						req = req.WithFiles(listFiles(t, fsys)...)
+					}
 
-		t.Run("InvalidFiles", func(t *testing.T) {
-			zippedData, err := hub.Zip(os.DirFS(filepath.Join("testdata", "replace_files", "invalid")))
-			require.NoError(t, err)
+					_, err := client.ReplaceFiles(context.Background(), req)
+					require.Error(t, err)
+					t.Log(err)
+					haveErr := new(hub.StoreRPCError)
+					require.ErrorAs(t, err, haveErr)
+					require.Equal(t, store.RPCErrorOperationDiscarded, haveErr.Kind)
+				})
 
-			_, err = client.ReplaceFiles(context.Background(), hub.NewReplaceFilesRequest(storeID, "Replace").WithZippedContents(zippedData))
-			haveErr := new(hub.StoreRPCError)
-			require.ErrorAs(t, err, haveErr)
-			require.Equal(t, store.RPCErrorValidationFailure, haveErr.Kind)
-			require.Len(t, haveErr.ValidationErrors, 1)
+				t.Run("InvalidRequest", func(t *testing.T) {
+					req := hub.NewReplaceFilesRequest(storeID, "Replace")
+					if kind == "Zipped" {
+						req = req.WithZippedContents([]byte("zip"))
+					} else {
+						req = req.WithFiles()
+					}
+					_, err := client.ReplaceFiles(context.Background(), req)
+					verr := new(hub.InvalidRequestError)
+					require.ErrorAs(t, err, verr)
+				})
 
-			haveFilesList, err := client.ListFiles(context.Background(), hub.NewListFilesRequest(storeID))
-			require.NoError(t, err)
-			require.ElementsMatch(t, wantFilesList, haveFilesList.GetFiles())
-		})
+				t.Run("InvalidFiles", func(t *testing.T) {
+					req := hub.NewReplaceFilesRequest(storeID, "Replace")
+					fsys := os.DirFS(filepath.Join("testdata", "replace_files", "invalid"))
+					if kind == "Zipped" {
+						zippedData, err := hub.Zip(fsys)
+						require.NoError(t, err)
+						req = req.WithZippedContents(zippedData)
+					} else {
+						req = req.WithFiles(listFiles(t, fsys)...)
+					}
 
-		t.Run("UnusableFiles", func(t *testing.T) {
-			zippedData, err := hub.Zip(os.DirFS(filepath.Join("testdata", "replace_files", "unusable")))
-			require.NoError(t, err)
+					_, err := client.ReplaceFiles(context.Background(), req)
+					haveErr := new(hub.StoreRPCError)
+					require.ErrorAs(t, err, haveErr)
+					require.Equal(t, store.RPCErrorValidationFailure, haveErr.Kind)
+					require.Len(t, haveErr.ValidationErrors, 1)
 
-			req := hub.NewReplaceFilesRequest(storeID, "Replace").WithZippedContents(zippedData)
-			_, err = client.ReplaceFilesLenient(context.Background(), req)
-			haveErr := new(hub.StoreRPCError)
-			require.ErrorAs(t, err, haveErr)
-			require.Equal(t, store.RPCErrorNoUsableFiles, haveErr.Kind)
-			require.ElementsMatch(t, []string{".hidden.yaml", "README.md"}, haveErr.IgnoredFiles)
+					haveFilesList, err := client.ListFiles(context.Background(), hub.NewListFilesRequest(storeID))
+					require.NoError(t, err)
+					require.ElementsMatch(t, wantFilesList, haveFilesList.GetFiles())
+				})
 
-			haveFilesList, err := client.ListFiles(context.Background(), hub.NewListFilesRequest(storeID))
-			require.NoError(t, err)
-			require.ElementsMatch(t, wantFilesList, haveFilesList.GetFiles())
-		})
+				t.Run("UnusableFiles", func(t *testing.T) {
+					fsys := os.DirFS(filepath.Join("testdata", "replace_files", "unusable"))
+					req := hub.NewReplaceFilesRequest(storeID, "Replace")
+					if kind == "Zipped" {
+						zippedData, err := hub.Zip(fsys)
+						require.NoError(t, err)
+						req = req.WithZippedContents(zippedData)
+					} else {
+						req = req.WithFiles(listFiles(t, fsys)...)
+					}
 
-		t.Run("UnsuccessfulCondition", func(t *testing.T) {
-			zippedData, err := hub.Zip(os.DirFS(filepath.Join("testdata", "replace_files", "conditional")))
-			require.NoError(t, err)
+					_, err := client.ReplaceFilesLenient(context.Background(), req)
+					haveErr := new(hub.StoreRPCError)
+					require.ErrorAs(t, err, haveErr)
+					require.Equal(t, store.RPCErrorNoUsableFiles, haveErr.Kind)
+					require.ElementsMatch(t, []string{".hidden.yaml", "README.md"}, haveErr.IgnoredFiles)
 
-			req := hub.NewReplaceFilesRequest(storeID, "Replace").WithZippedContents(zippedData).OnlyIfVersionEquals(math.MaxInt64)
-			_, err = client.ReplaceFiles(context.Background(), req)
-			haveErr := new(hub.StoreRPCError)
-			require.ErrorAs(t, err, haveErr)
-			require.Equal(t, store.RPCErrorConditionUnsatisfied, haveErr.Kind)
+					haveFilesList, err := client.ListFiles(context.Background(), hub.NewListFilesRequest(storeID))
+					require.NoError(t, err)
+					require.ElementsMatch(t, wantFilesList, haveFilesList.GetFiles())
+				})
 
-			haveFilesList, err := client.ListFiles(context.Background(), hub.NewListFilesRequest(storeID))
-			require.NoError(t, err)
-			require.ElementsMatch(t, wantFilesList, haveFilesList.GetFiles())
-		})
+				t.Run("UnsuccessfulCondition", func(t *testing.T) {
+					fsys := os.DirFS(filepath.Join("testdata", "replace_files", "conditional"))
+					req := hub.NewReplaceFilesRequest(storeID, "Replace")
+					if kind == "Zipped" {
+						zippedData, err := hub.Zip(fsys)
+						require.NoError(t, err)
+						req = req.WithZippedContents(zippedData)
+					} else {
+						req = req.WithFiles(listFiles(t, fsys)...)
+					}
+
+					req = req.OnlyIfVersionEquals(math.MaxInt64)
+					_, err := client.ReplaceFiles(context.Background(), req)
+					haveErr := new(hub.StoreRPCError)
+					require.ErrorAs(t, err, haveErr)
+					require.Equal(t, store.RPCErrorConditionUnsatisfied, haveErr.Kind)
+
+					haveFilesList, err := client.ListFiles(context.Background(), hub.NewListFilesRequest(storeID))
+					require.NoError(t, err)
+					require.ElementsMatch(t, wantFilesList, haveFilesList.GetFiles())
+				})
+			})
+		}
 	}
+}
+
+func listFiles(t *testing.T, fsys fs.FS) []*storev1.File {
+	t.Helper()
+	out := make([]*storev1.File, 0, 32)
+	err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			if len(path) > 1 && strings.HasPrefix(filepath.Base(path), ".") {
+				return fs.SkipDir
+			}
+			return nil
+		}
+
+		contents, err := fs.ReadFile(fsys, path)
+		if err != nil {
+			return err
+		}
+
+		if len(contents) == 0 {
+			return nil
+		}
+
+		out = append(out, &storev1.File{
+			Path:     path,
+			Contents: contents,
+		})
+
+		return nil
+	})
+	require.NoError(t, err)
+
+	return out
 }
 
 func testModifyFiles(client *hub.StoreClient, storeID string) func(*testing.T) {
