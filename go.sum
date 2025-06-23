@@ -34,8 +34,8 @@ github.com/bits-and-blooms/bitset v1.14.3 h1:Gd2c8lSNf9pKXom5JtD7AaKO8o7fGQ2LtFj
 github.com/bits-and-blooms/bitset v1.14.3/go.mod h1:7hO7Gc7Pp1vODcmWvKMRA9BNmbv6a/7QIWpPxHddWR8=
 github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=
 github.com/cenkalti/backoff/v4 v4.3.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
-github.com/cerbos/cerbos/api/genpb v0.44.0 h1:Nhes4yKaOsNMqaIH+QOvbieRaXXbk93fwsPkP487daE=
-github.com/cerbos/cerbos/api/genpb v0.44.0/go.mod h1:LUvFy/csdjMsnvQH0lP3UHkKTa8M/UOgF2sVEJgPlzU=
+github.com/cerbos/cerbos/api/genpb v0.45.0 h1:c8fdQqOh0S3Dm4/uZ1uqx+/hIKWUIkS9WVBpnRZFtTI=
+github.com/cerbos/cerbos/api/genpb v0.45.0/go.mod h1:LUvFy/csdjMsnvQH0lP3UHkKTa8M/UOgF2sVEJgPlzU=
 github.com/cerbos/cloud-api v0.1.53 h1:+6Y0Rd/rEyucbw/XO1dlvxeT9yTcee3D1/nNtFz/6QI=
 github.com/cerbos/cloud-api v0.1.53/go.mod h1:gpsRJ2okizeB6Q1tLJ+Th55QbwcBhBhG9qaWzTvwNzs=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=

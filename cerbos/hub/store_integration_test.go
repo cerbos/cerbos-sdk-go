@@ -19,6 +19,7 @@ import (
 
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	"github.com/cerbos/cerbos-sdk-go/cerbos/hub"
+	"github.com/cerbos/cloud-api/base"
 	storev1 "github.com/cerbos/cloud-api/genpb/cerbos/cloud/store/v1"
 	"github.com/cerbos/cloud-api/store"
 )
@@ -137,6 +138,7 @@ func testReplaceFiles(client *hub.StoreClient, storeID string) func(*testing.T) 
 		for _, kind := range testCases {
 			t.Run(kind, func(t *testing.T) {
 				t.Run("OperationDiscarded", func(t *testing.T) {
+					base.ResetCircuitBreaker()
 					req := hub.NewReplaceFilesRequest(storeID, "Replace")
 					fsys := os.DirFS(filepath.Join("testdata", "replace_files", "success"))
 					if kind == "Zipped" {
@@ -156,6 +158,7 @@ func testReplaceFiles(client *hub.StoreClient, storeID string) func(*testing.T) 
 				})
 
 				t.Run("InvalidRequest", func(t *testing.T) {
+					base.ResetCircuitBreaker()
 					req := hub.NewReplaceFilesRequest(storeID, "Replace")
 					if kind == "Zipped" {
 						req = req.WithZippedContents([]byte("zip"))
@@ -168,6 +171,7 @@ func testReplaceFiles(client *hub.StoreClient, storeID string) func(*testing.T) 
 				})
 
 				t.Run("InvalidFiles", func(t *testing.T) {
+					base.ResetCircuitBreaker()
 					req := hub.NewReplaceFilesRequest(storeID, "Replace")
 					fsys := os.DirFS(filepath.Join("testdata", "replace_files", "invalid"))
 					if kind == "Zipped" {
@@ -190,6 +194,7 @@ func testReplaceFiles(client *hub.StoreClient, storeID string) func(*testing.T) 
 				})
 
 				t.Run("UnusableFiles", func(t *testing.T) {
+					base.ResetCircuitBreaker()
 					fsys := os.DirFS(filepath.Join("testdata", "replace_files", "unusable"))
 					req := hub.NewReplaceFilesRequest(storeID, "Replace")
 					if kind == "Zipped" {
@@ -212,6 +217,7 @@ func testReplaceFiles(client *hub.StoreClient, storeID string) func(*testing.T) 
 				})
 
 				t.Run("UnsuccessfulCondition", func(t *testing.T) {
+					base.ResetCircuitBreaker()
 					fsys := os.DirFS(filepath.Join("testdata", "replace_files", "conditional"))
 					req := hub.NewReplaceFilesRequest(storeID, "Replace")
 					if kind == "Zipped" {
@@ -294,6 +300,7 @@ func testModifyFiles(client *hub.StoreClient, storeID string) func(*testing.T) {
 		})
 
 		t.Run("InvalidRequest", func(t *testing.T) {
+			base.ResetCircuitBreaker()
 			req := hub.NewModifyFilesRequest(storeID, "Test modification")
 			_, err := client.ModifyFiles(context.Background(), req)
 			verr := new(hub.InvalidRequestError)
@@ -301,6 +308,7 @@ func testModifyFiles(client *hub.StoreClient, storeID string) func(*testing.T) {
 		})
 
 		t.Run("InvalidFiles", func(t *testing.T) {
+			base.ResetCircuitBreaker()
 			req := hub.NewModifyFilesRequest(storeID, "Test modification")
 			addFilesToModifyRequest(t, filepath.Join("testdata", "modify_files", "invalid"), req)
 			_, err := client.ModifyFiles(context.Background(), req)
@@ -311,6 +319,7 @@ func testModifyFiles(client *hub.StoreClient, storeID string) func(*testing.T) {
 		})
 
 		t.Run("UnsuccessfulCondition", func(t *testing.T) {
+			base.ResetCircuitBreaker()
 			req := hub.NewModifyFilesRequest(storeID, "Test modification").OnlyIfVersionEquals(math.MaxInt64)
 			addFilesToModifyRequest(t, filepath.Join("testdata", "modify_files", "conditional"), req)
 			_, err := client.ModifyFiles(context.Background(), req)
