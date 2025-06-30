@@ -206,13 +206,13 @@ func FilterPathIn(paths ...string) *FileFilter {
 	}
 }
 
-// FilterPathLike creates a filter that partially matches the given path.
-func FilterPathLike(path string) *FileFilter {
+// FilterPathContains creates a filter that partially matches the given path.
+func FilterPathContains(path string) *FileFilter {
 	return &FileFilter{
 		obj: &storev1.FileFilter{
 			Path: &storev1.StringMatch{
-				Match: &storev1.StringMatch_Like{
-					Like: path,
+				Match: &storev1.StringMatch_Contains{
+					Contains: path,
 				},
 			},
 		},

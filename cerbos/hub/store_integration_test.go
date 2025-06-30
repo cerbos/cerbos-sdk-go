@@ -358,13 +358,13 @@ func testListFiles(client *hub.StoreClient, storeID string) func(*testing.T) {
 		resetStore(t, storeID, client)
 
 		t.Run("WithFilterMatch", func(t *testing.T) {
-			haveResp, err := client.ListFiles(context.Background(), hub.NewListFilesRequest(storeID).WithFileFilter(hub.FilterPathLike("export_")))
+			haveResp, err := client.ListFiles(context.Background(), hub.NewListFilesRequest(storeID).WithFileFilter(hub.FilterPathContains("export_")))
 			require.NoError(t, err)
 			require.ElementsMatch(t, []string{"export_constants/export_constants_01.yaml", "export_variables/export_variables_01.yaml"}, haveResp.GetFiles())
 		})
 
 		t.Run("WithNoFilterMatch", func(t *testing.T) {
-			haveResp, err := client.ListFiles(context.Background(), hub.NewListFilesRequest(storeID).WithFileFilter(hub.FilterPathLike("wibble")))
+			haveResp, err := client.ListFiles(context.Background(), hub.NewListFilesRequest(storeID).WithFileFilter(hub.FilterPathContains("wibble")))
 			require.NoError(t, err)
 			require.Len(t, haveResp.GetFiles(), 0)
 		})
