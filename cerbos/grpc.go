@@ -16,6 +16,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/stats"
 
 	effectv1 "github.com/cerbos/cerbos/api/genpb/cerbos/effect/v1"
@@ -29,21 +30,23 @@ import (
 var _ Client[*GRPCClient, PrincipalCtx] = (*GRPCClient)(nil)
 
 type config struct {
-	statsHandler       stats.Handler
-	address            string
-	tlsAuthority       string
-	tlsCACert          string
-	tlsClientCert      string
-	tlsClientKey       string
-	userAgent          string
-	playgroundInstance string
-	streamInterceptors []grpc.StreamClientInterceptor
-	unaryInterceptors  []grpc.UnaryClientInterceptor
-	connectTimeout     time.Duration
-	retryTimeout       time.Duration
-	maxRetries         uint
-	plaintext          bool
-	tlsInsecure        bool
+	statsHandler        stats.Handler
+	address             string
+	tlsAuthority        string
+	tlsCACert           string
+	tlsClientCert       string
+	tlsClientKey        string
+	userAgent           string
+	playgroundInstance  string
+	streamInterceptors  []grpc.StreamClientInterceptor
+	unaryInterceptors   []grpc.UnaryClientInterceptor
+	connectTimeout      time.Duration
+	retryTimeout        time.Duration
+	maxRetries          uint
+	plaintext           bool
+	tlsInsecure         bool
+	maxRecvMsgSizeBytes uint
+	maxSendMsgSizeBytes uint
 }
 
 type Opt func(*config)
@@ -139,6 +142,20 @@ func WithUnaryInterceptors(interceptors ...grpc.UnaryClientInterceptor) Opt {
 func WithStatsHandler(handler stats.Handler) Opt {
 	return func(c *config) {
 		c.statsHandler = handler
+	}
+}
+
+// WithMaxRecvMsgSizeBytes sets the maximum size of a single response payload that can be received from the server.
+func WithMaxRecvMsgSizeBytes(size uint) Opt {
+	return func(c *config) {
+		c.maxRecvMsgSizeBytes = size
+	}
+}
+
+// WithMaxSendMsgSizeBytes sets the maximum size of a single request payload that can be sent to the server.
+func WithMaxSendMsgSizeBytes(size uint) Opt {
+	return func(c *config) {
+		c.maxSendMsgSizeBytes = size
 	}
 }
 
@@ -239,6 +256,17 @@ func mkDialOpts(conf *config) ([]grpc.DialOption, error) {
 	if conf.playgroundInstance != "" {
 		dialOpts = append(dialOpts, grpc.WithPerRPCCredentials(newPlaygroundInstanceCredentials(conf.playgroundInstance)))
 	}
+
+	defaultCallOptions := []grpc.CallOption{grpc.UseCompressor(gzip.Name)}
+	if conf.maxRecvMsgSizeBytes > 0 {
+		defaultCallOptions = append(defaultCallOptions, grpc.MaxCallRecvMsgSize(int(conf.maxRecvMsgSizeBytes))) //nolint:gosec
+	}
+
+	if conf.maxSendMsgSizeBytes > 0 {
+		defaultCallOptions = append(defaultCallOptions, grpc.MaxCallSendMsgSize(int(conf.maxSendMsgSizeBytes))) //nolint:gosec
+	}
+
+	dialOpts = append(dialOpts, grpc.WithDefaultCallOptions(defaultCallOptions...))
 
 	return dialOpts, nil
 }
