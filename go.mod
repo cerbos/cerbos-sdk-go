@@ -3,7 +3,7 @@ module github.com/cerbos/cerbos-sdk-go
 go 1.23.4
 
 require (
-	buf.build/go/protovalidate v0.13.1
+	buf.build/go/protovalidate v0.14.0
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cerbos/cerbos/api/genpb v0.45.1
 	github.com/cerbos/cloud-api v0.1.55
@@ -21,7 +21,7 @@ require (
 )
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250625184727-c923a0c2a132.1 // indirect
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250717165733-d22d418d82d8.1 // indirect
 	cel.dev/expr v0.23.1 // indirect
 	connectrpc.com/connect v1.18.1 // indirect
 	connectrpc.com/otelconnect v0.7.2 // indirect
