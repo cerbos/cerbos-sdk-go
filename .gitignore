@@ -1,4 +1,10 @@
-
 .env
 go.work
 go.work.sum
+
+# Editor files
+.vscode
+.idea
+
+# macOS files
+.DS_Store
