@@ -113,7 +113,7 @@ func TestAdminClient(t *testing.T) {
 		Cmd: []string{
 			"server",
 			"--set=storage.driver=sqlite3",
-			"--set=storage.sqlite3.dsn=:memory:",
+			"--set=storage.sqlite3.dsn=file::memory:?cache=shared",
 		},
 	})
 	require.NoError(t, err)
