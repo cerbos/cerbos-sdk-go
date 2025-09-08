@@ -14,7 +14,7 @@ require (
 	github.com/lestrrat-go/jwx/v3 v3.0.10
 	github.com/ory/dockertest/v3 v3.12.0
 	github.com/rs/xid v1.6.0
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 	go.uber.org/multierr v1.11.0
 	google.golang.org/grpc v1.75.0
 	google.golang.org/protobuf v1.36.8
