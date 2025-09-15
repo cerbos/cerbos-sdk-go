@@ -3,7 +3,7 @@ module github.com/cerbos/cerbos-sdk-go
 go 1.24.4
 
 require (
-	buf.build/go/protovalidate v0.14.0
+	buf.build/go/protovalidate v1.0.0
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cerbos/cerbos/api/genpb v0.46.0
 	github.com/cerbos/cloud-api v0.1.57
@@ -21,7 +21,7 @@ require (
 )
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.8-20250717185734-6c6e0d3c608e.1 // indirect
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.9-20250912141014-52f32327d4b0.1 // indirect
 	cel.dev/expr v0.24.0 // indirect
 	connectrpc.com/connect v1.18.1 // indirect
 	connectrpc.com/otelconnect v0.7.2 // indirect
@@ -45,7 +45,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/google/cel-go v0.25.0 // indirect
+	github.com/google/cel-go v0.26.1 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.1 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
@@ -72,7 +72,7 @@ require (
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
-	github.com/stoewer/go-strcase v1.3.0 // indirect
+	github.com/stoewer/go-strcase v1.3.1 // indirect
 	github.com/valyala/fastjson v1.6.4 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
@@ -82,7 +82,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.37.0 // indirect
 	go.opentelemetry.io/otel/trace v1.37.0 // indirect
 	golang.org/x/crypto v0.42.0 // indirect
-	golang.org/x/exp v0.0.0-20250506013437-ce4c2cf36ca6 // indirect
+	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // indirect
 	golang.org/x/net v0.43.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/text v0.29.0 // indirect
