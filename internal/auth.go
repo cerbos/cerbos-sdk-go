@@ -58,11 +58,11 @@ func LoadBasicAuthData(env Environment, providedServer, providedUsername, provid
 	password = coalesceWithEnv(env, providedPassword, PasswordEnvVar)
 
 	if username != "" && password != "" {
-		return
+		return server, username, password, err
 	}
 
 	username, password, err = loadCredsFromNetrc(env, server)
-	return
+	return server, username, password, err
 }
 
 func loadCredsFromNetrc(env Environment, server string) (username, password string, err error) {

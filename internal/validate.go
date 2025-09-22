@@ -76,7 +76,7 @@ func validateResourcePolicy(rp *policyv1.ResourcePolicy) (err error) {
 		}
 	}
 
-	return
+	return err
 }
 
 func validatePrincipalPolicy(rp *policyv1.PrincipalPolicy) (err error) {
@@ -105,7 +105,7 @@ func validatePrincipalPolicy(rp *policyv1.PrincipalPolicy) (err error) {
 		}
 	}
 
-	return
+	return err
 }
 
 func validateDerivedRoles(dr *policyv1.DerivedRoles) (err error) {
@@ -124,7 +124,7 @@ func validateDerivedRoles(dr *policyv1.DerivedRoles) (err error) {
 		}
 	}
 
-	return
+	return err
 }
 
 func validateExportConstants(p *policyv1.Policy) error {
