@@ -5,6 +5,7 @@ package cerbos
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	localhub "github.com/cerbos/cerbos-sdk-go/cerbos/hub"
@@ -17,8 +18,9 @@ import (
 var errMissingCredentials = errors.New("missing credentials: either set the CERBOS_HUB_CLIENT_ID and CERBOS_HUB_CLIENT_SECRET environment variables or use the WithCredentials option when creating the client")
 
 type hubConfig struct {
-	apiEndpoint string
-	credentials hubCredentials
+	advancedConf *config
+	credentials  hubCredentials
+	apiEndpoint  string
 }
 
 type hubCredentials struct {
@@ -40,6 +42,16 @@ func WithHubAPIEndpoint(endpoint string) HubOpt {
 func WithHubCredentials(clientID, clientSecret string) HubOpt {
 	return func(hubConf *hubConfig) {
 		hubConf.credentials = hubCredentials{clientID: clientID, clientSecret: clientSecret}
+	}
+}
+
+// WithAdvancedOptions is only used for internal testing purposes. Don't use in production.
+func WithAdvancedOptions(opts ...Opt) HubOpt {
+	return func(hubConf *hubConfig) {
+		hubConf.advancedConf = &config{}
+		for _, o := range opts {
+			o(hubConf.advancedConf)
+		}
 	}
 }
 
@@ -76,6 +88,13 @@ func NewHubClient(opts ...HubOpt) (*HubClient, error) {
 		Credentials: credentials,
 	}
 	baseConf.SetDefaults()
+
+	if hubConf.advancedConf != nil {
+		baseConf.TLS, err = mkTLSConfig(hubConf.advancedConf)
+		if err != nil {
+			return nil, fmt.Errorf("failed to build TLS config: %w", err)
+		}
+	}
 
 	h, err := hub.New(baseConf)
 	if err != nil {
