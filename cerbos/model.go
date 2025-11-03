@@ -1338,6 +1338,7 @@ type (
 	// FilterOption allows filtering policies while calling InspectPolicies and ListPolicies.
 	FilterOption func(*FilterOptions)
 	// ListPoliciesOption allows filtering policies while calling ListPolicies
+	//
 	// Deprecated: ListPoliciesOption is deprecated, use FilterOption instead.
 	ListPoliciesOption = FilterOption
 )

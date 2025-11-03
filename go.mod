@@ -5,7 +5,7 @@ go 1.24.4
 require (
 	buf.build/go/protovalidate v1.0.0
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/cerbos/cerbos/api/genpb v0.46.0
+	github.com/cerbos/cerbos/api/genpb v0.47.0
 	github.com/cerbos/cloud-api v0.1.60
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
@@ -47,7 +47,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/cel-go v0.26.1 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.1 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.8 // indirect
 	github.com/influxdata/tdigest v0.0.1 // indirect
@@ -87,8 +87,8 @@ require (
 	golang.org/x/net v0.45.0 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/text v0.30.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20251007200510-49b9836ed3ff // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20251002232023-7c0ddcbb5797 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20251014184007-4626949a642f // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251007200510-49b9836ed3ff // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
