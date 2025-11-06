@@ -227,6 +227,38 @@ func (ff *FileFilter) Validate() error {
 	return internal.Validate(ff.obj)
 }
 
+type GetCurrentVersionRequest struct {
+	obj *storev1.GetCurrentVersionRequest
+}
+
+func NewGetCurrentVersionRequest(storeID string) *GetCurrentVersionRequest {
+	return &GetCurrentVersionRequest{
+		obj: &storev1.GetCurrentVersionRequest{
+			StoreId: storeID,
+		},
+	}
+}
+
+func (gcvr *GetCurrentVersionRequest) Proto() *storev1.GetCurrentVersionRequest {
+	return gcvr.obj
+}
+
+func (gcvr *GetCurrentVersionRequest) Validate() error {
+	return internal.Validate(gcvr.obj)
+}
+
+type GetCurrentVersionResponse struct {
+	*storev1.GetCurrentVersionResponse
+}
+
+func (gcvr *GetCurrentVersionResponse) String() string {
+	return protojson.Format(gcvr.GetCurrentVersionResponse)
+}
+
+func (gcvr *GetCurrentVersionResponse) MarshalJSON() ([]byte, error) {
+	return protojson.Marshal(gcvr.GetCurrentVersionResponse)
+}
+
 type GetFilesRequest struct {
 	obj *storev1.GetFilesRequest
 }

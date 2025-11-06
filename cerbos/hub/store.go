@@ -117,6 +117,19 @@ func (sc *StoreClient) ListFiles(ctx context.Context, req *ListFilesRequest) (*L
 	return &ListFilesResponse{ListFilesResponse: resp}, nil
 }
 
+func (sc *StoreClient) GetCurrentVersion(ctx context.Context, req *GetCurrentVersionRequest) (*GetCurrentVersionResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, newInvalidRequestError(err)
+	}
+
+	resp, err := sc.client.GetCurrentVersion(ctx, req.Proto())
+	if err != nil {
+		return nil, err
+	}
+
+	return &GetCurrentVersionResponse{GetCurrentVersionResponse: resp}, nil
+}
+
 func (sc *StoreClient) GetFiles(ctx context.Context, req *GetFilesRequest) (*GetFilesResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, newInvalidRequestError(err)

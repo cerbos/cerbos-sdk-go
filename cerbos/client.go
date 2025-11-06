@@ -69,6 +69,7 @@ type HubStoreClient interface {
 	ModifyFiles(context.Context, *hub.ModifyFilesRequest) (*hub.ModifyFilesResponse, error)
 	ModifyFilesLenient(context.Context, *hub.ModifyFilesRequest) (*hub.ModifyFilesResponse, error)
 	ListFiles(context.Context, *hub.ListFilesRequest) (*hub.ListFilesResponse, error)
+	GetCurrentVersion(context.Context, *hub.GetCurrentVersionRequest) (*hub.GetCurrentVersionResponse, error)
 	GetFiles(context.Context, *hub.GetFilesRequest) (*hub.GetFilesResponse, error)
 }
 
