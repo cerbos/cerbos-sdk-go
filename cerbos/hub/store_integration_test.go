@@ -15,7 +15,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/testing/protocmp"
 
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	"github.com/cerbos/cerbos-sdk-go/cerbos/hub"
@@ -91,6 +93,7 @@ func TestStoreClientIntegration(t *testing.T) {
 	t.Run("ReplaceFiles", testReplaceFiles(client, storeID))
 	t.Run("ModifyFiles", testModifyFiles(client, storeID))
 	t.Run("ListFiles", testListFiles(client, storeID))
+	t.Run("GetCurrentVersion", testGetCurrentVersion(client, storeID))
 	t.Run("GetFiles", testGetFiles(client, storeID))
 }
 
@@ -367,6 +370,24 @@ func testListFiles(client *hub.StoreClient, storeID string) func(*testing.T) {
 			haveResp, err := client.ListFiles(context.Background(), hub.NewListFilesRequest(storeID).WithFileFilter(hub.FilterPathContains("wibble")))
 			require.NoError(t, err)
 			require.Len(t, haveResp.GetFiles(), 0)
+		})
+	}
+}
+
+func testGetCurrentVersion(client *hub.StoreClient, storeID string) func(*testing.T) {
+	return func(t *testing.T) {
+		resetStore(t, storeID, client)
+
+		t.Run("Success", func(t *testing.T) {
+			haveResp, err := client.GetCurrentVersion(context.Background(), hub.NewGetCurrentVersionRequest(storeID))
+			require.NoError(t, err)
+			require.True(t, haveResp.GetStoreVersion() > 0)
+			require.Empty(t, cmp.Diff(&storev1.ChangeDetails{
+				Description: "Replace",
+				Uploader: &storev1.ChangeDetails_Uploader{
+					Name: "cerbos-sdk-go",
+				},
+			}, haveResp.GetChangeDetails(), protocmp.Transform()))
 		})
 	}
 }
