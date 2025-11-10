@@ -9,7 +9,7 @@ require (
 	github.com/cerbos/cloud-api v0.1.62
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.2
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3
 	github.com/jdx/go-netrc v1.0.0
 	github.com/lestrrat-go/jwx/v3 v3.0.12
 	github.com/ory/dockertest/v3 v3.12.0
