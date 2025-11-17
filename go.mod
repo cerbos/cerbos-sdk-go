@@ -6,7 +6,7 @@ require (
 	buf.build/go/protovalidate v1.0.0
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cerbos/cerbos/api/genpb v0.47.0
-	github.com/cerbos/cloud-api v0.1.62
+	github.com/cerbos/cloud-api v0.1.63
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3
