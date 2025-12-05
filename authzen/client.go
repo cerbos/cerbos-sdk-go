@@ -26,7 +26,7 @@ const (
 	accessEvaluationsPath = "/access/v1/evaluations"
 	metadataPath          = "/.well-known/authzen-configuration"
 	contentTypeJSON       = "application/json"
-	defaultUserAgent      = "cerbos-sdk-go-authzen/0.1.0"
+	defaultUserAgent      = "cerbos-sdk-go-authzen"
 )
 
 // Client provides access to the AuthZEN Authorization API over HTTP.
