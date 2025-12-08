@@ -5,6 +5,7 @@ package authzen
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
@@ -12,7 +13,12 @@ import (
 	responsev1 "github.com/cerbos/cerbos/api/genpb/cerbos/response/v1"
 )
 
-var _ cerbos.Client[*Adapter, *PrincipalCtx] = (*Adapter)(nil)
+var (
+	_ cerbos.Client[*Adapter, *PrincipalCtx] = (*Adapter)(nil)
+
+	// ErrNotImplemented is returned when a method is not supported by the AuthZEN adapter.
+	ErrNotImplemented = errors.New("not implemented")
+)
 
 // Adapter implements the cerbos.Client interface using the AuthZEN HTTP client.
 // This allows using AuthZEN as a drop-in replacement for the Cerbos gRPC client.
@@ -53,7 +59,7 @@ func (a *Adapter) IsAllowed(ctx context.Context, principal *cerbos.Principal, re
 		return false, fmt.Errorf("failed to convert resource: %w", err)
 	}
 
-	authzenAction := FromCerbosAction(action)
+	authzenAction := NewAction(action)
 
 	authzenCtx := NewContext()
 	authzenCtx.WithIncludeMeta(true)
@@ -118,7 +124,7 @@ func (a *Adapter) CheckResources(ctx context.Context, principal *cerbos.Principa
 		for _, action := range entry.Actions {
 			batchReq.Evaluations = append(batchReq.Evaluations, BatchEvaluation{
 				Resource: authzenResource,
-				Action:   FromCerbosAction(action),
+				Action:   NewAction(action),
 			})
 		}
 	}
@@ -132,23 +138,23 @@ func (a *Adapter) CheckResources(ctx context.Context, principal *cerbos.Principa
 }
 
 func (a *Adapter) convertBatchResults(result *AccessEvaluationBatchResult) (*cerbos.CheckResourcesResponse, error) {
-	if result.Count() == 0 {
-		return nil, fmt.Errorf("no evaluations in batch response")
+	resp := new(cerbos.CheckResourcesResponse)
+	resp.Results = make([]*responsev1.CheckResourcesResponse_ResultEntry, result.Count())
+
+	for i := range result.GetEvaluations() {
+		firstResult := &AccessEvaluationResult{
+			AccessEvaluationResponse: result.GetEvaluations()[i],
+		}
+
+		// Get the Cerbos response which includes full metadata
+		cerbosResp, err := firstResult.GetCerbosResponse()
+		if err != nil {
+			return nil, fmt.Errorf("failed to extract Cerbos response from AuthZEN batch result: %w", err)
+		}
+		resp.Results[i] = 
 	}
 
-	firstResult := &AccessEvaluationResult{
-		AccessEvaluationResponse: result.GetEvaluations()[0],
-	}
-
-	// Get the Cerbos response which includes full metadata
-	cerbosResp, err := firstResult.GetCerbosResponse()
-	if err != nil {
-		return nil, fmt.Errorf("failed to extract Cerbos response from AuthZEN batch result: %w", err)
-	}
-
-	return &cerbos.CheckResourcesResponse{
-		CheckResourcesResponse: cerbosResp,
-	}, nil
+	return resp, nil
 }
 
 // ServerInfo retrieves server information.
@@ -182,8 +188,9 @@ func (a *Adapter) With(opts ...cerbos.RequestOpt) *Adapter {
 
 // PlanResources is not supported by the AuthZEN adapter.
 // AuthZEN focuses on access evaluation rather than query planning.
+// Returns ErrNotImplemented which tests can check for using errors.Is().
 func (a *Adapter) PlanResources(ctx context.Context, principal *cerbos.Principal, resource *cerbos.Resource, actions ...string) (*cerbos.PlanResourcesResponse, error) {
-	return nil, fmt.Errorf("PlanResources is not supported by AuthZEN adapter")
+	return nil, fmt.Errorf("PlanResources: %w", ErrNotImplemented)
 }
 
 // WithPrincipal creates a principal-scoped context.

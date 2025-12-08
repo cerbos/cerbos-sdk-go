@@ -78,7 +78,6 @@ func ToCerbosPrincipal(subject *Subject) (*cerbos.Principal, error) {
 
 	props := s.GetProperties()
 
-	// Extract Cerbos-specific properties
 	if rolesVal, ok := props["cerbos.roles"]; ok {
 		roles, err := extractStringSlice(rolesVal)
 		if err != nil {
@@ -87,25 +86,17 @@ func ToCerbosPrincipal(subject *Subject) (*cerbos.Principal, error) {
 		principal.WithRoles(roles...)
 	}
 
-	if versionVal, ok := props["cerbos.policyVersion"]; ok {
-		version := versionVal.GetStringValue()
-		if version != "" {
-			principal.WithPolicyVersion(version)
-		}
+	if version := props["cerbos.policyVersion"].GetStringValue(); version != "" {
+		principal.WithPolicyVersion(version)
 	}
 
-	if scopeVal, ok := props["cerbos.scope"]; ok {
-		scope := scopeVal.GetStringValue()
-		if scope != "" {
-			principal.WithScope(scope)
-		}
+	if scope := props["cerbos.scope"].GetStringValue(); scope != "" {
+		principal.WithScope(scope)
 	}
 
-	// Add all non-Cerbos-specific properties as attributes
 	for k, v := range props {
 		if !isCerbosProperty(k) {
-			val := fromStructPB(v)
-			principal.WithAttr(k, val)
+			principal.WithAttrValue(k, v)
 		}
 	}
 
@@ -131,7 +122,6 @@ func FromCerbosResource(resource *cerbos.Resource) (*Resource, error) {
 	r := resource.Proto()
 	authzenResource := NewResource(r.GetKind(), r.GetId())
 
-	// Add Cerbos-specific properties
 	if r.GetPolicyVersion() != "" {
 		authzenResource.WithCerbosPolicyVersion(r.GetPolicyVersion())
 	}
@@ -140,10 +130,8 @@ func FromCerbosResource(resource *cerbos.Resource) (*Resource, error) {
 		authzenResource.WithCerbosScope(r.GetScope())
 	}
 
-	// Add all other attributes as properties
 	for k, v := range r.GetAttr() {
-		val := fromStructPB(v)
-		authzenResource.WithProperty(k, val)
+		authzenResource.WithProperty(k, v)
 	}
 
 	if err := authzenResource.Err(); err != nil {
@@ -170,26 +158,17 @@ func ToCerbosResource(resource *Resource) (*cerbos.Resource, error) {
 
 	props := r.GetProperties()
 
-	// Extract Cerbos-specific properties
-	if versionVal, ok := props["cerbos.policyVersion"]; ok {
-		version := versionVal.GetStringValue()
-		if version != "" {
-			cerbosResource.WithPolicyVersion(version)
-		}
+	if version := props["cerbos.policyVersion"].GetStringValue(); version != "" {
+		cerbosResource.WithPolicyVersion(version)
 	}
 
-	if scopeVal, ok := props["cerbos.scope"]; ok {
-		scope := scopeVal.GetStringValue()
-		if scope != "" {
-			cerbosResource.WithScope(scope)
-		}
+	if scope := props["cerbos.scope"].GetStringValue(); scope != "" {
+		cerbosResource.WithScope(scope)
 	}
 
-	// Add all non-Cerbos-specific properties as attributes
 	for k, v := range props {
 		if !isCerbosProperty(k) {
-			val := fromStructPB(v)
-			cerbosResource.WithAttr(k, val)
+			cerbosResource.WithAttrValue(k, v)
 		}
 	}
 
@@ -199,42 +178,6 @@ func ToCerbosResource(resource *Resource) (*cerbos.Resource, error) {
 
 	return cerbosResource, nil
 }
-
-// FromCerbosAction converts a Cerbos action string to an AuthZEN Action.
-func FromCerbosAction(action string) *Action {
-	return NewAction(action)
-}
-
-// ToCerbosAction converts an AuthZEN Action to a Cerbos action string.
-func ToCerbosAction(action *Action) string {
-	if action == nil {
-		return ""
-	}
-	return action.Name()
-}
-
-// BuildCerbosCheckResourceRequest builds a Cerbos CheckResources request from AuthZEN entities.
-// This is useful for converting AuthZEN requests to Cerbos format internally.
-func BuildCerbosCheckResourceRequest(subject *Subject, resource *Resource, action *Action) (*enginev1.Principal, *enginev1.Resource, string, error) {
-	principal, err := ToCerbosPrincipal(subject)
-	if err != nil {
-		return nil, nil, "", fmt.Errorf("failed to convert subject: %w", err)
-	}
-
-	cerbosResource, err := ToCerbosResource(resource)
-	if err != nil {
-		return nil, nil, "", fmt.Errorf("failed to convert resource: %w", err)
-	}
-
-	actionStr := ToCerbosAction(action)
-	if actionStr == "" {
-		return nil, nil, "", fmt.Errorf("action cannot be empty")
-	}
-
-	return principal.Proto(), cerbosResource.Proto(), actionStr, nil
-}
-
-// Helper functions
 
 func isCerbosProperty(key string) bool {
 	return len(key) >= 7 && key[:7] == "cerbos."

@@ -7,12 +7,14 @@ package tests
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 	"time"
 
+	"github.com/cerbos/cerbos-sdk-go/authzen"
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	enginev1 "github.com/cerbos/cerbos/api/genpb/cerbos/engine/v1"
 	"github.com/google/go-cmp/cmp"
@@ -362,6 +364,11 @@ func TestClient[P cerbos.PrincipalContext, C cerbos.Client[C, P]](c cerbos.Clien
 			check := func(t *testing.T, have *cerbos.PlanResourcesResponse, err error) {
 				t.Helper()
 				is := require.New(t)
+				// Skip test if PlanResources is not implemented
+				if errors.Is(err, authzen.ErrNotImplemented) {
+					t.Skip("PlanResources not implemented by this client")
+					return
+				}
 				is.NoError(err)
 				require.NotEmpty(t, have.GetRequestId())
 				is.Equal(enginev1.PlanResourcesFilter_KIND_CONDITIONAL, have.Filter.Kind, "Expected conditional filter")
@@ -396,6 +403,10 @@ func TestClient[P cerbos.PrincipalContext, C cerbos.Client[C, P]](c cerbos.Clien
 				have, err := cc.With(cerbos.RequestIDGenerator(func(_ context.Context) string {
 					return "foo"
 				})).PlanResources(ctx, principal, resource, "approve")
+				if errors.Is(err, authzen.ErrNotImplemented) {
+					t.Skip("PlanResources not implemented by this client")
+					return
+				}
 				require.NoError(t, err)
 				require.Equal(t, "foo", have.GetRequestId())
 			})
@@ -405,6 +416,10 @@ func TestClient[P cerbos.PrincipalContext, C cerbos.Client[C, P]](c cerbos.Clien
 				defer cancelFunc()
 
 				have, err := cc.PlanResources(ctx, principal, resource, "approve", "view")
+				if errors.Is(err, authzen.ErrNotImplemented) {
+					t.Skip("PlanResources not implemented by this client")
+					return
+				}
 				require.NoError(t, err)
 				require.NotEmpty(t, have.GetRequestId())
 
