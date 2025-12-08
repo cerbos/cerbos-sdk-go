@@ -3,99 +3,25 @@
 
 //go:build tests
 
-package cerbos
+package cerbos_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"io"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
 
+	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	"github.com/cerbos/cerbos-sdk-go/internal/tests"
 	"github.com/cerbos/cerbos-sdk-go/testutil"
-	auditv1 "github.com/cerbos/cerbos/api/genpb/cerbos/audit/v1"
-	responsev1 "github.com/cerbos/cerbos/api/genpb/cerbos/response/v1"
-	svcv1 "github.com/cerbos/cerbos/api/genpb/cerbos/svc/v1"
 )
 
 const (
 	adminUsername = "cerbos"
 	adminPassword = "cerbosAdmin"
-
-	connectTimeout = 1 * time.Second
-	readyTimeout   = 5 * time.Second
 )
-
-func TestCollectLogs(t *testing.T) {
-	t.Run("access logs", func(t *testing.T) {
-		receiver := func() (*responsev1.ListAuditLogEntriesResponse, error) {
-			return &responsev1.ListAuditLogEntriesResponse{Entry: &responsev1.ListAuditLogEntriesResponse_AccessLogEntry{
-				AccessLogEntry: &auditv1.AccessLogEntry{CallId: "test"},
-			}}, nil
-		}
-
-		logs, err := collectLogs(receiver)
-		require.NoError(t, err)
-
-		log := <-logs
-		accessLog, err := log.AccessLog()
-		require.NoError(t, err)
-		require.Equal(t, "test", accessLog.CallId)
-		require.Empty(t, logs)
-	})
-
-	t.Run("return io.EOF directly", func(t *testing.T) {
-		receiver := func() (*responsev1.ListAuditLogEntriesResponse, error) {
-			return nil, io.EOF
-		}
-
-		logs, err := collectLogs(receiver)
-		require.NoError(t, err)
-		require.Empty(t, logs)
-	})
-
-	t.Run("error from receiver", func(t *testing.T) {
-		receiver := func() (*responsev1.ListAuditLogEntriesResponse, error) { return nil, errors.New("test-error") }
-
-		logs, err := collectLogs(receiver)
-		require.NoError(t, err)
-
-		log := <-logs
-		al, err := log.AccessLog()
-		require.Nil(t, al)
-		require.Error(t, err)
-	})
-}
-
-func TestAuditLogs(t *testing.T) {
-	t.Run("should fail on invalid log options", func(t *testing.T) {
-		c := &GRPCAdminClient{client: svcv1.NewCerbosAdminServiceClient(&grpc.ClientConn{})}
-
-		_, err := c.AuditLogs(context.Background(), AuditLogOptions{
-			Type: AccessLogs,
-			Tail: 10000,
-		})
-
-		require.Error(t, err)
-	})
-
-	t.Run("should fail if log type is different", func(t *testing.T) {
-		c := &GRPCAdminClient{client: svcv1.NewCerbosAdminServiceClient(&grpc.ClientConn{})}
-
-		_, err := c.AuditLogs(context.Background(), AuditLogOptions{
-			Type: AuditLogType(100),
-			Tail: 10000,
-		})
-
-		require.Error(t, err)
-	})
-}
 
 func TestAdminClient(t *testing.T) {
 	launcher, err := testutil.NewCerbosServerLauncher()
@@ -123,7 +49,7 @@ func TestAdminClient(t *testing.T) {
 	defer cancel()
 	require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
 
-	ac, err := NewAdminClientWithCredentials("passthrough:///"+s.GRPCAddr(), adminUsername, adminPassword, WithTLSInsecure(), WithConnectTimeout(connectTimeout))
+	ac, err := cerbos.NewAdminClientWithCredentials("passthrough:///"+s.GRPCAddr(), adminUsername, adminPassword, cerbos.WithTLSInsecure(), cerbos.WithConnectTimeout(connectTimeout))
 	require.NoError(t, err)
 
 	policies := map[string]string{
@@ -149,7 +75,7 @@ func TestAdminClient(t *testing.T) {
 	}
 
 	t.Run("AddOrUpdatePolicy", func(t *testing.T) {
-		ps := NewPolicySet()
+		ps := cerbos.NewPolicySet()
 		for _, p := range policies {
 			_, err := ps.AddPolicyFromFileWithErr(filepath.Join(policyDir, p))
 			require.NoError(t, err, "Failed to add %s", p)
@@ -162,7 +88,7 @@ func TestAdminClient(t *testing.T) {
 	t.Run("ListPolicies", func(t *testing.T) {
 		testCases := []struct {
 			name    string
-			options []FilterOption
+			options []cerbos.FilterOption
 			want    map[string]string
 		}{
 			{
@@ -171,7 +97,7 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "NameRegexp",
-				options: []FilterOption{WithNameRegexp("leave_req")},
+				options: []cerbos.FilterOption{cerbos.WithNameRegexp("leave_req")},
 				want: map[string]string{
 					"resource.leave_request.v20210210":           "",
 					"resource.leave_request.vdefault":            "",
@@ -182,7 +108,7 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "ScopeRegexp",
-				options: []FilterOption{WithScopeRegexp("acme")},
+				options: []cerbos.FilterOption{cerbos.WithScopeRegexp("acme")},
 				want: map[string]string{
 					"principal.donald_duck.vdefault/acme":        "",
 					"principal.donald_duck.vdefault/acme.hr":     "",
@@ -193,14 +119,14 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "VersionRegexp",
-				options: []FilterOption{WithVersionRegexp(`\d+`)},
+				options: []cerbos.FilterOption{cerbos.WithVersionRegexp(`\d+`)},
 				want: map[string]string{
 					"resource.leave_request.v20210210": "",
 				},
 			},
 			{
 				name:    "AllRegexp",
-				options: []FilterOption{WithNameRegexp(`.*`), WithScopeRegexp(`.*`), WithVersionRegexp("def")},
+				options: []cerbos.FilterOption{cerbos.WithNameRegexp(`.*`), cerbos.WithScopeRegexp(`.*`), cerbos.WithVersionRegexp("def")},
 				want: map[string]string{
 					"principal.donald_duck.vdefault":             "",
 					"principal.donald_duck.vdefault/acme":        "",
@@ -228,7 +154,7 @@ func TestAdminClient(t *testing.T) {
 	t.Run("InspectPolicies", func(t *testing.T) {
 		testCases := []struct {
 			name    string
-			options []FilterOption
+			options []cerbos.FilterOption
 			want    map[string][]string
 		}{
 			{
@@ -246,7 +172,7 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "NameRegexp",
-				options: []FilterOption{WithNameRegexp("leave_req")},
+				options: []cerbos.FilterOption{cerbos.WithNameRegexp("leave_req")},
 				want: map[string][]string{
 					"resource.leave_request.v20210210":           {"*", "approve", "create", "defer", "delete", "remind", "view", "view:*", "view:public"},
 					"resource.leave_request.vdefault":            {"*"},
@@ -257,7 +183,7 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "ScopeRegexp",
-				options: []FilterOption{WithScopeRegexp("acme")},
+				options: []cerbos.FilterOption{cerbos.WithScopeRegexp("acme")},
 				want: map[string][]string{
 					"principal.donald_duck.vdefault/acme":        {"*"},
 					"principal.donald_duck.vdefault/acme.hr":     {"view:*"},
@@ -268,14 +194,14 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name:    "VersionRegexp",
-				options: []FilterOption{WithVersionRegexp(`\d+`)},
+				options: []cerbos.FilterOption{cerbos.WithVersionRegexp(`\d+`)},
 				want: map[string][]string{
 					"resource.leave_request.v20210210": {"*", "approve", "create", "defer", "delete", "remind", "view", "view:*", "view:public"},
 				},
 			},
 			{
 				name:    "AllRegexp",
-				options: []FilterOption{WithNameRegexp(`.*`), WithScopeRegexp(`.*`), WithVersionRegexp("def")},
+				options: []cerbos.FilterOption{cerbos.WithNameRegexp(`.*`), cerbos.WithScopeRegexp(`.*`), cerbos.WithVersionRegexp("def")},
 				want: map[string][]string{
 					"principal.donald_duck.vdefault":             {"*"},
 					"principal.donald_duck.vdefault/acme":        {"*"},
@@ -288,8 +214,8 @@ func TestAdminClient(t *testing.T) {
 			},
 			{
 				name: "PolicyIDs",
-				options: []FilterOption{
-					WithPolicyID("resource.leave_request.v20210210"),
+				options: []cerbos.FilterOption{
+					cerbos.WithPolicyID("resource.leave_request.v20210210"),
 				},
 				want: map[string][]string{
 					"resource.leave_request.v20210210": {"*", "approve", "create", "defer", "delete", "remind", "view", "view:*", "view:public"},
@@ -315,7 +241,7 @@ func TestAdminClient(t *testing.T) {
 	})
 
 	t.Run("AddOrUpdateSchema", func(t *testing.T) {
-		ss := NewSchemaSet()
+		ss := cerbos.NewSchemaSet()
 		for k, s := range schemas {
 			_, err := ss.AddSchemaFromFileWithIDAndErr(filepath.Join(policyDir, s), k)
 			require.NoError(t, err, "Failed to add %s", s)
