@@ -116,13 +116,6 @@ func TestClient(t *testing.T) {
 				require.NoError(t, err)
 				t.Cleanup(func() { _ = s.Stop() })
 
-				// TODO(cell): The docker health check does not work with UDS
-				/*
-					ctx, cancel := context.WithTimeout(context.Background(), readyTimeout)
-					defer cancel()
-					require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
-				*/
-
 				socketPath := filepath.Join(tempDir, "grpc.sock")
 				require.Eventually(t, func() bool {
 					_, err := os.Stat(socketPath)
