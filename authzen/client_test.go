@@ -3,11 +3,13 @@
 
 //go:build tests
 
-package cerbos_test
+package authzen_test
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
@@ -15,6 +17,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/cerbos/cerbos-sdk-go/authzen"
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	"github.com/cerbos/cerbos-sdk-go/internal/tests"
 	"github.com/cerbos/cerbos-sdk-go/testutil"
@@ -25,7 +28,7 @@ const (
 	readyTimeout   = 5 * time.Second
 )
 
-func TestClient(t *testing.T) {
+func TestAdapter(t *testing.T) {
 	launcher, err := testutil.NewCerbosServerLauncher()
 	require.NoError(t, err)
 
@@ -84,12 +87,30 @@ func TestClient(t *testing.T) {
 					},
 				}
 				for _, port := range ports {
-					// TODO: Use AuthZEN adapter
-					c, err := cerbos.New(port.addr, tc.opts...)
+					// Use AuthZEN adapter for HTTP endpoint
+					var httpURL string
+					var adapterOpts []authzen.Opt
+
+					if tc.tls {
+						httpURL = "https://" + s.HTTPAddr()
+						// Create HTTP client with insecure TLS for testing
+						httpClient := &http.Client{
+							Transport: &http.Transport{
+								TLSClientConfig: &tls.Config{
+									InsecureSkipVerify: true,
+								},
+							},
+							Timeout: 30 * time.Second,
+						}
+						adapterOpts = append(adapterOpts, authzen.WithHTTPClient(httpClient))
+					} else {
+						httpURL = "http://" + s.HTTPAddr()
+					}
+
+					c, err := authzen.NewAdapter(httpURL, adapterOpts...)
 					require.NoError(t, err)
 
-					// TODO: Use AuthZEN adapter
-					t.Run(port.name, tests.TestClient[cerbos.PrincipalCtx, *cerbos.GRPCClient](c))
+					t.Run(port.name, tests.TestClient[*authzen.PrincipalCtx, *authzen.Adapter](c))
 				}
 			})
 
@@ -122,13 +143,18 @@ func TestClient(t *testing.T) {
 					return err == nil
 				}, 1*time.Minute, 100*time.Millisecond)
 
-				addr := fmt.Sprintf("unix://%s", socketPath)
-				// TODO: Use AuthZEN adapter
-				c, err := cerbos.New(addr, tc.opts...)
+				// Use AuthZEN adapter for HTTP over Unix socket
+				httpSocketPath := filepath.Join(tempDir, "http.sock")
+				require.Eventually(t, func() bool {
+					_, err := os.Stat(httpSocketPath)
+					return err == nil
+				}, 1*time.Minute, 100*time.Millisecond)
+
+				httpURL := fmt.Sprintf("http://unix:%s", httpSocketPath)
+				c, err := authzen.NewAdapter(httpURL)
 				require.NoError(t, err)
 
-				// TODO: Use AuthZEN adapter
-				t.Run("grpc", tests.TestClient[cerbos.PrincipalCtx, *cerbos.GRPCClient](c))
+				t.Run("http", tests.TestClient[*authzen.PrincipalCtx, *authzen.Adapter](c))
 			})
 		})
 	}

@@ -9,7 +9,6 @@ import (
 
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	"github.com/cerbos/cerbos-sdk-go/internal"
-	effectv1 "github.com/cerbos/cerbos/api/genpb/cerbos/effect/v1"
 	responsev1 "github.com/cerbos/cerbos/api/genpb/cerbos/response/v1"
 )
 
@@ -44,7 +43,6 @@ func NewAdapter(baseURL string, opts ...Opt) (*Adapter, error) {
 
 // IsAllowed checks if a principal is allowed to perform an action on a resource.
 func (a *Adapter) IsAllowed(ctx context.Context, principal *cerbos.Principal, resource *cerbos.Resource, action string) (bool, error) {
-	// Convert Cerbos types to AuthZEN types
 	subject, err := FromCerbosPrincipal(principal)
 	if err != nil {
 		return false, fmt.Errorf("failed to convert principal: %w", err)
@@ -57,16 +55,18 @@ func (a *Adapter) IsAllowed(ctx context.Context, principal *cerbos.Principal, re
 
 	authzenAction := FromCerbosAction(action)
 
-	// Create AuthZEN context from request options
-	var authzenCtx *Context
-	if a.opts != nil && (a.opts.RequestIDGenerator != nil || a.opts.IncludeMeta) {
-		authzenCtx = NewContext()
-		if a.opts.RequestIDGenerator != nil {
-			authzenCtx.WithRequestID(a.opts.RequestID(ctx))
+	authzenCtx := NewContext()
+	authzenCtx.WithIncludeMeta(true)
+	authzenCtx.WithRequestID(a.opts.RequestID(ctx))
+	if a.opts != nil && a.opts.AuxData != nil {
+		auxDataMap := make(map[string]any)
+		if jwt := a.opts.AuxData.GetJwt(); jwt != nil {
+			auxDataMap["jwt"] = map[string]any{
+				"token":    jwt.Token,
+				"keySetId": jwt.KeySetId,
+			}
 		}
-		if a.opts.IncludeMeta {
-			authzenCtx.WithIncludeMeta(true)
-		}
+		authzenCtx.WithAuxData(auxDataMap)
 	}
 
 	// Make the AuthZEN request
@@ -78,17 +78,29 @@ func (a *Adapter) IsAllowed(ctx context.Context, principal *cerbos.Principal, re
 	return result.IsAllowed(), nil
 }
 
-// CheckResources checks access to a batch of resources.
 func (a *Adapter) CheckResources(ctx context.Context, principal *cerbos.Principal, resources *cerbos.ResourceBatch) (*cerbos.CheckResourcesResponse, error) {
-	// Convert principal
 	subject, err := FromCerbosPrincipal(principal)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert principal: %w", err)
 	}
 
-	// Build batch request
+	defaultContext := NewContext()
+	defaultContext.WithIncludeMeta(true)
+	defaultContext.WithRequestID(a.opts.RequestID(ctx))
+	if a.opts != nil && a.opts.AuxData != nil {
+		auxDataMap := make(map[string]any)
+		if jwt := a.opts.AuxData.GetJwt(); jwt != nil {
+			auxDataMap["jwt"] = map[string]any{
+				"token":    jwt.Token,
+				"keySetId": jwt.KeySetId,
+			}
+		}
+		defaultContext.WithAuxData(auxDataMap)
+	}
+
 	batchReq := &BatchEvaluationRequest{
 		DefaultSubject: subject,
+		DefaultContext: defaultContext,
 		Evaluations:    make([]BatchEvaluation, 0),
 		Semantics:      ExecuteAll,
 	}
@@ -111,58 +123,32 @@ func (a *Adapter) CheckResources(ctx context.Context, principal *cerbos.Principa
 		}
 	}
 
-	// Execute batch request
 	result, err := a.client.AccessEvaluations(ctx, batchReq)
 	if err != nil {
 		return nil, fmt.Errorf("batch evaluation failed: %w", err)
 	}
 
-	// Convert AuthZEN batch results back to Cerbos CheckResourcesResponse
-	return a.convertBatchResults(resources, result)
+	return a.convertBatchResults(result)
 }
 
-// convertBatchResults converts AuthZEN batch results to Cerbos CheckResourcesResponse.
-func (a *Adapter) convertBatchResults(originalBatch *cerbos.ResourceBatch, result *AccessEvaluationBatchResult) (*cerbos.CheckResourcesResponse, error) {
-	requestId := ""
-	if len(result.Evaluations) >0 {
-		requestId := result.Evaluations[0].GetContext()
-	}
-	response := &cerbos.CheckResourcesResponse{
-		CheckResourcesResponse: &responsev1.CheckResourcesResponse{
-			RequestId: result.AccessEvaluationBatchResponse.
-			Results:   make([]*responsev1.CheckResourcesResponse_ResultEntry, 0, len(originalBatch.Batch)),
-		},
+func (a *Adapter) convertBatchResults(result *AccessEvaluationBatchResult) (*cerbos.CheckResourcesResponse, error) {
+	if result.Count() == 0 {
+		return nil, fmt.Errorf("no evaluations in batch response")
 	}
 
-	resultIdx := 0
-	for _, entry := range originalBatch.Batch {
-		resResult := &responsev1.CheckResourcesResponse_ResultEntry{
-			Resource: &responsev1.CheckResourcesResponse_ResultEntry_Resource{
-				Id:            entry.Resource.Id,
-				Kind:          entry.Resource.Kind,
-				PolicyVersion: entry.Resource.PolicyVersion,
-				Scope:         entry.Resource.Scope,
-			},
-			Actions: make(map[string]effectv1.Effect, len(entry.Actions)),
-		}
-
-		// Map each action result
-		for _, action := range entry.Actions {
-			if resultIdx < result.Count() {
-				decision := result.GetEvaluations()[resultIdx].GetDecision()
-				if decision {
-					resResult.Actions[action] = effectv1.Effect_EFFECT_ALLOW
-				} else {
-					resResult.Actions[action] = effectv1.Effect_EFFECT_DENY
-				}
-				resultIdx++
-			}
-		}
-
-		response.Results = append(response.Results, resResult)
+	firstResult := &AccessEvaluationResult{
+		AccessEvaluationResponse: result.GetEvaluations()[0],
 	}
 
-	return response, nil
+	// Get the Cerbos response which includes full metadata
+	cerbosResp, err := firstResult.GetCerbosResponse()
+	if err != nil {
+		return nil, fmt.Errorf("failed to extract Cerbos response from AuthZEN batch result: %w", err)
+	}
+
+	return &cerbos.CheckResourcesResponse{
+		CheckResourcesResponse: cerbosResp,
+	}, nil
 }
 
 // ServerInfo retrieves server information.
