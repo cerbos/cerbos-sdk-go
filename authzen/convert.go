@@ -20,14 +20,14 @@ func fromStructPB(v *structpb.Value) any {
 	return v.AsInterface()
 }
 
-// PrincipalToSubject converts a Cerbos Principal to an AuthZEN Subject.
+// FromCerbosPrincipal converts a Cerbos Principal to an AuthZEN Subject.
 // The mapping follows the AuthZEN specification:
 // - principal.id -> subject.id
 // - principal.roles -> subject.properties["cerbos.roles"]
 // - principal.policyVersion -> subject.properties["cerbos.policyVersion"]
 // - principal.scope -> subject.properties["cerbos.scope"]
 // - principal.attr.* -> subject.properties.*.
-func PrincipalToSubject(principal *cerbos.Principal) (*Subject, error) {
+func FromCerbosPrincipal(principal *cerbos.Principal) (*Subject, error) {
 	if principal == nil {
 		return nil, fmt.Errorf("principal cannot be nil")
 	}
@@ -61,14 +61,14 @@ func PrincipalToSubject(principal *cerbos.Principal) (*Subject, error) {
 	return subject, nil
 }
 
-// SubjectToPrincipal converts an AuthZEN Subject to a Cerbos Principal.
+// ToCerbosPrincipal converts an AuthZEN Subject to a Cerbos Principal.
 // The mapping follows the AuthZEN specification in reverse:
 // - subject.id -> principal.id
 // - subject.properties["cerbos.roles"] -> principal.roles
 // - subject.properties["cerbos.policyVersion"] -> principal.policyVersion
 // - subject.properties["cerbos.scope"] -> principal.scope
 // - subject.properties.* (non-cerbos) -> principal.attr.*.
-func SubjectToPrincipal(subject *Subject) (*cerbos.Principal, error) {
+func ToCerbosPrincipal(subject *Subject) (*cerbos.Principal, error) {
 	if subject == nil {
 		return nil, fmt.Errorf("subject cannot be nil")
 	}
@@ -116,14 +116,14 @@ func SubjectToPrincipal(subject *Subject) (*cerbos.Principal, error) {
 	return principal, nil
 }
 
-// ResourceToAuthZEN converts a Cerbos Resource to an AuthZEN Resource.
+// FromCerbosResource converts a Cerbos Resource to an AuthZEN Resource.
 // The mapping follows the AuthZEN specification:
 // - resource.kind -> resource.type
 // - resource.id -> resource.id
 // - resource.policyVersion -> resource.properties["cerbos.policyVersion"]
 // - resource.scope -> resource.properties["cerbos.scope"]
 // - resource.attr.* -> resource.properties.*.
-func ResourceToAuthZEN(resource *cerbos.Resource) (*Resource, error) {
+func FromCerbosResource(resource *cerbos.Resource) (*Resource, error) {
 	if resource == nil {
 		return nil, fmt.Errorf("resource cannot be nil")
 	}
@@ -153,16 +153,14 @@ func ResourceToAuthZEN(resource *cerbos.Resource) (*Resource, error) {
 	return authzenResource, nil
 }
 
-// AuthZENToResource converts an AuthZEN Resource to a Cerbos Resource.
+// ToCerbosResource converts an AuthZEN Resource to a Cerbos Resource.
 // The mapping follows the AuthZEN specification in reverse:
 // - resource.type -> resource.kind
 // - resource.id -> resource.id
 // - resource.properties["cerbos.policyVersion"] -> resource.policyVersion
 // - resource.properties["cerbos.scope"] -> resource.scope
 // - resource.properties.* (non-cerbos) -> resource.attr.*.
-//
-//nolint:revive // AuthZEN is the standard name
-func AuthZENToResource(resource *Resource) (*cerbos.Resource, error) {
+func ToCerbosResource(resource *Resource) (*cerbos.Resource, error) {
 	if resource == nil {
 		return nil, fmt.Errorf("resource cannot be nil")
 	}
@@ -202,15 +200,13 @@ func AuthZENToResource(resource *Resource) (*cerbos.Resource, error) {
 	return cerbosResource, nil
 }
 
-// ActionToAuthZEN converts a Cerbos action string to an AuthZEN Action.
-func ActionToAuthZEN(action string) *Action {
+// FromCerbosAction converts a Cerbos action string to an AuthZEN Action.
+func FromCerbosAction(action string) *Action {
 	return NewAction(action)
 }
 
-// AuthZENToAction converts an AuthZEN Action to a Cerbos action string.
-//
-//nolint:revive // AuthZEN is the standard name
-func AuthZENToAction(action *Action) string {
+// ToCerbosAction converts an AuthZEN Action to a Cerbos action string.
+func ToCerbosAction(action *Action) string {
 	if action == nil {
 		return ""
 	}
@@ -220,17 +216,17 @@ func AuthZENToAction(action *Action) string {
 // BuildCerbosCheckResourceRequest builds a Cerbos CheckResources request from AuthZEN entities.
 // This is useful for converting AuthZEN requests to Cerbos format internally.
 func BuildCerbosCheckResourceRequest(subject *Subject, resource *Resource, action *Action) (*enginev1.Principal, *enginev1.Resource, string, error) {
-	principal, err := SubjectToPrincipal(subject)
+	principal, err := ToCerbosPrincipal(subject)
 	if err != nil {
 		return nil, nil, "", fmt.Errorf("failed to convert subject: %w", err)
 	}
 
-	cerbosResource, err := AuthZENToResource(resource)
+	cerbosResource, err := ToCerbosResource(resource)
 	if err != nil {
 		return nil, nil, "", fmt.Errorf("failed to convert resource: %w", err)
 	}
 
-	actionStr := AuthZENToAction(action)
+	actionStr := ToCerbosAction(action)
 	if actionStr == "" {
 		return nil, nil, "", fmt.Errorf("action cannot be empty")
 	}

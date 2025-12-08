@@ -158,10 +158,10 @@ func TestContext(t *testing.T) {
 	})
 }
 
-func TestPrincipalToSubject(t *testing.T) {
+func TestFromCerbosPrincipal(t *testing.T) {
 	t.Run("convert basic principal", func(t *testing.T) {
 		principal := cerbos.NewPrincipal("alice", "admin", "user")
-		subject, err := authzen.PrincipalToSubject(principal)
+		subject, err := authzen.FromCerbosPrincipal(principal)
 
 		require.NoError(t, err)
 		require.NotNil(t, subject)
@@ -176,7 +176,7 @@ func TestPrincipalToSubject(t *testing.T) {
 			WithPolicyVersion("v1.0").
 			WithScope("acme.corp")
 
-		subject, err := authzen.PrincipalToSubject(principal)
+		subject, err := authzen.FromCerbosPrincipal(principal)
 
 		require.NoError(t, err)
 		require.NotNil(t, subject)
@@ -190,16 +190,16 @@ func TestPrincipalToSubject(t *testing.T) {
 	})
 
 	t.Run("nil principal", func(t *testing.T) {
-		subject, err := authzen.PrincipalToSubject(nil)
+		subject, err := authzen.FromCerbosPrincipal(nil)
 		require.Error(t, err)
 		require.Nil(t, subject)
 	})
 }
 
-func TestResourceToAuthZEN(t *testing.T) {
+func TestFromCerbosResource(t *testing.T) {
 	t.Run("convert basic resource", func(t *testing.T) {
 		resource := cerbos.NewResource("document", "doc123")
-		authzenResource, err := authzen.ResourceToAuthZEN(resource)
+		authzenResource, err := authzen.FromCerbosResource(resource)
 
 		require.NoError(t, err)
 		require.NotNil(t, authzenResource)
@@ -214,7 +214,7 @@ func TestResourceToAuthZEN(t *testing.T) {
 			WithPolicyVersion("v1.0").
 			WithScope("acme.corp")
 
-		authzenResource, err := authzen.ResourceToAuthZEN(resource)
+		authzenResource, err := authzen.FromCerbosResource(resource)
 
 		require.NoError(t, err)
 		require.NotNil(t, authzenResource)
