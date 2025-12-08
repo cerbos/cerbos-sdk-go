@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	authorizationv1 "github.com/cerbos/cerbos/api/genpb/authzen/authorization/v1"
+	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
 	"go.uber.org/multierr"
 	"google.golang.org/protobuf/types/known/structpb"
 
@@ -266,8 +267,20 @@ func (c *Context) WithProperty(key string, value any) *Context {
 func (c *Context) WithRequestID(id string) *Context {
 	return c.WithProperty("cerbos.requestId", id)
 }
-
-func (c *Context) WithAuxData(auxData map[string]any) *Context {
+func (c *Context) WithAuxData(auxData *requestv1.AuxData) *Context {
+	if auxData == nil {
+		return c
+	}
+	auxDataMap := make(map[string]any)
+	if jwt := auxData.GetJwt(); jwt != nil {
+		auxDataMap["jwt"] = map[string]any{
+			"token":    jwt.Token,
+			"keySetId": jwt.KeySetId,
+		}
+	}
+	return c.WithAuxDataMap(auxDataMap)
+}
+func (c *Context) WithAuxDataMap(auxData map[string]any) *Context {
 	return c.WithProperty("cerbos.auxData", auxData)
 }
 

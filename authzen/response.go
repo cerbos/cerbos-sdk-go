@@ -59,7 +59,7 @@ func (r *AccessEvaluationResult) GetCerbosResponse() (*responsev1.CheckResources
 		return nil, fmt.Errorf("cerbos.response is not a struct")
 	}
 
-	// Marshal to JSON and unmarshal to CheckResourcesResponse
+	//TODO: replace marshalling with protobuf mapping
 	jsonBytes, err := protojson.Marshal(structVal)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal cerbos.response: %w", err)

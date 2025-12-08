@@ -61,18 +61,12 @@ func (a *Adapter) IsAllowed(ctx context.Context, principal *cerbos.Principal, re
 
 	authzenAction := NewAction(action)
 
-	authzenCtx := NewContext()
-	authzenCtx.WithIncludeMeta(true)
-	authzenCtx.WithRequestID(a.opts.RequestID(ctx))
+	authzenCtx := NewContext().
+		WithIncludeMeta(true).
+		WithRequestID(a.opts.RequestID(ctx))
+
 	if a.opts != nil && a.opts.AuxData != nil {
-		auxDataMap := make(map[string]any)
-		if jwt := a.opts.AuxData.GetJwt(); jwt != nil {
-			auxDataMap["jwt"] = map[string]any{
-				"token":    jwt.Token,
-				"keySetId": jwt.KeySetId,
-			}
-		}
-		authzenCtx.WithAuxData(auxDataMap)
+		authzenCtx.WithAuxData(a.opts.AuxData)
 	}
 
 	// Make the AuthZEN request
@@ -90,18 +84,12 @@ func (a *Adapter) CheckResources(ctx context.Context, principal *cerbos.Principa
 		return nil, fmt.Errorf("failed to convert principal: %w", err)
 	}
 
-	defaultContext := NewContext()
-	defaultContext.WithIncludeMeta(true)
-	defaultContext.WithRequestID(a.opts.RequestID(ctx))
+	defaultContext := NewContext().
+		WithIncludeMeta(true).
+		WithRequestID(a.opts.RequestID(ctx))
+
 	if a.opts != nil && a.opts.AuxData != nil {
-		auxDataMap := make(map[string]any)
-		if jwt := a.opts.AuxData.GetJwt(); jwt != nil {
-			auxDataMap["jwt"] = map[string]any{
-				"token":    jwt.Token,
-				"keySetId": jwt.KeySetId,
-			}
-		}
-		defaultContext.WithAuxData(auxDataMap)
+		defaultContext.WithAuxData(a.opts.AuxData)
 	}
 
 	batchReq := &BatchEvaluationRequest{
@@ -111,16 +99,13 @@ func (a *Adapter) CheckResources(ctx context.Context, principal *cerbos.Principa
 		Semantics:      ExecuteAll,
 	}
 
-	// Convert each resource check to a batch evaluation
 	for _, entry := range resources.Batch {
-		// Wrap protobuf Resource in cerbos.Resource for conversion
 		resource := &cerbos.Resource{Obj: entry.Resource}
 		authzenResource, err := FromCerbosResource(resource)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert resource %q: %w", entry.Resource.Id, err)
 		}
 
-		// Create an evaluation for each action
 		for _, action := range entry.Actions {
 			batchReq.Evaluations = append(batchReq.Evaluations, BatchEvaluation{
 				Resource: authzenResource,
@@ -142,16 +127,15 @@ func (a *Adapter) convertBatchResults(result *AccessEvaluationBatchResult) (*cer
 	resp.Results = make([]*responsev1.CheckResourcesResponse_ResultEntry, result.Count())
 
 	for i := range result.GetEvaluations() {
-		firstResult := &AccessEvaluationResult{
+		r := &AccessEvaluationResult{
 			AccessEvaluationResponse: result.GetEvaluations()[i],
 		}
-
-		// Get the Cerbos response which includes full metadata
-		cerbosResp, err := firstResult.GetCerbosResponse()
+		//TODO: optimise conversion
+		cerbosResp, err := r.GetCerbosResponse()
 		if err != nil {
 			return nil, fmt.Errorf("failed to extract Cerbos response from AuthZEN batch result: %w", err)
 		}
-		resp.Results[i] = 
+		resp.Results[i] = cerbosResp.Results[0]
 	}
 
 	return resp, nil
