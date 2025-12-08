@@ -362,9 +362,8 @@ func TestClient[P cerbos.PrincipalContext, C cerbos.Client[C, P]](c cerbos.Clien
 			check := func(t *testing.T, have *cerbos.PlanResourcesResponse, err error) {
 				t.Helper()
 				is := require.New(t)
-				require.NotEmpty(t, have.GetRequestId())
-
 				is.NoError(err)
+				require.NotEmpty(t, have.GetRequestId())
 				is.Equal(enginev1.PlanResourcesFilter_KIND_CONDITIONAL, have.Filter.Kind, "Expected conditional filter")
 				expression := have.Filter.Condition.GetExpression()
 				is.NotNil(expression)
