@@ -112,17 +112,16 @@ func (a *Adapter) CheckResources(ctx context.Context, principal *cerbos.Principa
 				Action:   NewAction(action),
 			})
 		}
-		// fmt.Printf("requested resourceId:%v #action: %d ", entry.Resource.Id, len(entry.Actions))
 	}
-	result, err := a.client.AccessEvaluations(ctx, batchReq)
+	results, err := a.client.AccessEvaluations(ctx, batchReq)
 	if err != nil {
 		return nil, fmt.Errorf("batch evaluation failed: %w", err)
 	}
-	res, err := result.GetEvaluation(0)
+	result0, err := results.GetEvaluation(0)
 	if err != nil {
 		return nil, fmt.Errorf("no corresponding evaluation result: %w", err)
 	}
-	resp, err := res.GetCerbosResponse()
+	resp, err := result0.GetCerbosResponse()
 	if err != nil {
 		return nil, err
 	}
