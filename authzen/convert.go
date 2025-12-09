@@ -6,7 +6,6 @@ package authzen
 import (
 	"fmt"
 
-	enginev1 "github.com/cerbos/cerbos/api/genpb/cerbos/engine/v1"
 	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
@@ -48,10 +47,8 @@ func FromCerbosPrincipal(principal *cerbos.Principal) (*Subject, error) {
 		subject.WithCerbosScope(p.GetScope())
 	}
 
-	// Add all other attributes as properties
 	for k, v := range p.GetAttr() {
-		val := fromStructPB(v)
-		subject.WithProperty(k, val)
+		subject.WithPropertyValue(k, v)
 	}
 
 	if err := subject.Err(); err != nil {
@@ -131,7 +128,7 @@ func FromCerbosResource(resource *cerbos.Resource) (*Resource, error) {
 	}
 
 	for k, v := range r.GetAttr() {
-		authzenResource.WithProperty(k, v)
+		authzenResource.WithPropertyValue(k, v)
 	}
 
 	if err := authzenResource.Err(); err != nil {

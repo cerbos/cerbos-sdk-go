@@ -127,6 +127,33 @@ func (r *Resource) WithProperty(key string, value any) *Resource {
 	return r
 }
 
+func (r *Resource) WithPropertyValue(key string, value *structpb.Value) *Resource {
+	if r.Obj.Properties == nil {
+		r.Obj.Properties = make(map[string]*structpb.Value)
+	}
+
+	r.Obj.Properties[key] = value
+	return r
+}
+
+func (r *Subject) WithPropertyValue(key string, value *structpb.Value) *Subject {
+	if r.Obj.Properties == nil {
+		r.Obj.Properties = make(map[string]*structpb.Value)
+	}
+
+	r.Obj.Properties[key] = value
+	return r
+}
+
+func (r *Context) WithPropertyValue(key string, value *structpb.Value) *Context {
+	if r.data == nil {
+		r.data = make(map[string]*structpb.Value)
+	}
+
+	r.data[key] = value
+	return r
+}
+
 func (r *Resource) WithProperties(properties map[string]any) *Resource {
 	if r.Obj.Properties == nil {
 		r.Obj.Properties = make(map[string]*structpb.Value, len(properties))
