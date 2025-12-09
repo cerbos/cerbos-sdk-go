@@ -123,8 +123,9 @@ func (a *Adapter) CheckResources(ctx context.Context, principal *cerbos.Principa
 }
 
 func (a *Adapter) convertBatchResults(result *AccessEvaluationBatchResult) (*cerbos.CheckResourcesResponse, error) {
-	resp := new(cerbos.CheckResourcesResponse)
-	resp.Results = make([]*responsev1.CheckResourcesResponse_ResultEntry, result.Count())
+	resp := &responsev1.CheckResourcesResponse{
+		Results: make([]*responsev1.CheckResourcesResponse_ResultEntry, result.Count()),
+	}
 
 	for i := range result.GetEvaluations() {
 		r := &AccessEvaluationResult{
@@ -138,7 +139,9 @@ func (a *Adapter) convertBatchResults(result *AccessEvaluationBatchResult) (*cer
 		resp.Results[i] = cerbosResp.Results[0]
 	}
 
-	return resp, nil
+	return &cerbos.CheckResourcesResponse{
+		CheckResourcesResponse: resp,
+	}, nil
 }
 
 // ServerInfo retrieves server information.

@@ -191,7 +191,11 @@ func (c *Client) AccessEvaluations(ctx context.Context, batchReq *BatchEvaluatio
 	if batchReq.DefaultContext != nil {
 		req.Context = batchReq.DefaultContext.Data()
 	}
-
+	if batchReq.Semantics != "" {
+		req.Options = &authorizationv1.AccessEvaluationsOptions{
+			EvaluationsSemantic: string(batchReq.Semantics),
+		}
+	}
 	// Build evaluations list
 	req.Evaluations = make([]*authorizationv1.AccessEvaluationBatchRequest_Evaluation, len(batchReq.Evaluations))
 	for i, eval := range batchReq.Evaluations {
@@ -213,14 +217,6 @@ func (c *Client) AccessEvaluations(ctx context.Context, batchReq *BatchEvaluatio
 		req.Evaluations[i] = e
 	}
 
-	req.
-
-		// Note: Evaluation semantics (execute_all, deny_on_first_deny, permit_on_first_permit)
-		// are not currently supported in the protobuf definition but are part of the AuthZEN spec.
-		// This will be added when the protobuf is updated.
-		_ = batchReq.Semantics // Avoid unused variable warning
-
-	// Make HTTP request
 	resp := &authorizationv1.AccessEvaluationBatchResponse{}
 	if err := c.doRequest(ctx, http.MethodPost, accessEvaluationsPath, req, resp); err != nil {
 		return nil, err
@@ -246,20 +242,17 @@ func (c *Client) doRequest(ctx context.Context, method, path string, reqBody, re
 
 	var bodyReader io.Reader
 	if reqBody != nil {
-		// Marshal request body using protojson for protobuf messages
 		var jsonData []byte
 		var err error
 
 		switch v := reqBody.(type) {
 		case proto.Message:
-			// Use protojson for protobuf messages
 			marshaler := protojson.MarshalOptions{
 				UseProtoNames:   true,
 				EmitUnpopulated: false,
 			}
 			jsonData, err = marshaler.Marshal(v)
 		default:
-			// Use standard JSON for other types
 			jsonData, err = json.Marshal(v)
 		}
 
