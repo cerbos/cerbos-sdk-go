@@ -41,20 +41,9 @@ func (r *AccessEvaluationResult) GetContextValue(key string) (*structpb.Value, b
 	return val, ok
 }
 
-// GetCerbosResponse extracts the Cerbos CheckResources response if it was included.
-// This is available when the request context included "cerbos.includeMeta": true.
-func (r *AccessEvaluationResult) GetCerbosResponse() (*responsev1.CheckResourcesResponse, error) {
-	if r == nil || r.AccessEvaluationResponse == nil {
-		return nil, fmt.Errorf("response is nil")
-	}
-
-	contextVal, ok := r.GetContextValue("cerbos.response")
-	if !ok {
-		return nil, fmt.Errorf("cerbos.response not found in context")
-	}
-
+func GetCerbosResponse(v *structpb.Value) (*responsev1.CheckResourcesResponse, error) {
 	// Convert structpb.Value to CheckResourcesResponse
-	structVal := contextVal.GetStructValue()
+	structVal := v.GetStructValue()
 	if structVal == nil {
 		return nil, fmt.Errorf("cerbos.response is not a struct")
 	}
@@ -71,6 +60,21 @@ func (r *AccessEvaluationResult) GetCerbosResponse() (*responsev1.CheckResources
 	}
 
 	return &cerbosResp, nil
+}
+
+// GetCerbosResponse extracts the Cerbos CheckResources response if it was included.
+// This is available when the request context included "cerbos.includeMeta": true.
+func (r *AccessEvaluationResult) GetCerbosResponse() (*responsev1.CheckResourcesResponse, error) {
+	if r == nil || r.AccessEvaluationResponse == nil {
+		return nil, fmt.Errorf("response is nil")
+	}
+
+	contextVal, ok := r.GetContextValue("cerbos.response")
+	if !ok {
+		return nil, fmt.Errorf("cerbos.response not found in context")
+	}
+
+	return GetCerbosResponse(contextVal)
 }
 
 // String returns a JSON string representation of the response.

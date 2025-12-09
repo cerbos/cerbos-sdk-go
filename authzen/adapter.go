@@ -112,34 +112,20 @@ func (a *Adapter) CheckResources(ctx context.Context, principal *cerbos.Principa
 				Action:   NewAction(action),
 			})
 		}
+		// fmt.Printf("requested resourceId:%v #action: %d ", entry.Resource.Id, len(entry.Actions))
 	}
-
 	result, err := a.client.AccessEvaluations(ctx, batchReq)
 	if err != nil {
 		return nil, fmt.Errorf("batch evaluation failed: %w", err)
 	}
-
-	return a.convertBatchResults(result)
-}
-
-func (a *Adapter) convertBatchResults(result *AccessEvaluationBatchResult) (*cerbos.CheckResourcesResponse, error) {
-	resp := &responsev1.CheckResourcesResponse{
-		Results: make([]*responsev1.CheckResourcesResponse_ResultEntry, result.Count()),
+	res, err := result.GetEvaluation(0)
+	if err != nil {
+		return nil, fmt.Errorf("no corresponding evaluation result: %w", err)
 	}
-
-	for i := range result.GetEvaluations() {
-		r := &AccessEvaluationResult{
-			AccessEvaluationResponse: result.GetEvaluations()[i],
-		}
-		//TODO: optimise conversion
-		cerbosResp, err := r.GetCerbosResponse()
-		if err != nil {
-			return nil, fmt.Errorf("failed to extract Cerbos response from AuthZEN batch result: %w", err)
-		}
-		resp.RequestId = cerbosResp.RequestId
-		resp.Results[i] = cerbosResp.Results[0]
+	resp, err := res.GetCerbosResponse()
+	if err != nil {
+		return nil, err
 	}
-
 	return &cerbos.CheckResourcesResponse{
 		CheckResourcesResponse: resp,
 	}, nil
