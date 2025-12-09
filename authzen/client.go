@@ -177,10 +177,8 @@ func (c *Client) AccessEvaluations(ctx context.Context, batchReq *BatchEvaluatio
 		return nil, fmt.Errorf("batch request must contain at least one evaluation")
 	}
 
-	// Build protobuf request
 	req := &authorizationv1.AccessEvaluationBatchRequest{}
 
-	// Set defaults
 	if batchReq.DefaultSubject != nil {
 		req.Subject = batchReq.DefaultSubject.Proto()
 	}
@@ -215,10 +213,12 @@ func (c *Client) AccessEvaluations(ctx context.Context, batchReq *BatchEvaluatio
 		req.Evaluations[i] = e
 	}
 
-	// Note: Evaluation semantics (execute_all, deny_on_first_deny, permit_on_first_permit)
-	// are not currently supported in the protobuf definition but are part of the AuthZEN spec.
-	// This will be added when the protobuf is updated.
-	_ = batchReq.Semantics // Avoid unused variable warning
+	req.
+
+		// Note: Evaluation semantics (execute_all, deny_on_first_deny, permit_on_first_permit)
+		// are not currently supported in the protobuf definition but are part of the AuthZEN spec.
+		// This will be added when the protobuf is updated.
+		_ = batchReq.Semantics // Avoid unused variable warning
 
 	// Make HTTP request
 	resp := &authorizationv1.AccessEvaluationBatchResponse{}
