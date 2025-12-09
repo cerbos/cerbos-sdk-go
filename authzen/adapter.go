@@ -136,6 +136,7 @@ func (a *Adapter) convertBatchResults(result *AccessEvaluationBatchResult) (*cer
 		if err != nil {
 			return nil, fmt.Errorf("failed to extract Cerbos response from AuthZEN batch result: %w", err)
 		}
+		resp.RequestId = cerbosResp.RequestId
 		resp.Results[i] = cerbosResp.Results[0]
 	}
 

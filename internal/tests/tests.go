@@ -119,7 +119,7 @@ func TestClient[P cerbos.PrincipalContext, C cerbos.Client[C, P]](c cerbos.Clien
 			check := func(t *testing.T, have *cerbos.CheckResourcesResponse, err error) {
 				t.Helper()
 				require.NoError(t, err)
-				require.NotEmpty(t, have.GetRequestId())
+				require.NotEmpty(t, have.GetRequestId(), "requestId should not be empty")
 
 				haveXX125 := have.GetResource("XX125", cerbos.MatchResourceKind("leave_request"))
 				require.NoError(t, haveXX125.Err())
