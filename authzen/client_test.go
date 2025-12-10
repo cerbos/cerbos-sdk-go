@@ -163,3 +163,37 @@ func TestAdapter(t *testing.T) {
 		})
 	}
 }
+
+func TestGetMetadata(t *testing.T) {
+	launcher, err := testutil.NewCerbosServerLauncher()
+	require.NoError(t, err)
+
+	confDir := tests.PathToTestDataDir(t, "configs")
+	policyDir := tests.PathToTestDataDir(t, "policies")
+
+	s, err := launcher.Launch(testutil.LaunchConf{
+		ConfFilePath: filepath.Join(confDir, "tcp_without_tls.yaml"),
+		PolicyDir:    policyDir,
+	})
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = s.Stop() })
+
+	ctx, cancel := context.WithTimeout(context.Background(), readyTimeout)
+	defer cancel()
+	require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
+
+	httpURL := "http://" + s.HTTPAddr()
+	client, err := authzen.NewClient(httpURL)
+	require.NoError(t, err)
+
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	metadata, err := client.GetMetadata(ctx)
+	require.NoError(t, err)
+	require.NotNil(t, metadata)
+
+	require.Equal(t, httpURL, metadata.GetPolicyDecisionPoint())
+	require.Equal(t, httpURL+"/access/v1/evaluation", metadata.GetAccessEvaluationEndpoint())
+	require.Equal(t, httpURL+"/access/v1/evaluations", metadata.GetAccessEvaluationsEndpoint())
+}
