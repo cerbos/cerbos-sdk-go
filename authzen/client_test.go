@@ -220,6 +220,9 @@ func TestCheckResources(t *testing.T) {
 	client, err := authzen.NewClient(httpURL)
 	require.NoError(t, err)
 
+	// Generate JWT token for auxData
+	token := tests.GenerateToken(t, time.Now().Add(5*time.Minute))
+
 	// Create subject (principal)
 	subject := authzen.NewSubject("user", "john").
 		WithCerbosRoles("employee").
@@ -229,10 +232,17 @@ func TestCheckResources(t *testing.T) {
 		WithProperty("team", "design")
 
 	// Create batch evaluations - one entry per action
-	// Resource XX125: view:public (allow), approve (deny)
+	// Resource XX125: view:public (allow), defer (allow), approve (deny)
 	// Resource XX225: approve (deny)
 	batch := &authzen.BatchEvaluationRequest{
-		DefaultContext: authzen.NewContext().WithIncludeMeta(false),
+		DefaultContext: authzen.NewContext().
+			WithIncludeMeta(false).
+			WithAuxDataMap(map[string]any{
+				"jwt": map[string]any{
+					"token":    token,
+					"keySetId": "",
+				},
+			}),
 		Evaluations: []authzen.BatchEvaluation{
 			// XX125 - view:public
 			{
@@ -244,6 +254,17 @@ func TestCheckResources(t *testing.T) {
 					WithProperty("owner", "john").
 					WithProperty("team", "design"),
 				Action: authzen.NewAction("view:public"),
+			},
+			// XX125 - defer
+			{
+				Resource: authzen.NewResource("leave_request", "XX125").
+					WithCerbosPolicyVersion("20210210").
+					WithProperty("department", "marketing").
+					WithProperty("geography", "GB").
+					WithProperty("id", "XX125").
+					WithProperty("owner", "john").
+					WithProperty("team", "design"),
+				Action: authzen.NewAction("defer"),
 			},
 			// XX125 - approve
 			{
@@ -278,7 +299,7 @@ func TestCheckResources(t *testing.T) {
 	result, err := client.AccessEvaluations(ctx, batch)
 	require.NoError(t, err)
 	require.NotNil(t, result)
-	require.Equal(t, 3, result.Count())
+	require.Equal(t, 4, result.Count())
 
 	// Verify decisions by index
 	// Index 0: XX125 - view:public (should be allowed)
@@ -286,15 +307,20 @@ func TestCheckResources(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, eval0.IsAllowed(), "XX125 view:public should be allowed")
 
-	// Index 1: XX125 - approve (should be denied)
+	// Index 1: XX125 - defer (should be allowed)
 	eval1, err := result.GetEvaluation(1)
 	require.NoError(t, err)
-	require.False(t, eval1.IsAllowed(), "XX125 approve should be denied")
+	require.True(t, eval1.IsAllowed(), "XX125 defer should be allowed")
 
-	// Index 2: XX225 - approve (should be denied)
+	// Index 2: XX125 - approve (should be denied)
 	eval2, err := result.GetEvaluation(2)
 	require.NoError(t, err)
-	require.False(t, eval2.IsAllowed(), "XX225 approve should be denied")
+	require.False(t, eval2.IsAllowed(), "XX125 approve should be denied")
+
+	// Index 3: XX225 - approve (should be denied)
+	eval3, err := result.GetEvaluation(3)
+	require.NoError(t, err)
+	require.False(t, eval3.IsAllowed(), "XX225 approve should be denied")
 }
 
 func TestCheckResourcesScoped(t *testing.T) {
