@@ -255,12 +255,13 @@ func (c *Client) AccessEvaluations(ctx context.Context, batchReq *BatchEvaluatio
 }
 
 // GetMetadata retrieves the AuthZEN configuration metadata.
-func (c *Client) GetMetadata(ctx context.Context) (*MetadataResponse, error) {
-	var metadata MetadataResponse
-	if err := c.doRequest(ctx, http.MethodGet, metadataPath, nil, &metadata); err != nil {
+func (c *Client) GetMetadata(ctx context.Context) (*authorizationv1.MetadataResponse, error) {
+	req := authorizationv1.MetadataRequest{}
+	resp := authorizationv1.MetadataResponse{}
+	if err := c.doRequest(ctx, http.MethodGet, metadataPath, &req, &resp); err != nil {
 		return nil, err
 	}
-	return &metadata, nil
+	return &resp, nil
 }
 
 // doRequest performs an HTTP request and handles marshaling/unmarshaling.
@@ -345,11 +346,4 @@ func (c *Client) doRequest(ctx context.Context, method, path string, reqBody, re
 	}
 
 	return nil
-}
-
-// MetadataResponse represents the AuthZEN configuration metadata.
-type MetadataResponse struct {
-	PolicyDecisionPoint       string `json:"policy_decision_point"`       //nolint:tagliatelle // AuthZEN spec
-	AccessEvaluationEndpoint  string `json:"access_evaluation_endpoint"`  //nolint:tagliatelle // AuthZEN spec
-	AccessEvaluationsEndpoint string `json:"access_evaluations_endpoint"` //nolint:tagliatelle // AuthZEN spec
 }
