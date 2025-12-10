@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"io"
 	"maps"
@@ -264,25 +263,16 @@ func (c *Client) GetMetadata(ctx context.Context) (*authorizationv1.MetadataResp
 	return &resp, nil
 }
 
-// doRequest performs an HTTP request and handles marshaling/unmarshaling.
-func (c *Client) doRequest(ctx context.Context, method, path string, reqBody, respBody any) error {
+// doRequest performs an HTTP request and handles marshaling/unmarshaling of protobuf messages.
+func (c *Client) doRequest(ctx context.Context, method, path string, reqBody, respBody proto.Message) error {
 	url := c.baseURL + path
 	var bodyReader io.Reader
 	if reqBody != nil {
-		var jsonData []byte
-		var err error
-
-		switch v := reqBody.(type) {
-		case proto.Message:
-			marshaler := protojson.MarshalOptions{
-				UseProtoNames:   true,
-				EmitUnpopulated: false,
-			}
-			jsonData, err = marshaler.Marshal(v)
-		default:
-			jsonData, err = json.Marshal(v)
+		marshaler := protojson.MarshalOptions{
+			UseProtoNames:   true,
+			EmitUnpopulated: false,
 		}
-
+		jsonData, err := marshaler.Marshal(reqBody)
 		if err != nil {
 			return fmt.Errorf("failed to marshal request body: %w", err)
 		}
@@ -327,20 +317,10 @@ func (c *Client) doRequest(ctx context.Context, method, path string, reqBody, re
 
 	// Unmarshal response
 	if respBody != nil {
-		var err error
-		switch v := respBody.(type) {
-		case proto.Message:
-			// Use protojson for protobuf messages
-			unmarshaler := protojson.UnmarshalOptions{
-				DiscardUnknown: true,
-			}
-			err = unmarshaler.Unmarshal(body, v)
-		default:
-			// Use standard JSON for other types
-			err = json.Unmarshal(body, v)
+		unmarshaler := protojson.UnmarshalOptions{
+			DiscardUnknown: true,
 		}
-
-		if err != nil {
+		if err := unmarshaler.Unmarshal(body, respBody); err != nil {
 			return fmt.Errorf("failed to unmarshal response: %w", err)
 		}
 	}
