@@ -6,10 +6,12 @@ package authzen
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"maps"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -65,6 +67,31 @@ func WithHeaders(headers map[string]string) Opt {
 func WithUserAgent(userAgent string) Opt {
 	return func(c *Client) {
 		c.userAgent = userAgent
+	}
+}
+
+func WithUDS(socketPath string) Opt {
+	return func(c *Client) {
+		dialer := &net.Dialer{}
+		c.httpClient.Transport = &http.Transport{
+			DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
+				return dialer.DialContext(ctx, "unix", socketPath)
+			},
+		}
+	}
+}
+
+func WithInsecureUDS(socketPath string) Opt {
+	return func(c *Client) {
+		dialer := &net.Dialer{}
+		c.httpClient.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+			DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
+				return dialer.DialContext(ctx, "unix", socketPath)
+			},
+		}
 	}
 }
 
@@ -239,7 +266,6 @@ func (c *Client) GetMetadata(ctx context.Context) (*MetadataResponse, error) {
 // doRequest performs an HTTP request and handles marshaling/unmarshaling.
 func (c *Client) doRequest(ctx context.Context, method, path string, reqBody, respBody any) error {
 	url := c.baseURL + path
-
 	var bodyReader io.Reader
 	if reqBody != nil {
 		var jsonData []byte
