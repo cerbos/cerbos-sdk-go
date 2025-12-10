@@ -62,13 +62,26 @@ func (s *Subject) WithProperties(properties map[string]any) *Subject {
 	return s
 }
 
+func (r *Subject) WithPropertyValue(key string, value *structpb.Value) *Subject {
+	if r.Obj.Properties == nil {
+		r.Obj.Properties = make(map[string]*structpb.Value)
+	}
+
+	r.Obj.Properties[key] = value
+	return r
+}
+
+// WithCerbosRoles appends the set of roles to subject's existing roles.
 func (s *Subject) WithCerbosRoles(roles ...string) *Subject {
 	return s.WithProperty("cerbos.roles", roles)
 }
+
+// WithCerbosPolicyVersion sets the policy version for this principal.
 func (s *Subject) WithCerbosPolicyVersion(version string) *Subject {
 	return s.WithProperty("cerbos.policyVersion", version)
 }
 
+// WithCerbosScope sets the scope this subject belongs to.
 func (s *Subject) WithCerbosScope(scope string) *Subject {
 	return s.WithProperty("cerbos.scope", scope)
 }
@@ -127,33 +140,6 @@ func (r *Resource) WithProperty(key string, value any) *Resource {
 	return r
 }
 
-func (r *Resource) WithPropertyValue(key string, value *structpb.Value) *Resource {
-	if r.Obj.Properties == nil {
-		r.Obj.Properties = make(map[string]*structpb.Value)
-	}
-
-	r.Obj.Properties[key] = value
-	return r
-}
-
-func (r *Subject) WithPropertyValue(key string, value *structpb.Value) *Subject {
-	if r.Obj.Properties == nil {
-		r.Obj.Properties = make(map[string]*structpb.Value)
-	}
-
-	r.Obj.Properties[key] = value
-	return r
-}
-
-func (r *Context) WithPropertyValue(key string, value *structpb.Value) *Context {
-	if r.data == nil {
-		r.data = make(map[string]*structpb.Value)
-	}
-
-	r.data[key] = value
-	return r
-}
-
 func (r *Resource) WithProperties(properties map[string]any) *Resource {
 	if r.Obj.Properties == nil {
 		r.Obj.Properties = make(map[string]*structpb.Value, len(properties))
@@ -168,6 +154,15 @@ func (r *Resource) WithProperties(properties map[string]any) *Resource {
 		r.Obj.Properties[k] = pbVal
 	}
 
+	return r
+}
+
+func (r *Resource) WithPropertyValue(key string, value *structpb.Value) *Resource {
+	if r.Obj.Properties == nil {
+		r.Obj.Properties = make(map[string]*structpb.Value)
+	}
+
+	r.Obj.Properties[key] = value
 	return r
 }
 
@@ -289,6 +284,15 @@ func (c *Context) WithProperty(key string, value any) *Context {
 
 	c.data[key] = pbVal
 	return c
+}
+
+func (r *Context) WithPropertyValue(key string, value *structpb.Value) *Context {
+	if r.data == nil {
+		r.data = make(map[string]*structpb.Value)
+	}
+
+	r.data[key] = value
+	return r
 }
 
 func (c *Context) WithRequestID(id string) *Context {

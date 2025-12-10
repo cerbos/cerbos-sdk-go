@@ -41,27 +41,6 @@ func (r *AccessEvaluationResult) GetContextValue(key string) (*structpb.Value, b
 	return val, ok
 }
 
-func GetCerbosResponse(v *structpb.Value) (*responsev1.CheckResourcesResponse, error) {
-	// Convert structpb.Value to CheckResourcesResponse
-	structVal := v.GetStructValue()
-	if structVal == nil {
-		return nil, fmt.Errorf("cerbos.response is not a struct")
-	}
-
-	//TODO: replace marshalling with protobuf mapping
-	jsonBytes, err := protojson.Marshal(structVal)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal cerbos.response: %w", err)
-	}
-
-	var cerbosResp responsev1.CheckResourcesResponse
-	if err := protojson.Unmarshal(jsonBytes, &cerbosResp); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal cerbos.response: %w", err)
-	}
-
-	return &cerbosResp, nil
-}
-
 // GetCerbosResponse extracts the Cerbos CheckResources response if it was included.
 // This is available when the request context included "cerbos.includeMeta": true.
 func (r *AccessEvaluationResult) GetCerbosResponse() (*responsev1.CheckResourcesResponse, error) {
@@ -74,7 +53,19 @@ func (r *AccessEvaluationResult) GetCerbosResponse() (*responsev1.CheckResources
 		return nil, fmt.Errorf("cerbos.response not found in context")
 	}
 
-	return GetCerbosResponse(contextVal)
+	structVal := contextVal.GetStructValue()
+	if structVal == nil {
+		return nil, fmt.Errorf("cerbos.response is not a struct")
+	}
+	jsonBytes, err := protojson.Marshal(structVal)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal cerbos.response: %w", err)
+	}
+	var cerbosResp responsev1.CheckResourcesResponse
+	if err := protojson.Unmarshal(jsonBytes, &cerbosResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal cerbos.response: %w", err)
+	}
+	return &cerbosResp, nil
 }
 
 // String returns a JSON string representation of the response.
@@ -91,6 +82,12 @@ func (r *AccessEvaluationResult) MarshalJSON() ([]byte, error) {
 		return []byte("{}"), nil
 	}
 	return protojson.Marshal(r.AccessEvaluationResponse)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for AccessEvaluationResult.
+func (r *AccessEvaluationResult) UnmarshalJSON(data []byte) error {
+	r.AccessEvaluationResponse = &authorizationv1.AccessEvaluationResponse{}
+	return json.Unmarshal(data, r.AccessEvaluationResponse)
 }
 
 // AccessEvaluationBatchResult wraps an AuthZEN batch access evaluation response.
@@ -152,9 +149,6 @@ func (r *AccessEvaluationBatchResult) AnyAllowed() bool {
 
 // Count returns the number of evaluations in the batch response.
 func (r *AccessEvaluationBatchResult) Count() int {
-	if r == nil || r.AccessEvaluationBatchResponse == nil {
-		return 0
-	}
 	return len(r.GetEvaluations())
 }
 
@@ -205,12 +199,6 @@ func (r *AccessEvaluationBatchResult) MarshalJSON() ([]byte, error) {
 		return []byte("{}"), nil
 	}
 	return protojson.Marshal(r.AccessEvaluationBatchResponse)
-}
-
-// UnmarshalJSON implements json.Unmarshaler for AccessEvaluationResult.
-func (r *AccessEvaluationResult) UnmarshalJSON(data []byte) error {
-	r.AccessEvaluationResponse = &authorizationv1.AccessEvaluationResponse{}
-	return json.Unmarshal(data, r.AccessEvaluationResponse)
 }
 
 // UnmarshalJSON implements json.Unmarshaler for AccessEvaluationBatchResult.

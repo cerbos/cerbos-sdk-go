@@ -11,14 +11,6 @@ import (
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
 )
 
-// fromStructPB converts a structpb.Value to a Go value.
-func fromStructPB(v *structpb.Value) any {
-	if v == nil {
-		return nil
-	}
-	return v.AsInterface()
-}
-
 // FromCerbosPrincipal converts a Cerbos Principal to an AuthZEN Subject.
 // The mapping follows the AuthZEN specification:
 // - principal.id -> subject.id
