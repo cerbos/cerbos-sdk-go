@@ -48,12 +48,12 @@ func TestAdapter(t *testing.T) {
 			confFilePath: filepath.Join(confDir, "tcp_with_tls.yaml"),
 			opts:         []cerbos.Opt{cerbos.WithTLSInsecure(), cerbos.WithConnectTimeout(connectTimeout)},
 		},
-		// {
-		// 	name:         "without_tls",
-		// 	tls:          false,
-		// 	confFilePath: filepath.Join(confDir, "tcp_without_tls.yaml"),
-		// 	opts:         []cerbos.Opt{cerbos.WithPlaintext(), cerbos.WithConnectTimeout(connectTimeout)},
-		// },
+		{
+			name:         "without_tls",
+			tls:          false,
+			confFilePath: filepath.Join(confDir, "tcp_without_tls.yaml"),
+			opts:         []cerbos.Opt{cerbos.WithPlaintext(), cerbos.WithConnectTimeout(connectTimeout)},
+		},
 	}
 
 	for _, tc := range testCases {
@@ -149,7 +149,12 @@ func TestAdapter(t *testing.T) {
 					_, err := os.Stat(httpSocketPath)
 					return err == nil
 				}, 1*time.Minute, 100*time.Millisecond)
-				httpURL := "https://" + s.HTTPAddr()
+				var httpURL string
+				if tc.tls {
+					httpURL = "https://" + s.HTTPAddr()
+				} else {
+					httpURL = "http://" + s.HTTPAddr()
+				}
 				c, err := authzen.NewAdapter(httpURL, authzen.WithInsecureUDS(httpSocketPath))
 				require.NoError(t, err)
 
