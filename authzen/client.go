@@ -263,7 +263,6 @@ func (c *Client) GetMetadata(ctx context.Context) (*authorizationv1.MetadataResp
 	return &resp, nil
 }
 
-// doRequest performs an HTTP request and handles marshaling/unmarshaling of protobuf messages.
 func (c *Client) doRequest(ctx context.Context, method, path string, reqBody, respBody proto.Message) error {
 	url := c.baseURL + path
 	var bodyReader io.Reader
@@ -279,43 +278,36 @@ func (c *Client) doRequest(ctx context.Context, method, path string, reqBody, re
 		bodyReader = bytes.NewReader(jsonData)
 	}
 
-	// Create request
 	req, err := http.NewRequestWithContext(ctx, method, url, bodyReader)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
-	// Set headers
 	if bodyReader != nil {
 		req.Header.Set("Content-Type", contentTypeJSON)
 	}
 	req.Header.Set("Accept", contentTypeJSON)
 	req.Header.Set("User-Agent", c.userAgent)
 
-	// Add custom headers
 	for k, v := range c.headers {
 		req.Header.Set(k, v)
 	}
 
-	// Perform request
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("HTTP request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
-	// Read response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	// Check status code
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(body))
 	}
 
-	// Unmarshal response
 	if respBody != nil {
 		unmarshaler := protojson.UnmarshalOptions{
 			DiscardUnknown: true,
