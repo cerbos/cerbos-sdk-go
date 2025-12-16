@@ -29,89 +29,69 @@ import (
 
 var _ Client[*GRPCClient, PrincipalCtx] = (*GRPCClient)(nil)
 
-type config struct {
-	statsHandler        stats.Handler
-	address             string
-	tlsAuthority        string
-	tlsCACert           string
-	tlsClientCert       string
-	tlsClientKey        string
-	userAgent           string
-	playgroundInstance  string
-	streamInterceptors  []grpc.StreamClientInterceptor
-	unaryInterceptors   []grpc.UnaryClientInterceptor
-	connectTimeout      time.Duration
-	retryTimeout        time.Duration
-	maxRetries          uint
-	plaintext           bool
-	tlsInsecure         bool
-	maxRecvMsgSizeBytes uint
-	maxSendMsgSizeBytes uint
-}
-
-type Opt func(*config)
+type Opt func(*internal.Config)
 
 // WithPlaintext configures the client to connect over h2c.
 func WithPlaintext() Opt {
-	return func(c *config) {
-		c.plaintext = true
+	return func(c *internal.Config) {
+		c.Plaintext = true
 	}
 }
 
 // WithTLSAuthority overrides the remote server authority if it is different from what is provided in the address.
 func WithTLSAuthority(authority string) Opt {
-	return func(c *config) {
-		c.tlsAuthority = authority
+	return func(c *internal.Config) {
+		c.TLSAuthority = authority
 	}
 }
 
 // WithTLSInsecure enables skipping TLS certificate verification.
 func WithTLSInsecure() Opt {
-	return func(c *config) {
-		c.tlsInsecure = true
+	return func(c *internal.Config) {
+		c.TLSInsecure = true
 	}
 }
 
 // WithTLSCACert sets the CA certificate chain to use for certificate verification.
 func WithTLSCACert(certPath string) Opt {
-	return func(c *config) {
-		c.tlsCACert = certPath
+	return func(c *internal.Config) {
+		c.TLSCACert = certPath
 	}
 }
 
 // WithTLSClientCert sets the client certificate to use to authenticate to the server.
 func WithTLSClientCert(cert, key string) Opt {
-	return func(c *config) {
-		c.tlsClientCert = cert
-		c.tlsClientKey = key
+	return func(c *internal.Config) {
+		c.TLSClientCert = cert
+		c.TLSClientKey = key
 	}
 }
 
 // WithConnectTimeout sets the connection establishment timeout.
 func WithConnectTimeout(timeout time.Duration) Opt {
-	return func(c *config) {
-		c.connectTimeout = timeout
+	return func(c *internal.Config) {
+		c.ConnectTimeout = timeout
 	}
 }
 
 // WithMaxRetries sets the maximum number of retries per call.
 func WithMaxRetries(retries uint) Opt {
-	return func(c *config) {
-		c.maxRetries = retries
+	return func(c *internal.Config) {
+		c.MaxRetries = retries
 	}
 }
 
 // WithRetryTimeout sets the timeout per retry attempt.
 func WithRetryTimeout(timeout time.Duration) Opt {
-	return func(c *config) {
-		c.retryTimeout = timeout
+	return func(c *internal.Config) {
+		c.RetryTimeout = timeout
 	}
 }
 
 // WithUserAgent sets the user agent string.
 func WithUserAgent(ua string) Opt {
-	return func(c *config) {
-		c.userAgent = ua
+	return func(c *internal.Config) {
+		c.UserAgent = ua
 	}
 }
 
@@ -119,43 +99,43 @@ func WithUserAgent(ua string) Opt {
 // Note that Playground instances are for demonstration purposes only and do not provide any
 // performance or availability guarantees.
 func WithPlaygroundInstance(instance string) Opt {
-	return func(c *config) {
-		c.playgroundInstance = instance
+	return func(c *internal.Config) {
+		c.PlaygroundInstance = instance
 	}
 }
 
 // WithStreamInterceptors sets the interceptors to be used for streaming gRPC operations.
 func WithStreamInterceptors(interceptors ...grpc.StreamClientInterceptor) Opt {
-	return func(c *config) {
-		c.streamInterceptors = interceptors
+	return func(c *internal.Config) {
+		c.StreamInterceptors = interceptors
 	}
 }
 
 // WithUnaryInterceptors sets the interceptors to be used for unary gRPC operations.
 func WithUnaryInterceptors(interceptors ...grpc.UnaryClientInterceptor) Opt {
-	return func(c *config) {
-		c.unaryInterceptors = interceptors
+	return func(c *internal.Config) {
+		c.UnaryInterceptors = interceptors
 	}
 }
 
 // WithStatsHandler sets the gRPC stats handler for the connection.
 func WithStatsHandler(handler stats.Handler) Opt {
-	return func(c *config) {
-		c.statsHandler = handler
+	return func(c *internal.Config) {
+		c.StatsHandler = handler
 	}
 }
 
 // WithMaxRecvMsgSizeBytes sets the maximum size of a single response payload that can be received from the server.
 func WithMaxRecvMsgSizeBytes(size uint) Opt {
-	return func(c *config) {
-		c.maxRecvMsgSizeBytes = size
+	return func(c *internal.Config) {
+		c.MaxRecvMsgSizeBytes = size
 	}
 }
 
 // WithMaxSendMsgSizeBytes sets the maximum size of a single request payload that can be sent to the server.
 func WithMaxSendMsgSizeBytes(size uint) Opt {
-	return func(c *config) {
-		c.maxSendMsgSizeBytes = size
+	return func(c *internal.Config) {
+		c.MaxSendMsgSizeBytes = size
 	}
 }
 
@@ -169,13 +149,13 @@ func New(address string, opts ...Opt) (*GRPCClient, error) {
 	return &GRPCClient{stub: svcv1.NewCerbosServiceClient(grpcConn)}, nil
 }
 
-func mkConn(address string, opts ...Opt) (*grpc.ClientConn, *config, error) {
-	conf := &config{
-		address:        address,
-		connectTimeout: 30 * time.Second, //nolint:mnd
-		maxRetries:     3,                //nolint:mnd
-		retryTimeout:   2 * time.Second,  //nolint:mnd
-		userAgent:      internal.UserAgent("grpc"),
+func mkConn(address string, opts ...Opt) (*grpc.ClientConn, *internal.Config, error) {
+	conf := &internal.Config{
+		Address:        address,
+		ConnectTimeout: 30 * time.Second, //nolint:mnd
+		MaxRetries:     3,                //nolint:mnd
+		RetryTimeout:   2 * time.Second,  //nolint:mnd
+		UserAgent:      internal.UserAgent("grpc"),
 	}
 
 	for _, o := range opts {
@@ -187,7 +167,7 @@ func mkConn(address string, opts ...Opt) (*grpc.ClientConn, *config, error) {
 		return nil, nil, err
 	}
 
-	grpcConn, err := grpc.NewClient(conf.address, dialOpts...)
+	grpcConn, err := grpc.NewClient(conf.Address, dialOpts...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to dial gRPC: %w", err)
 	}
@@ -195,26 +175,26 @@ func mkConn(address string, opts ...Opt) (*grpc.ClientConn, *config, error) {
 	return grpcConn, conf, nil
 }
 
-func mkDialOpts(conf *config) ([]grpc.DialOption, error) {
-	dialOpts := []grpc.DialOption{grpc.WithUserAgent(conf.userAgent)}
+func mkDialOpts(conf *internal.Config) ([]grpc.DialOption, error) {
+	dialOpts := []grpc.DialOption{grpc.WithUserAgent(conf.UserAgent)}
 
-	if conf.statsHandler != nil {
-		dialOpts = append(dialOpts, grpc.WithStatsHandler(conf.statsHandler))
+	if conf.StatsHandler != nil {
+		dialOpts = append(dialOpts, grpc.WithStatsHandler(conf.StatsHandler))
 	}
 
-	if conf.connectTimeout > 0 {
-		dialOpts = append(dialOpts, grpc.WithConnectParams(grpc.ConnectParams{MinConnectTimeout: conf.connectTimeout}))
+	if conf.ConnectTimeout > 0 {
+		dialOpts = append(dialOpts, grpc.WithConnectParams(grpc.ConnectParams{MinConnectTimeout: conf.ConnectTimeout}))
 	}
 
-	streamInterceptors := conf.streamInterceptors
-	unaryInterceptors := conf.unaryInterceptors
+	streamInterceptors := conf.StreamInterceptors
+	unaryInterceptors := conf.UnaryInterceptors
 
-	if conf.maxRetries > 0 && conf.retryTimeout > 0 {
+	if conf.MaxRetries > 0 && conf.RetryTimeout > 0 {
 		streamInterceptors = append(
 			[]grpc.StreamClientInterceptor{
 				grpc_retry.StreamClientInterceptor(
-					grpc_retry.WithMax(conf.maxRetries),
-					grpc_retry.WithPerRetryTimeout(conf.retryTimeout),
+					grpc_retry.WithMax(conf.MaxRetries),
+					grpc_retry.WithPerRetryTimeout(conf.RetryTimeout),
 				),
 			},
 			streamInterceptors...,
@@ -223,8 +203,8 @@ func mkDialOpts(conf *config) ([]grpc.DialOption, error) {
 		unaryInterceptors = append(
 			[]grpc.UnaryClientInterceptor{
 				grpc_retry.UnaryClientInterceptor(
-					grpc_retry.WithMax(conf.maxRetries),
-					grpc_retry.WithPerRetryTimeout(conf.retryTimeout),
+					grpc_retry.WithMax(conf.MaxRetries),
+					grpc_retry.WithPerRetryTimeout(conf.RetryTimeout),
 				),
 			},
 			unaryInterceptors...,
@@ -239,7 +219,7 @@ func mkDialOpts(conf *config) ([]grpc.DialOption, error) {
 		dialOpts = append(dialOpts, grpc.WithChainUnaryInterceptor(unaryInterceptors...))
 	}
 
-	if conf.plaintext {
+	if conf.Plaintext {
 		dialOpts = append(dialOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	} else {
 		tlsConf, err := mkTLSConfig(conf)
@@ -248,22 +228,22 @@ func mkDialOpts(conf *config) ([]grpc.DialOption, error) {
 		}
 
 		dialOpts = append(dialOpts, grpc.WithTransportCredentials(credentials.NewTLS(tlsConf)))
-		if conf.tlsAuthority != "" {
-			dialOpts = append(dialOpts, grpc.WithAuthority(conf.tlsAuthority))
+		if conf.TLSAuthority != "" {
+			dialOpts = append(dialOpts, grpc.WithAuthority(conf.TLSAuthority))
 		}
 	}
 
-	if conf.playgroundInstance != "" {
-		dialOpts = append(dialOpts, grpc.WithPerRPCCredentials(newPlaygroundInstanceCredentials(conf.playgroundInstance)))
+	if conf.PlaygroundInstance != "" {
+		dialOpts = append(dialOpts, grpc.WithPerRPCCredentials(newPlaygroundInstanceCredentials(conf.PlaygroundInstance)))
 	}
 
 	defaultCallOptions := []grpc.CallOption{grpc.UseCompressor(gzip.Name)}
-	if conf.maxRecvMsgSizeBytes > 0 {
-		defaultCallOptions = append(defaultCallOptions, grpc.MaxCallRecvMsgSize(int(conf.maxRecvMsgSizeBytes))) //nolint:gosec
+	if conf.MaxRecvMsgSizeBytes > 0 {
+		defaultCallOptions = append(defaultCallOptions, grpc.MaxCallRecvMsgSize(int(conf.MaxRecvMsgSizeBytes))) //nolint:gosec
 	}
 
-	if conf.maxSendMsgSizeBytes > 0 {
-		defaultCallOptions = append(defaultCallOptions, grpc.MaxCallSendMsgSize(int(conf.maxSendMsgSizeBytes))) //nolint:gosec
+	if conf.MaxSendMsgSizeBytes > 0 {
+		defaultCallOptions = append(defaultCallOptions, grpc.MaxCallSendMsgSize(int(conf.MaxSendMsgSizeBytes))) //nolint:gosec
 	}
 
 	dialOpts = append(dialOpts, grpc.WithDefaultCallOptions(defaultCallOptions...))
@@ -271,17 +251,17 @@ func mkDialOpts(conf *config) ([]grpc.DialOption, error) {
 	return dialOpts, nil
 }
 
-func mkTLSConfig(conf *config) (*tls.Config, error) {
+func mkTLSConfig(conf *internal.Config) (*tls.Config, error) {
 	tlsConf := internal.DefaultTLSConfig()
 
-	if conf.tlsInsecure {
+	if conf.TLSInsecure {
 		tlsConf.InsecureSkipVerify = true
 	}
 
-	if conf.tlsCACert != "" {
-		bs, err := os.ReadFile(conf.tlsCACert)
+	if conf.TLSCACert != "" {
+		bs, err := os.ReadFile(conf.TLSCACert)
 		if err != nil {
-			return nil, fmt.Errorf("failed to load CA certificate from %s: %w", conf.tlsCACert, err)
+			return nil, fmt.Errorf("failed to load CA certificate from %s: %w", conf.TLSCACert, err)
 		}
 
 		certPool := x509.NewCertPool()
@@ -293,10 +273,10 @@ func mkTLSConfig(conf *config) (*tls.Config, error) {
 		tlsConf.RootCAs = certPool
 	}
 
-	if conf.tlsClientCert != "" && conf.tlsClientKey != "" {
-		certificate, err := tls.LoadX509KeyPair(conf.tlsClientCert, conf.tlsClientKey)
+	if conf.TLSClientCert != "" && conf.TLSClientKey != "" {
+		certificate, err := tls.LoadX509KeyPair(conf.TLSClientCert, conf.TLSClientKey)
 		if err != nil {
-			return nil, fmt.Errorf("failed to load client certificate and key from [%s, %s]: %w", conf.tlsClientCert, conf.tlsClientKey, err)
+			return nil, fmt.Errorf("failed to load client certificate and key from [%s, %s]: %w", conf.TLSClientCert, conf.TLSClientKey, err)
 		}
 		tlsConf.Certificates = []tls.Certificate{certificate}
 	}

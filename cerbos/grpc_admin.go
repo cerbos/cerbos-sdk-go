@@ -54,7 +54,7 @@ func NewAdminClientWithCredentials(address, username, password string, opts ...O
 	}
 
 	basicAuth := newBasicAuthCredentials(user, pass)
-	if conf.plaintext {
+	if conf.Plaintext {
 		basicAuth = basicAuth.Insecure()
 	}
 

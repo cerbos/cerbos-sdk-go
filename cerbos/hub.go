@@ -13,12 +13,14 @@ import (
 	"github.com/cerbos/cloud-api/credentials"
 	"github.com/cerbos/cloud-api/hub"
 	"github.com/cerbos/cloud-api/store"
+
+	"github.com/cerbos/cerbos-sdk-go/internal"
 )
 
 var errMissingCredentials = errors.New("missing credentials: either set the CERBOS_HUB_CLIENT_ID and CERBOS_HUB_CLIENT_SECRET environment variables or use the WithCredentials option when creating the client")
 
 type hubConfig struct {
-	advancedConf *config
+	advancedConf *internal.Config
 	credentials  hubCredentials
 	apiEndpoint  string
 }
@@ -48,7 +50,7 @@ func WithHubCredentials(clientID, clientSecret string) HubOpt {
 // WithAdvancedOptions is only used for internal testing purposes. Don't use in production.
 func WithAdvancedOptions(opts ...Opt) HubOpt {
 	return func(hubConf *hubConfig) {
-		hubConf.advancedConf = &config{}
+		hubConf.advancedConf = &internal.Config{}
 		for _, o := range opts {
 			o(hubConf.advancedConf)
 		}
