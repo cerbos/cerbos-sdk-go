@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	_ cerbos.Client[*Adapter, *PrincipalCtx] = (*Adapter)(nil)
+	_ cerbos.Client[*Adapter, *PrincipalCtxAdapter] = (*Adapter)(nil)
 
 	// ErrNotImplemented is returned when a method is not supported by the AuthZEN adapter.
 	ErrNotImplemented = errors.New("not implemented")
@@ -27,8 +27,8 @@ type Adapter struct {
 	opts   *internal.ReqOpt
 }
 
-// PrincipalCtx provides a principal-scoped context for the adapter.
-type PrincipalCtx struct {
+// PrincipalCtxAdapter provides a principal-scoped context for the adapter.
+type PrincipalCtxAdapter struct {
 	adapter   *Adapter
 	principal *cerbos.Principal
 }
@@ -167,29 +167,29 @@ func (a *Adapter) PlanResources(ctx context.Context, principal *cerbos.Principal
 }
 
 // WithPrincipal creates a principal-scoped context.
-func (a *Adapter) WithPrincipal(principal *cerbos.Principal) *PrincipalCtx {
-	return &PrincipalCtx{
+func (a *Adapter) WithPrincipal(principal *cerbos.Principal) *PrincipalCtxAdapter {
+	return &PrincipalCtxAdapter{
 		adapter:   a,
 		principal: principal,
 	}
 }
 
 // Principal returns the principal attached to this context.
-func (pc *PrincipalCtx) Principal() *cerbos.Principal {
+func (pc *PrincipalCtxAdapter) Principal() *cerbos.Principal {
 	return pc.principal
 }
 
 // IsAllowed checks if the principal is allowed to perform an action on a resource.
-func (pc *PrincipalCtx) IsAllowed(ctx context.Context, resource *cerbos.Resource, action string) (bool, error) {
+func (pc *PrincipalCtxAdapter) IsAllowed(ctx context.Context, resource *cerbos.Resource, action string) (bool, error) {
 	return pc.adapter.IsAllowed(ctx, pc.principal, resource, action)
 }
 
 // CheckResources checks access to a batch of resources for the principal.
-func (pc *PrincipalCtx) CheckResources(ctx context.Context, resources *cerbos.ResourceBatch) (*cerbos.CheckResourcesResponse, error) {
+func (pc *PrincipalCtxAdapter) CheckResources(ctx context.Context, resources *cerbos.ResourceBatch) (*cerbos.CheckResourcesResponse, error) {
 	return pc.adapter.CheckResources(ctx, pc.principal, resources)
 }
 
 // PlanResources is not supported by the AuthZEN adapter.
-func (pc *PrincipalCtx) PlanResources(ctx context.Context, resource *cerbos.Resource, actions ...string) (*cerbos.PlanResourcesResponse, error) {
+func (pc *PrincipalCtxAdapter) PlanResources(ctx context.Context, resource *cerbos.Resource, actions ...string) (*cerbos.PlanResourcesResponse, error) {
 	return pc.adapter.PlanResources(ctx, pc.principal, resource, actions...)
 }

@@ -16,9 +16,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cerbos/cerbos-sdk-go/cerbos"
+	"github.com/cerbos/cerbos-sdk-go/internal"
 	authorizationv1 "github.com/cerbos/cerbos/api/genpb/authzen/authorization/v1"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 const (
@@ -36,6 +39,7 @@ type Client struct {
 	httpClient *http.Client
 	headers    map[string]string
 	userAgent  string
+	opts       *internal.ReqOpt
 }
 
 // Opt is a functional option for configuring the Client.
@@ -114,6 +118,24 @@ func WithUDS(socketPath string) Opt {
 	}
 }
 
+func mergeWithReqOpts(ctx context.Context, evalContext *Context, opts *internal.ReqOpt) map[string]*structpb.Value {
+	evalContext.Data()
+	if opts == nil {
+		return evalContext.Data()
+	}
+	if evalContext == nil {
+		evalContext = NewContext().
+			WithIncludeMeta(opts.IncludeMeta)
+	}
+	if opts.AuxData != nil {
+		evalContext = evalContext.WithAuxData(opts.AuxData)
+	}
+	if opts.RequestIDGenerator != nil {
+		evalContext = evalContext.WithRequestID(opts.RequestIDGenerator(ctx))
+	}
+	return evalContext.Data()
+}
+
 // NewClient creates a new AuthZEN HTTP client.
 // The baseURL should be the full URL to the Cerbos server (e.g., "https://pdp.example.com:3592").
 func NewClient(baseURL string, opts ...Opt) (*Client, error) {
@@ -145,6 +167,15 @@ func NewClient(baseURL string, opts ...Opt) (*Client, error) {
 	return client, nil
 }
 
+// IsAllowed checks if a subject is allowed to perform an action on a resource.
+func (c *Client) IsAllowed(ctx context.Context, subj *Subject, resource *Resource, action string, evalContext *Context) (bool, error) {
+	eval, err := c.AccessEvaluation(ctx, subj, resource, NewAction(action), evalContext)
+	if err != nil {
+		return false, err
+	}
+	return *eval.Decision, nil
+}
+
 // AccessEvaluation evaluates whether a subject can perform a single action on a single resource.
 // Returns the decision and optionally the full response context.
 func (c *Client) AccessEvaluation(ctx context.Context, subject *Subject, resource *Resource, action *Action, evalContext *Context) (*AccessEvaluationResult, error) {
@@ -163,10 +194,7 @@ func (c *Client) AccessEvaluation(ctx context.Context, subject *Subject, resourc
 		Subject:  subject.Proto(),
 		Resource: resource.Proto(),
 		Action:   action.Proto(),
-	}
-
-	if evalContext != nil {
-		req.Context = evalContext.Data()
+		Context:  mergeWithReqOpts(ctx, evalContext, c.opts),
 	}
 
 	// Make HTTP request
@@ -232,9 +260,8 @@ func (c *Client) AccessEvaluations(ctx context.Context, batchReq *BatchEvaluatio
 	if batchReq.DefaultAction != nil {
 		req.Action = batchReq.DefaultAction.Proto()
 	}
-	if batchReq.DefaultContext != nil {
-		req.Context = batchReq.DefaultContext.Data()
-	}
+	req.Context = mergeWithReqOpts(ctx, batchReq.DefaultContext, c.opts)
+
 	if batchReq.Semantics != "" {
 		req.Options = &authorizationv1.AccessEvaluationsOptions{
 			EvaluationsSemantic: string(batchReq.Semantics),
@@ -269,6 +296,15 @@ func (c *Client) AccessEvaluations(ctx context.Context, batchReq *BatchEvaluatio
 	return &AccessEvaluationBatchResult{
 		AccessEvaluationBatchResponse: resp,
 	}, nil
+}
+
+func (c *Client) With(reqOpts ...cerbos.RequestOpt) *Client {
+	opts := &internal.ReqOpt{}
+	for _, ro := range reqOpts {
+		ro(opts)
+	}
+	c.opts = opts
+	return c
 }
 
 // GetMetadata retrieves the AuthZEN configuration metadata.
@@ -339,4 +375,30 @@ func (c *Client) doRequest(ctx context.Context, method, path string, reqBody, re
 	}
 
 	return nil
+}
+
+type SubjectCtx struct {
+	client *Client
+	subj   *Subject
+	ctx    *Context
+}
+
+// WithSubject creates a subject-scoped context.
+func (c *Client) WithSubject(subj *Subject) *SubjectCtx {
+	return &SubjectCtx{client: c, subj: subj}
+}
+
+// Subject returns the subject attached to this context.
+func (sc *SubjectCtx) Subject() *Subject {
+	return sc.subj
+}
+
+// WithEvalContext add AuthZEN evaluation context to the subject-scoped context.
+func (sc *SubjectCtx) WithEvalContext(ctx *Context) {
+	sc.ctx = ctx
+}
+
+// IsAllowed checks if the subject is allowed to perform an action on a resource.
+func (sc *SubjectCtx) IsAllowed(ctx context.Context, resource *Resource, action string) (bool, error) {
+	return sc.client.IsAllowed(ctx, sc.subj, resource, action, sc.ctx)
 }

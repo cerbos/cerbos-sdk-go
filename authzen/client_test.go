@@ -74,7 +74,7 @@ func TestAdapter(t *testing.T) {
 				c, err := authzen.NewAdapter(httpURL, tc.opts...)
 				require.NoError(t, err)
 
-				t.Run("http", tests.TestClient[*authzen.PrincipalCtx, *authzen.Adapter](c))
+				t.Run("http", tests.TestClient[*authzen.PrincipalCtxAdapter, *authzen.Adapter](c))
 			})
 
 			t.Run("uds", func(t *testing.T) {
@@ -116,7 +116,7 @@ func TestAdapter(t *testing.T) {
 				c, err := authzen.NewAdapter(httpURL, authzen.WithUDS(httpSocketPath), authzen.WithTLSInsecure())
 				require.NoError(t, err)
 
-				t.Run("http", tests.TestClient[*authzen.PrincipalCtx, *authzen.Adapter](c))
+				t.Run("http", tests.TestClient[*authzen.PrincipalCtxAdapter, *authzen.Adapter](c))
 			})
 		})
 	}
@@ -156,7 +156,11 @@ func TestGetMetadata(t *testing.T) {
 	require.Equal(t, httpURL+"/access/v1/evaluations", metadata.GetAccessEvaluationsEndpoint())
 }
 
-func TestCheckResources(t *testing.T) {
+func TestIsAllowed(t *testing.T) {
+
+}
+
+func TestAccessEvaluation(t *testing.T) {
 	launcher, err := testutil.NewCerbosServerLauncher()
 	require.NoError(t, err)
 
@@ -286,7 +290,7 @@ func TestCheckResources(t *testing.T) {
 	require.False(t, eval3.IsAllowed(), "XX225 approve should be denied")
 }
 
-func TestCheckResourcesScoped(t *testing.T) {
+func TestAccessEvaluationsScoped(t *testing.T) {
 	launcher, err := testutil.NewCerbosServerLauncher()
 	require.NoError(t, err)
 

@@ -320,6 +320,9 @@ func (c *Context) WithIncludeMeta(include bool) *Context {
 }
 
 func (c *Context) Data() map[string]*structpb.Value {
+	if c == nil {
+		return nil
+	}
 	return c.data
 }
 
