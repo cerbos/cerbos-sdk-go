@@ -35,11 +35,11 @@ const (
 
 // Client provides access to the AuthZEN Authorization API over HTTP.
 type Client struct {
-	baseURL    string
 	httpClient *http.Client
 	headers    map[string]string
-	userAgent  string
 	opts       *internal.ReqOpt
+	baseURL    string
+	userAgent  string
 }
 
 // Opt is a functional option for configuring the Client.
@@ -89,7 +89,7 @@ func WithTLSConfig(tlsConf *tls.Config) Opt {
 func WithTLSInsecure() Opt {
 	return func(c *Client) {
 		tlsConf := tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: true, //nolint:gosec
 		}
 		if t, _ := c.httpClient.Transport.(*http.Transport); t == nil {
 			c.httpClient.Transport = &http.Transport{
@@ -101,7 +101,7 @@ func WithTLSInsecure() Opt {
 	}
 }
 
-// WithUDS configures the client to connect over Unix Domain Socket
+// WithUDS configures the client to connect over Unix Domain Socket.
 func WithUDS(socketPath string) Opt {
 	return func(c *Client) {
 		dialer := &net.Dialer{}

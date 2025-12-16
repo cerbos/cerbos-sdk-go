@@ -132,7 +132,7 @@ func (a *Adapter) CheckResources(ctx context.Context, principal *cerbos.Principa
 
 // ServerInfo retrieves server information.
 // Note: AuthZEN doesn't have a direct equivalent, so we return minimal information.
-func (a *Adapter) ServerInfo(ctx context.Context) (*cerbos.ServerInfo, error) {
+func (a *Adapter) ServerInfo(_ context.Context) (*cerbos.ServerInfo, error) {
 	return &cerbos.ServerInfo{
 		ServerInfoResponse: &responsev1.ServerInfoResponse{
 			Version:   "authzen", // AuthZEN doesn't provide version info
@@ -162,7 +162,7 @@ func (a *Adapter) With(opts ...cerbos.RequestOpt) *Adapter {
 // PlanResources is not supported by the AuthZEN adapter.
 // AuthZEN focuses on access evaluation rather than query planning.
 // Returns ErrNotImplemented which tests can check for using errors.Is().
-func (a *Adapter) PlanResources(ctx context.Context, principal *cerbos.Principal, resource *cerbos.Resource, actions ...string) (*cerbos.PlanResourcesResponse, error) {
+func (a *Adapter) PlanResources(_ context.Context, _ *cerbos.Principal, _ *cerbos.Resource, _ ...string) (*cerbos.PlanResourcesResponse, error) {
 	return nil, fmt.Errorf("PlanResources: %w", ErrNotImplemented)
 }
 

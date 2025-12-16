@@ -62,13 +62,13 @@ func (s *Subject) WithProperties(properties map[string]any) *Subject {
 	return s
 }
 
-func (r *Subject) WithPropertyValue(key string, value *structpb.Value) *Subject {
-	if r.Obj.Properties == nil {
-		r.Obj.Properties = make(map[string]*structpb.Value)
+func (s *Subject) WithPropertyValue(key string, value *structpb.Value) *Subject {
+	if s.Obj.Properties == nil {
+		s.Obj.Properties = make(map[string]*structpb.Value)
 	}
 
-	r.Obj.Properties[key] = value
-	return r
+	s.Obj.Properties[key] = value
+	return s
 }
 
 // WithCerbosRoles appends the set of roles to subject's existing roles.
@@ -286,18 +286,19 @@ func (c *Context) WithProperty(key string, value any) *Context {
 	return c
 }
 
-func (r *Context) WithPropertyValue(key string, value *structpb.Value) *Context {
-	if r.data == nil {
-		r.data = make(map[string]*structpb.Value)
+func (c *Context) WithPropertyValue(key string, value *structpb.Value) *Context {
+	if c.data == nil {
+		c.data = make(map[string]*structpb.Value)
 	}
 
-	r.data[key] = value
-	return r
+	c.data[key] = value
+	return c
 }
 
 func (c *Context) WithRequestID(id string) *Context {
 	return c.WithProperty("cerbos.requestId", id)
 }
+
 func (c *Context) WithAuxData(auxData *requestv1.AuxData) *Context {
 	if auxData == nil {
 		return c
@@ -311,6 +312,7 @@ func (c *Context) WithAuxData(auxData *requestv1.AuxData) *Context {
 	}
 	return c.WithAuxDataMap(auxDataMap)
 }
+
 func (c *Context) WithAuxDataMap(auxData map[string]any) *Context {
 	return c.WithProperty("cerbos.auxData", auxData)
 }
