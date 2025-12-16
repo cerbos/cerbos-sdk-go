@@ -92,7 +92,7 @@ func NewHubClient(opts ...HubOpt) (*HubClient, error) {
 	baseConf.SetDefaults()
 
 	if hubConf.advancedConf != nil {
-		baseConf.TLS, err = mkTLSConfig(hubConf.advancedConf)
+		baseConf.TLS, err = internal.MkTLSConfig(hubConf.advancedConf)
 		if err != nil {
 			return nil, fmt.Errorf("failed to build TLS config: %w", err)
 		}

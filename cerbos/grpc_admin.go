@@ -48,7 +48,12 @@ func NewAdminClientWithCredentials(address, username, password string, opts ...O
 		return nil, err
 	}
 
-	grpcConn, conf, err := mkConn(target, opts...)
+	conf := internal.NewConfig(target)
+
+	for _, o := range opts {
+		o(conf)
+	}
+	grpcConn, err := internal.MkConn(conf)
 	if err != nil {
 		return nil, err
 	}
