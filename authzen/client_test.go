@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/cerbos/cerbos-sdk-go/authzen"
+	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	"github.com/cerbos/cerbos-sdk-go/internal/tests"
 	"github.com/cerbos/cerbos-sdk-go/testutil"
 )
@@ -157,7 +158,54 @@ func TestGetMetadata(t *testing.T) {
 }
 
 func TestIsAllowed(t *testing.T) {
+	launcher, err := testutil.NewCerbosServerLauncher()
+	require.NoError(t, err)
 
+	certsDir := tests.PathToTestDataDir(t, "certs")
+	confDir := tests.PathToTestDataDir(t, "configs")
+	policyDir := tests.PathToTestDataDir(t, "policies")
+
+	s, err := launcher.Launch(testutil.LaunchConf{
+		ConfFilePath: filepath.Join(confDir, "tcp_without_tls.yaml"),
+		PolicyDir:    policyDir,
+		AdditionalMounts: []string{
+			fmt.Sprintf("%s:/certs", certsDir),
+		},
+	})
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = s.Stop() })
+
+	ctx, cancel := context.WithTimeout(context.Background(), readyTimeout)
+	defer cancel()
+	require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
+
+	httpURL := "http://" + s.HTTPAddr()
+	client, err := authzen.NewClient(httpURL, authzen.WithTLSInsecure())
+	require.NoError(t, err)
+
+	// Generate JWT token for auxData
+	token := tests.GenerateToken(t, time.Now().Add(5*time.Minute))
+
+	subjCtx := client.
+		With(cerbos.AuxDataJWT(token, "")).
+		WithSubject(authzen.NewSubject("user", "john").
+			WithCerbosRoles("employee").
+			WithCerbosPolicyVersion("20210210").
+			WithProperty("department", "marketing").
+			WithProperty("geography", "GB").
+			WithProperty("team", "design"))
+
+	decision, err := subjCtx.IsAllowed(context.Background(), authzen.NewResource("leave_request", "XX125").
+		WithCerbosPolicyVersion("20210210").
+		WithProperty("department", "marketing").
+		WithProperty("geography", "GB").
+		WithProperty("id", "XX125").
+		WithProperty("owner", "john").
+		WithProperty("team", "design"),
+		"defer",
+	)
+	require.NoError(t, err)
+	require.True(t, decision)
 }
 
 func TestAccessEvaluation(t *testing.T) {
