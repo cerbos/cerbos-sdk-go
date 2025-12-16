@@ -7,9 +7,7 @@ package authzen_test
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
@@ -18,13 +16,12 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/cerbos/cerbos-sdk-go/authzen"
-	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	"github.com/cerbos/cerbos-sdk-go/internal/tests"
 	"github.com/cerbos/cerbos-sdk-go/testutil"
 )
 
 const (
-	connectTimeout = 1 * time.Second
+	requestTimeout = 30 * time.Second
 	readyTimeout   = 5 * time.Second
 )
 
@@ -38,21 +35,21 @@ func TestAdapter(t *testing.T) {
 
 	testCases := []struct {
 		name         string
-		tls          bool
+		urlSchema    string
 		confFilePath string
-		opts         []cerbos.Opt
+		opts         []authzen.Opt
 	}{
 		{
 			name:         "with_tls",
-			tls:          true,
+			urlSchema:    "https",
 			confFilePath: filepath.Join(confDir, "tcp_with_tls.yaml"),
-			opts:         []cerbos.Opt{cerbos.WithTLSInsecure(), cerbos.WithConnectTimeout(connectTimeout)},
+			opts:         []authzen.Opt{authzen.WithTLSInsecure(), authzen.WithTimeout(requestTimeout)},
 		},
 		{
 			name:         "without_tls",
-			tls:          false,
+			urlSchema:    "http",
 			confFilePath: filepath.Join(confDir, "tcp_without_tls.yaml"),
-			opts:         []cerbos.Opt{cerbos.WithPlaintext(), cerbos.WithConnectTimeout(connectTimeout)},
+			opts:         []authzen.Opt{authzen.WithTimeout(requestTimeout)},
 		},
 	}
 
@@ -73,45 +70,11 @@ func TestAdapter(t *testing.T) {
 				defer cancel()
 				require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
 
-				ports := []struct {
-					name string
-					addr string
-				}{
-					// {
-					// 	name: "grpc",
-					// 	addr: "passthrough:///" + s.GRPCAddr(),
-					// },
-					{
-						name: "http",
-						addr: "passthrough:///" + s.HTTPAddr(),
-					},
-				}
-				for _, port := range ports {
-					// Use AuthZEN adapter for HTTP endpoint
-					var httpURL string
-					var adapterOpts []authzen.Opt
+				httpURL := tc.urlSchema + "://" + s.HTTPAddr()
+				c, err := authzen.NewAdapter(httpURL, tc.opts...)
+				require.NoError(t, err)
 
-					if tc.tls {
-						httpURL = "https://" + s.HTTPAddr()
-						// Create HTTP client with insecure TLS for testing
-						httpClient := &http.Client{
-							Transport: &http.Transport{
-								TLSClientConfig: &tls.Config{
-									InsecureSkipVerify: true,
-								},
-							},
-							Timeout: 30 * time.Second,
-						}
-						adapterOpts = append(adapterOpts, authzen.WithHTTPClient(httpClient))
-					} else {
-						httpURL = "http://" + s.HTTPAddr()
-					}
-
-					c, err := authzen.NewAdapter(httpURL, adapterOpts...)
-					require.NoError(t, err)
-
-					t.Run(port.name, tests.TestClient[*authzen.PrincipalCtx, *authzen.Adapter](c))
-				}
+				t.Run("http", tests.TestClient[*authzen.PrincipalCtx, *authzen.Adapter](c))
 			})
 
 			t.Run("uds", func(t *testing.T) {
@@ -149,13 +112,8 @@ func TestAdapter(t *testing.T) {
 					_, err := os.Stat(httpSocketPath)
 					return err == nil
 				}, 1*time.Minute, 100*time.Millisecond)
-				var httpURL string
-				if tc.tls {
-					httpURL = "https://" + s.HTTPAddr()
-				} else {
-					httpURL = "http://" + s.HTTPAddr()
-				}
-				c, err := authzen.NewAdapter(httpURL, authzen.WithInsecureUDS(httpSocketPath))
+				httpURL := tc.urlSchema + "://" + s.HTTPAddr()
+				c, err := authzen.NewAdapter(httpURL, authzen.WithUDS(httpSocketPath), authzen.WithTLSInsecure())
 				require.NoError(t, err)
 
 				t.Run("http", tests.TestClient[*authzen.PrincipalCtx, *authzen.Adapter](c))
@@ -202,12 +160,16 @@ func TestCheckResources(t *testing.T) {
 	launcher, err := testutil.NewCerbosServerLauncher()
 	require.NoError(t, err)
 
+	certsDir := tests.PathToTestDataDir(t, "certs")
 	confDir := tests.PathToTestDataDir(t, "configs")
 	policyDir := tests.PathToTestDataDir(t, "policies")
 
 	s, err := launcher.Launch(testutil.LaunchConf{
 		ConfFilePath: filepath.Join(confDir, "tcp_without_tls.yaml"),
 		PolicyDir:    policyDir,
+		AdditionalMounts: []string{
+			fmt.Sprintf("%s:/certs", certsDir),
+		},
 	})
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = s.Stop() })
@@ -217,7 +179,8 @@ func TestCheckResources(t *testing.T) {
 	require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
 
 	httpURL := "http://" + s.HTTPAddr()
-	client, err := authzen.NewClient(httpURL)
+	// httpURL := "http://localhost:3592"
+	client, err := authzen.NewClient(httpURL, authzen.WithTLSInsecure())
 	require.NoError(t, err)
 
 	// Generate JWT token for auxData

@@ -69,35 +69,54 @@ func WithUserAgent(userAgent string) Opt {
 	}
 }
 
-func WithUDS(socketPath string) Opt {
+func WithTLSConfig(tlsConf *tls.Config) Opt {
 	return func(c *Client) {
-		dialer := &net.Dialer{}
-		c.httpClient.Transport = &http.Transport{
-			DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
-				return dialer.DialContext(ctx, "unix", socketPath)
-			},
+		if t, _ := c.httpClient.Transport.(*http.Transport); t == nil {
+			c.httpClient.Transport = &http.Transport{
+				TLSClientConfig: tlsConf,
+			}
+		} else {
+			t.TLSClientConfig = tlsConf
 		}
 	}
 }
 
-func WithInsecureUDS(socketPath string) Opt {
+// WithTLSInsecure enables skipping TLS certificate verification.
+func WithTLSInsecure() Opt {
+	return func(c *Client) {
+		tlsConf := tls.Config{
+			InsecureSkipVerify: true,
+		}
+		if t, _ := c.httpClient.Transport.(*http.Transport); t == nil {
+			c.httpClient.Transport = &http.Transport{
+				TLSClientConfig: &tlsConf,
+			}
+		} else {
+			t.TLSClientConfig = &tlsConf
+		}
+	}
+}
+
+// WithUDS configures the client to connect over Unix Domain Socket
+func WithUDS(socketPath string) Opt {
 	return func(c *Client) {
 		dialer := &net.Dialer{}
-		c.httpClient.Transport = &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-			DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
-				return dialer.DialContext(ctx, "unix", socketPath)
-			},
+		dialContext := func(ctx context.Context, _, _ string) (net.Conn, error) {
+			return dialer.DialContext(ctx, "unix", socketPath)
+		}
+		if t, _ := c.httpClient.Transport.(*http.Transport); t == nil {
+			c.httpClient.Transport = &http.Transport{
+				DialContext: dialContext,
+			}
+		} else {
+			t.DialContext = dialContext
 		}
 	}
 }
 
 // NewClient creates a new AuthZEN HTTP client.
-// The baseURL should be the full URL to the Cerbos server (e.g., "https://localhost:3592").
+// The baseURL should be the full URL to the Cerbos server (e.g., "https://pdp.example.com:3592").
 func NewClient(baseURL string, opts ...Opt) (*Client, error) {
-	// Validate and normalize base URL
 	if baseURL == "" {
 		return nil, fmt.Errorf("baseURL cannot be empty")
 	}
@@ -119,7 +138,6 @@ func NewClient(baseURL string, opts ...Opt) (*Client, error) {
 		userAgent: defaultUserAgent,
 	}
 
-	// Apply options
 	for _, opt := range opts {
 		opt(client)
 	}
@@ -272,6 +290,9 @@ func (c *Client) doRequest(ctx context.Context, method, path string, reqBody, re
 			EmitUnpopulated: false,
 		}
 		jsonData, err := marshaler.Marshal(reqBody)
+		// if strings.Contains(string(jsonData), "aux") {
+		// 	fmt.Println(string(jsonData))
+		// }
 		if err != nil {
 			return fmt.Errorf("failed to marshal request body: %w", err)
 		}
