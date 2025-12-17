@@ -363,11 +363,7 @@ func (c *Client) doRequest(ctx context.Context, method, path string, reqBody, re
 	url := c.baseURL + path
 	var bodyReader io.Reader
 	if reqBody != nil {
-		marshaler := protojson.MarshalOptions{
-			UseProtoNames:   true,
-			EmitUnpopulated: false,
-		}
-		jsonData, err := marshaler.Marshal(reqBody)
+		jsonData, err := protojson.Marshal(reqBody)
 		if err != nil {
 			return fmt.Errorf("failed to marshal request body: %w", err)
 		}

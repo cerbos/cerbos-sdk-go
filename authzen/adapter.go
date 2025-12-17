@@ -10,7 +10,6 @@ import (
 
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	"github.com/cerbos/cerbos-sdk-go/internal"
-	responsev1 "github.com/cerbos/cerbos/api/genpb/cerbos/response/v1"
 )
 
 var (
@@ -143,16 +142,8 @@ func (a *Adapter) CheckResources(ctx context.Context, principal *cerbos.Principa
 	}, nil
 }
 
-// ServerInfo retrieves server information.
-// Note: AuthZEN doesn't have a direct equivalent, so we return minimal information.
 func (a *Adapter) ServerInfo(_ context.Context) (*cerbos.ServerInfo, error) {
-	return &cerbos.ServerInfo{
-		ServerInfoResponse: &responsev1.ServerInfoResponse{
-			Version:   "authzen", // AuthZEN doesn't provide version info
-			Commit:    "",
-			BuildDate: "",
-		},
-	}, nil
+	return nil, fmt.Errorf("ServerInfo: %w", ErrNotImplemented)
 }
 
 // With creates a new adapter instance with the given request options.
