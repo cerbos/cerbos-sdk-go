@@ -35,12 +35,12 @@ const (
 
 // Client provides access to the AuthZEN Authorization API over HTTP.
 type Client struct {
+	stub       svcv1.AuthorizationServiceClient
 	httpClient *http.Client
 	headers    map[string]string
 	opts       *internal.ReqOpt
 	baseURL    string
 	userAgent  string
-	stub       svcv1.AuthorizationServiceClient
 }
 
 // Opt is a functional option for configuring the Client.
@@ -150,7 +150,6 @@ func NewGRPCClient(address string, opts ...cerbos.Opt) (*Client, error) {
 	}
 
 	return &Client{stub: svcv1.NewAuthorizationServiceClient(grpcConn)}, nil
-
 }
 
 // NewClient creates a new AuthZEN HTTP client.

@@ -216,22 +216,87 @@ func TestIsAllowedGRPC(t *testing.T) {
 	confDir := tests.PathToTestDataDir(t, "configs")
 	policyDir := tests.PathToTestDataDir(t, "policies")
 
-	s, err := launcher.Launch(testutil.LaunchConf{
-		ConfFilePath: filepath.Join(confDir, "tcp_without_tls.yaml"),
-		PolicyDir:    policyDir,
-		AdditionalMounts: []string{
-			fmt.Sprintf("%s:/certs", certsDir),
+	testCases := []struct {
+		name         string
+		confFilePath string
+		opts         []cerbos.Opt
+	}{
+		{
+			name:         "with_tls",
+			confFilePath: filepath.Join(confDir, "tcp_with_tls.yaml"),
+			opts:         []cerbos.Opt{cerbos.WithTLSInsecure()},
 		},
-	})
-	require.NoError(t, err)
-	t.Cleanup(func() { _ = s.Stop() })
+		{
+			name:         "without_tls",
+			confFilePath: filepath.Join(confDir, "tcp_without_tls.yaml"),
+			opts:         []cerbos.Opt{cerbos.WithPlaintext()},
+		},
+	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), readyTimeout)
-	defer cancel()
-	require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Run("tcp", func(t *testing.T) {
+				s, err := launcher.Launch(testutil.LaunchConf{
+					ConfFilePath: tc.confFilePath,
+					PolicyDir:    policyDir,
+					AdditionalMounts: []string{
+						fmt.Sprintf("%s:/certs", certsDir),
+					},
+				})
+				require.NoError(t, err)
+				t.Cleanup(func() { _ = s.Stop() })
 
-	client, err := authzen.NewGRPCClient(s.GRPCAddr(), cerbos.WithPlaintext())
-	require.NoError(t, err)
+				ctx, cancel := context.WithTimeout(context.Background(), readyTimeout)
+				defer cancel()
+				require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
+
+				client, err := authzen.NewGRPCClient(s.GRPCAddr(), tc.opts...)
+				require.NoError(t, err)
+
+				runIsAllowedGRPCTest(t, client)
+			})
+
+			t.Run("uds", func(t *testing.T) {
+				if !osSupportsUDS {
+					t.Skip("Sharing a Unix domain socket over a Docker bind mount is not supported on this operating system")
+				}
+
+				tempDir := t.TempDir()
+				s, err := launcher.Launch(testutil.LaunchConf{
+					ConfFilePath: tc.confFilePath,
+					PolicyDir:    policyDir,
+					AdditionalMounts: []string{
+						fmt.Sprintf("%s:/certs", certsDir),
+						fmt.Sprintf("%s:/sock", tempDir),
+					},
+					Cmd: []string{
+						"server",
+						"--set=server.httpListenAddr=unix:/sock/http.sock",
+						"--set=server.grpcListenAddr=unix:/sock/grpc.sock",
+						"--set=server.udsFileMode=0777",
+					},
+				})
+				require.NoError(t, err)
+				t.Cleanup(func() { _ = s.Stop() })
+
+				socketPath := filepath.Join(tempDir, "grpc.sock")
+				require.Eventually(t, func() bool {
+					_, err := os.Stat(socketPath)
+					return err == nil
+				}, 1*time.Minute, 100*time.Millisecond)
+
+				addr := fmt.Sprintf("unix://%s", socketPath)
+				client, err := authzen.NewGRPCClient(addr, tc.opts...)
+				require.NoError(t, err)
+
+				runIsAllowedGRPCTest(t, client)
+			})
+		})
+	}
+}
+
+func runIsAllowedGRPCTest(t *testing.T, client *authzen.Client) {
+	t.Helper()
 
 	// Generate JWT token for auxData
 	token := tests.GenerateToken(t, time.Now().Add(5*time.Minute))

@@ -49,8 +49,8 @@ func NewConfig(address string) *Config {
 		UserAgent:      UserAgent("grpc"),
 	}
 }
-func MkConn(conf *Config) (*grpc.ClientConn, error) {
 
+func MkConn(conf *Config) (*grpc.ClientConn, error) {
 	dialOpts, err := mkDialOpts(conf)
 	if err != nil {
 		return nil, err
