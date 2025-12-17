@@ -44,7 +44,8 @@ type Client struct {
 	userAgent  string
 }
 
-// Opt is a functional option for configuring the Client.
+// Opt is a functional option for configuring the HTTP Client created by NewClient.
+// GRPC client, created by NewGRPCClient, is configured by cerbos.Opt options.
 type Opt func(*Client)
 
 // WithHTTPClient sets a custom HTTP client.
