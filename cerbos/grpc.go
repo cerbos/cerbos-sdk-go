@@ -17,43 +17,44 @@ import (
 	svcv1 "github.com/cerbos/cerbos/api/genpb/cerbos/svc/v1"
 
 	"github.com/cerbos/cerbos-sdk-go/internal"
+	internalgrpc "github.com/cerbos/cerbos-sdk-go/internal/grpc"
 )
 
 var _ Client[*GRPCClient, PrincipalCtx] = (*GRPCClient)(nil)
 
-type Opt func(*internal.Config)
+type Opt func(*internalgrpc.Config)
 
 // WithPlaintext configures the client to connect over h2c.
 func WithPlaintext() Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.Plaintext = true
 	}
 }
 
 // WithTLSAuthority overrides the remote server authority if it is different from what is provided in the address.
 func WithTLSAuthority(authority string) Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.TLSAuthority = authority
 	}
 }
 
 // WithTLSInsecure enables skipping TLS certificate verification.
 func WithTLSInsecure() Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.TLSInsecure = true
 	}
 }
 
 // WithTLSCACert sets the CA certificate chain to use for certificate verification.
 func WithTLSCACert(certPath string) Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.TLSCACert = certPath
 	}
 }
 
 // WithTLSClientCert sets the client certificate to use to authenticate to the server.
 func WithTLSClientCert(cert, key string) Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.TLSClientCert = cert
 		c.TLSClientKey = key
 	}
@@ -61,28 +62,28 @@ func WithTLSClientCert(cert, key string) Opt {
 
 // WithConnectTimeout sets the connection establishment timeout.
 func WithConnectTimeout(timeout time.Duration) Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.ConnectTimeout = timeout
 	}
 }
 
 // WithMaxRetries sets the maximum number of retries per call.
 func WithMaxRetries(retries uint) Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.MaxRetries = retries
 	}
 }
 
 // WithRetryTimeout sets the timeout per retry attempt.
 func WithRetryTimeout(timeout time.Duration) Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.RetryTimeout = timeout
 	}
 }
 
 // WithUserAgent sets the user agent string.
 func WithUserAgent(ua string) Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.UserAgent = ua
 	}
 }
@@ -91,55 +92,55 @@ func WithUserAgent(ua string) Opt {
 // Note that Playground instances are for demonstration purposes only and do not provide any
 // performance or availability guarantees.
 func WithPlaygroundInstance(instance string) Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.PlaygroundInstance = instance
 	}
 }
 
 // WithStreamInterceptors sets the interceptors to be used for streaming gRPC operations.
 func WithStreamInterceptors(interceptors ...grpc.StreamClientInterceptor) Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.StreamInterceptors = interceptors
 	}
 }
 
 // WithUnaryInterceptors sets the interceptors to be used for unary gRPC operations.
 func WithUnaryInterceptors(interceptors ...grpc.UnaryClientInterceptor) Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.UnaryInterceptors = interceptors
 	}
 }
 
 // WithStatsHandler sets the gRPC stats handler for the connection.
 func WithStatsHandler(handler stats.Handler) Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.StatsHandler = handler
 	}
 }
 
 // WithMaxRecvMsgSizeBytes sets the maximum size of a single response payload that can be received from the server.
 func WithMaxRecvMsgSizeBytes(size uint) Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.MaxRecvMsgSizeBytes = size
 	}
 }
 
 // WithMaxSendMsgSizeBytes sets the maximum size of a single request payload that can be sent to the server.
 func WithMaxSendMsgSizeBytes(size uint) Opt {
-	return func(c *internal.Config) {
+	return func(c *internalgrpc.Config) {
 		c.MaxSendMsgSizeBytes = size
 	}
 }
 
 // New creates a new Cerbos client.
 func New(address string, opts ...Opt) (*GRPCClient, error) {
-	conf := internal.NewConfig(address)
+	conf := internalgrpc.NewConfig(address)
 
 	for _, o := range opts {
 		o(conf)
 	}
 
-	grpcConn, err := internal.MkConn(conf)
+	grpcConn, err := internalgrpc.MkConn(conf)
 	if err != nil {
 		return nil, err
 	}

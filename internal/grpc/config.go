@@ -1,7 +1,7 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-package internal
+package grpc
 
 import (
 	"context"
@@ -18,6 +18,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/stats"
+
+	"github.com/cerbos/cerbos-sdk-go/internal"
 )
 
 type Config struct {
@@ -46,7 +48,7 @@ func NewConfig(address string) *Config {
 		ConnectTimeout: 30 * time.Second, //nolint:mnd
 		MaxRetries:     3,                //nolint:mnd
 		RetryTimeout:   2 * time.Second,  //nolint:mnd
-		UserAgent:      UserAgent("grpc"),
+		UserAgent:      internal.UserAgent("grpc"),
 	}
 }
 
@@ -141,7 +143,7 @@ func mkDialOpts(conf *Config) ([]grpc.DialOption, error) {
 }
 
 func MkTLSConfig(conf *Config) (*tls.Config, error) {
-	tlsConf := DefaultTLSConfig()
+	tlsConf := internal.DefaultTLSConfig()
 
 	if conf.TLSInsecure {
 		tlsConf.InsecureSkipVerify = true
@@ -182,7 +184,7 @@ type playgroundInstanceCredentials struct {
 }
 
 func (pic playgroundInstanceCredentials) GetRequestMetadata(_ context.Context, _ ...string) (map[string]string, error) {
-	return map[string]string{PlaygroundInstanceHeader: pic.instance}, nil
+	return map[string]string{internal.PlaygroundInstanceHeader: pic.instance}, nil
 }
 
 func (playgroundInstanceCredentials) RequireTransportSecurity() bool {

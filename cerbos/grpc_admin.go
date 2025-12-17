@@ -21,6 +21,7 @@ import (
 	svcv1 "github.com/cerbos/cerbos/api/genpb/cerbos/svc/v1"
 
 	"github.com/cerbos/cerbos-sdk-go/internal"
+	internalgrpc "github.com/cerbos/cerbos-sdk-go/internal/grpc"
 )
 
 const (
@@ -48,12 +49,12 @@ func NewAdminClientWithCredentials(address, username, password string, opts ...O
 		return nil, err
 	}
 
-	conf := internal.NewConfig(target)
+	conf := internalgrpc.NewConfig(target)
 
 	for _, o := range opts {
 		o(conf)
 	}
-	grpcConn, err := internal.MkConn(conf)
+	grpcConn, err := internalgrpc.MkConn(conf)
 	if err != nil {
 		return nil, err
 	}

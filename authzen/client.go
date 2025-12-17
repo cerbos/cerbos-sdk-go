@@ -18,6 +18,7 @@ import (
 
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	"github.com/cerbos/cerbos-sdk-go/internal"
+	internalgrpc "github.com/cerbos/cerbos-sdk-go/internal/grpc"
 	svcv1 "github.com/cerbos/cerbos/api/genpb/authzen/authorization/v1"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -138,13 +139,13 @@ func mergeWithReqOpts(ctx context.Context, evalContext *Context, opts *internal.
 }
 
 func NewGRPCClient(address string, opts ...cerbos.Opt) (*Client, error) {
-	conf := internal.NewConfig(address)
+	conf := internalgrpc.NewConfig(address)
 
 	for _, o := range opts {
 		o(conf)
 	}
 
-	grpcConn, err := internal.MkConn(conf)
+	grpcConn, err := internalgrpc.MkConn(conf)
 	if err != nil {
 		return nil, err
 	}
