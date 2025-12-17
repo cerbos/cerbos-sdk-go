@@ -137,7 +137,7 @@ func mergeWithReqOpts(ctx context.Context, evalContext *Context, opts *internal.
 	return evalContext.Data()
 }
 
-func NewGrpcClient(address string, opts ...cerbos.Opt) (*Client, error) {
+func NewGRPCClient(address string, opts ...cerbos.Opt) (*Client, error) {
 	conf := internal.NewConfig(address)
 
 	for _, o := range opts {
