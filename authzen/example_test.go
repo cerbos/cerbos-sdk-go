@@ -6,6 +6,7 @@ package authzen_test
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/cerbos/cerbos-sdk-go/authzen"
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
@@ -175,4 +176,76 @@ func ExampleClient_AccessEvaluations() {
 		}
 		log.Printf("Evaluation %d: allowed=%t", i, eval.IsAllowed())
 	}
+}
+
+// ExampleNewGRPCClient demonstrates how to create a gRPC client for AuthZEN.
+func ExampleNewGRPCClient() {
+	// Create a gRPC client with TLS (default)
+	c, err := authzen.NewGRPCClient("localhost:3593", cerbos.WithTLSInsecure())
+	if err != nil {
+		log.Fatalf("Failed to create gRPC client: %v", err)
+	}
+
+	subject := authzen.NewSubject("user", "john").
+		WithCerbosRoles("employee").
+		WithProperty("department", "marketing")
+
+	resource := authzen.NewResource("leave_request", "XX125").
+		WithProperty("owner", "john")
+
+	allowed, err := c.IsAllowed(context.TODO(), subject, resource, "view", nil)
+	if err != nil {
+		log.Fatalf("Failed to check permission: %v", err)
+	}
+
+	log.Printf("Is john allowed to view leave_request XX125: %t", allowed)
+}
+
+// ExampleNewGRPCClient_plaintext demonstrates how to create a gRPC client without TLS.
+func ExampleNewGRPCClient_plaintext() {
+	// Create a gRPC client without TLS (plaintext)
+	c, err := authzen.NewGRPCClient("localhost:3593", cerbos.WithPlaintext())
+	if err != nil {
+		log.Fatalf("Failed to create gRPC client: %v", err)
+	}
+
+	subject := authzen.NewSubject("user", "john").
+		WithCerbosRoles("employee").
+		WithProperty("department", "marketing")
+
+	resource := authzen.NewResource("leave_request", "XX125").
+		WithProperty("owner", "john")
+
+	allowed, err := c.IsAllowed(context.TODO(), subject, resource, "view", nil)
+	if err != nil {
+		log.Fatalf("Failed to check permission: %v", err)
+	}
+
+	log.Printf("Is john allowed to view leave_request XX125: %t", allowed)
+}
+
+// ExampleNewGRPCClient_withOptions demonstrates how to configure the gRPC client with various options.
+func ExampleNewGRPCClient_withOptions() {
+	c, err := authzen.NewGRPCClient(
+		"localhost:3593",
+		cerbos.WithTLSInsecure(),
+		cerbos.WithConnectTimeout(5*time.Second),
+		cerbos.WithMaxRetries(3),
+		cerbos.WithUserAgent("my-app/1.0"),
+	)
+	if err != nil {
+		log.Fatalf("Failed to create gRPC client: %v", err)
+	}
+
+	subject := authzen.NewSubject("user", "john").
+		WithCerbosRoles("employee")
+
+	resource := authzen.NewResource("leave_request", "XX125")
+
+	allowed, err := c.IsAllowed(context.TODO(), subject, resource, "view", nil)
+	if err != nil {
+		log.Fatalf("Failed to check permission: %v", err)
+	}
+
+	log.Printf("Is john allowed to view leave_request XX125: %t", allowed)
 }
