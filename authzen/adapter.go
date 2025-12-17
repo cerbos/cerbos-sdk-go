@@ -47,6 +47,19 @@ func NewAdapter(baseURL string, opts ...Opt) (*Adapter, error) {
 	}, nil
 }
 
+// NewGRPCAdapter creates a new Cerbos client adapter that uses AuthZEN API over GRPC protocol.
+func NewGRPCAdapter(address string, opts ...cerbos.Opt) (*Adapter, error) {
+	client, err := NewGRPCClient(address, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Adapter{
+		client: client,
+		opts:   &internal.ReqOpt{},
+	}, nil
+}
+
 // IsAllowed checks if a principal is allowed to perform an action on a resource.
 func (a *Adapter) IsAllowed(ctx context.Context, principal *cerbos.Principal, resource *cerbos.Resource, action string) (bool, error) {
 	subject, err := FromCerbosPrincipal(principal)

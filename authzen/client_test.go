@@ -38,19 +38,22 @@ func TestAdapter(t *testing.T) {
 		name         string
 		urlSchema    string
 		confFilePath string
-		opts         []authzen.Opt
+		httpOpts     []authzen.Opt
+		grpcOpts     []cerbos.Opt
 	}{
 		{
 			name:         "with_tls",
 			urlSchema:    "https",
 			confFilePath: filepath.Join(confDir, "tcp_with_tls.yaml"),
-			opts:         []authzen.Opt{authzen.WithTLSInsecure(), authzen.WithTimeout(requestTimeout)},
+			httpOpts:     []authzen.Opt{authzen.WithTLSInsecure(), authzen.WithTimeout(requestTimeout)},
+			grpcOpts:     []cerbos.Opt{cerbos.WithTLSInsecure()},
 		},
 		{
 			name:         "without_tls",
 			urlSchema:    "http",
 			confFilePath: filepath.Join(confDir, "tcp_without_tls.yaml"),
-			opts:         []authzen.Opt{authzen.WithTimeout(requestTimeout)},
+			httpOpts:     []authzen.Opt{authzen.WithTimeout(requestTimeout)},
+			grpcOpts:     []cerbos.Opt{cerbos.WithPlaintext()},
 		},
 	}
 
@@ -71,11 +74,20 @@ func TestAdapter(t *testing.T) {
 				defer cancel()
 				require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
 
-				httpURL := tc.urlSchema + "://" + s.HTTPAddr()
-				c, err := authzen.NewAdapter(httpURL, tc.opts...)
-				require.NoError(t, err)
+				t.Run("http", func(t *testing.T) {
+					httpURL := tc.urlSchema + "://" + s.HTTPAddr()
+					c, err := authzen.NewAdapter(httpURL, tc.httpOpts...)
+					require.NoError(t, err)
 
-				t.Run("http", tests.TestClient[*authzen.PrincipalCtxAdapter, *authzen.Adapter](c))
+					t.Run("adapter", tests.TestClient[*authzen.PrincipalCtxAdapter, *authzen.Adapter](c))
+				})
+
+				t.Run("grpc", func(t *testing.T) {
+					c, err := authzen.NewGRPCAdapter(s.GRPCAddr(), tc.grpcOpts...)
+					require.NoError(t, err)
+
+					t.Run("adapter", tests.TestClient[*authzen.PrincipalCtxAdapter, *authzen.Adapter](c))
+				})
 			})
 
 			t.Run("uds", func(t *testing.T) {
@@ -101,23 +113,34 @@ func TestAdapter(t *testing.T) {
 				require.NoError(t, err)
 				t.Cleanup(func() { _ = s.Stop() })
 
-				socketPath := filepath.Join(tempDir, "grpc.sock")
-				require.Eventually(t, func() bool {
-					_, err := os.Stat(socketPath)
-					return err == nil
-				}, 1*time.Minute, 100*time.Millisecond)
-
-				// Use AuthZEN adapter for HTTP over Unix socket
 				httpSocketPath := filepath.Join(tempDir, "http.sock")
+				grpcSocketPath := filepath.Join(tempDir, "grpc.sock")
+
 				require.Eventually(t, func() bool {
 					_, err := os.Stat(httpSocketPath)
 					return err == nil
 				}, 1*time.Minute, 100*time.Millisecond)
-				httpURL := tc.urlSchema + "://" + s.HTTPAddr()
-				c, err := authzen.NewAdapter(httpURL, authzen.WithUDS(httpSocketPath), authzen.WithTLSInsecure())
-				require.NoError(t, err)
 
-				t.Run("http", tests.TestClient[*authzen.PrincipalCtxAdapter, *authzen.Adapter](c))
+				require.Eventually(t, func() bool {
+					_, err := os.Stat(grpcSocketPath)
+					return err == nil
+				}, 1*time.Minute, 100*time.Millisecond)
+
+				t.Run("http", func(t *testing.T) {
+					httpURL := tc.urlSchema + "://" + s.HTTPAddr()
+					c, err := authzen.NewAdapter(httpURL, authzen.WithUDS(httpSocketPath), authzen.WithTLSInsecure())
+					require.NoError(t, err)
+
+					t.Run("adapter", tests.TestClient[*authzen.PrincipalCtxAdapter, *authzen.Adapter](c))
+				})
+
+				t.Run("grpc", func(t *testing.T) {
+					addr := fmt.Sprintf("unix://%s", grpcSocketPath)
+					c, err := authzen.NewGRPCAdapter(addr, tc.grpcOpts...)
+					require.NoError(t, err)
+
+					t.Run("adapter", tests.TestClient[*authzen.PrincipalCtxAdapter, *authzen.Adapter](c))
+				})
 			})
 		})
 	}
