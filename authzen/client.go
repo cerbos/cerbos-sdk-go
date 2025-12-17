@@ -18,7 +18,7 @@ import (
 
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
 	"github.com/cerbos/cerbos-sdk-go/internal"
-	authorizationv1 "github.com/cerbos/cerbos/api/genpb/authzen/authorization/v1"
+	svcv1 "github.com/cerbos/cerbos/api/genpb/authzen/authorization/v1"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -40,6 +40,7 @@ type Client struct {
 	opts       *internal.ReqOpt
 	baseURL    string
 	userAgent  string
+	stub       svcv1.AuthorizationServiceClient
 }
 
 // Opt is a functional option for configuring the Client.
@@ -136,6 +137,22 @@ func mergeWithReqOpts(ctx context.Context, evalContext *Context, opts *internal.
 	return evalContext.Data()
 }
 
+func NewGrpcClient(address string, opts ...cerbos.Opt) (*Client, error) {
+	conf := internal.NewConfig(address)
+
+	for _, o := range opts {
+		o(conf)
+	}
+
+	grpcConn, err := internal.MkConn(conf)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Client{stub: svcv1.NewAuthorizationServiceClient(grpcConn)}, nil
+
+}
+
 // NewClient creates a new AuthZEN HTTP client.
 // The baseURL should be the full URL to the Cerbos server (e.g., "https://pdp.example.com:3592").
 func NewClient(baseURL string, opts ...Opt) (*Client, error) {
@@ -190,15 +207,24 @@ func (c *Client) AccessEvaluation(ctx context.Context, subject *Subject, resourc
 	}
 
 	// Build request
-	req := &authorizationv1.AccessEvaluationRequest{
+	req := &svcv1.AccessEvaluationRequest{
 		Subject:  subject.Proto(),
 		Resource: resource.Proto(),
 		Action:   action.Proto(),
 		Context:  mergeWithReqOpts(ctx, evalContext, c.opts),
 	}
 
+	if c.stub != nil {
+		resp, err := c.stub.AccessEvaluation(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+		return &AccessEvaluationResult{
+			AccessEvaluationResponse: resp,
+		}, nil
+	}
 	// Make HTTP request
-	resp := &authorizationv1.AccessEvaluationResponse{}
+	resp := &svcv1.AccessEvaluationResponse{}
 	if err := c.doRequest(ctx, http.MethodPost, accessEvaluationPath, req, resp); err != nil {
 		return nil, err
 	}
@@ -249,7 +275,7 @@ func (c *Client) AccessEvaluations(ctx context.Context, batchReq *BatchEvaluatio
 		return nil, fmt.Errorf("batch request must contain at least one evaluation")
 	}
 
-	req := &authorizationv1.AccessEvaluationBatchRequest{}
+	req := &svcv1.AccessEvaluationBatchRequest{}
 
 	if batchReq.DefaultSubject != nil {
 		req.Subject = batchReq.DefaultSubject.Proto()
@@ -263,14 +289,14 @@ func (c *Client) AccessEvaluations(ctx context.Context, batchReq *BatchEvaluatio
 	req.Context = mergeWithReqOpts(ctx, batchReq.DefaultContext, c.opts)
 
 	if batchReq.Semantics != "" {
-		req.Options = &authorizationv1.AccessEvaluationsOptions{
+		req.Options = &svcv1.AccessEvaluationsOptions{
 			EvaluationsSemantic: string(batchReq.Semantics),
 		}
 	}
 	// Build evaluations list
-	req.Evaluations = make([]*authorizationv1.AccessEvaluationBatchRequest_Evaluation, len(batchReq.Evaluations))
+	req.Evaluations = make([]*svcv1.AccessEvaluationBatchRequest_Evaluation, len(batchReq.Evaluations))
 	for i, eval := range batchReq.Evaluations {
-		e := &authorizationv1.AccessEvaluationBatchRequest_Evaluation{}
+		e := &svcv1.AccessEvaluationBatchRequest_Evaluation{}
 
 		if eval.Subject != nil {
 			e.Subject = eval.Subject.Proto()
@@ -287,8 +313,16 @@ func (c *Client) AccessEvaluations(ctx context.Context, batchReq *BatchEvaluatio
 
 		req.Evaluations[i] = e
 	}
-
-	resp := &authorizationv1.AccessEvaluationBatchResponse{}
+	if c.stub != nil {
+		resp, err := c.stub.AccessEvaluationBatch(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+		return &AccessEvaluationBatchResult{
+			AccessEvaluationBatchResponse: resp,
+		}, nil
+	}
+	resp := &svcv1.AccessEvaluationBatchResponse{}
 	if err := c.doRequest(ctx, http.MethodPost, accessEvaluationsPath, req, resp); err != nil {
 		return nil, err
 	}
@@ -308,13 +342,20 @@ func (c *Client) With(reqOpts ...cerbos.RequestOpt) *Client {
 }
 
 // GetMetadata retrieves the AuthZEN configuration metadata.
-func (c *Client) GetMetadata(ctx context.Context) (*authorizationv1.MetadataResponse, error) {
-	req := authorizationv1.MetadataRequest{}
-	resp := authorizationv1.MetadataResponse{}
-	if err := c.doRequest(ctx, http.MethodGet, metadataPath, &req, &resp); err != nil {
+func (c *Client) GetMetadata(ctx context.Context) (*svcv1.MetadataResponse, error) {
+	req := &svcv1.MetadataRequest{}
+	if c.stub != nil {
+		resp, err := c.stub.Metadata(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+		return resp, nil
+	}
+	resp := &svcv1.MetadataResponse{}
+	if err := c.doRequest(ctx, http.MethodGet, metadataPath, req, resp); err != nil {
 		return nil, err
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 func (c *Client) doRequest(ctx context.Context, method, path string, reqBody, respBody proto.Message) error {
@@ -326,9 +367,6 @@ func (c *Client) doRequest(ctx context.Context, method, path string, reqBody, re
 			EmitUnpopulated: false,
 		}
 		jsonData, err := marshaler.Marshal(reqBody)
-		// if strings.Contains(string(jsonData), "aux") {
-		// 	fmt.Println(string(jsonData))
-		// }
 		if err != nil {
 			return fmt.Errorf("failed to marshal request body: %w", err)
 		}
