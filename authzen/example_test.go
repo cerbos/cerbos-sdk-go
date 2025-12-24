@@ -14,7 +14,7 @@ import (
 
 // ExampleClient_AccessEvaluation demonstrates how to evaluate a single access request using the AuthZEN API.
 func ExampleClient_AccessEvaluation() {
-	c, err := authzen.NewClient("https://pdp.example.com:3592")
+	c, err := authzen.NewHTTPClient("https://pdp.example.com:3592")
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -48,7 +48,7 @@ func ExampleClient_AccessEvaluation() {
 
 // ExampleClient_IsAllowed demonstrates how to check if an action is allowed using the simplified IsAllowed method.
 func ExampleClient_IsAllowed() {
-	c, err := authzen.NewClient("https://pdp.example.com:3592")
+	c, err := authzen.NewHTTPClient("https://pdp.example.com:3592")
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -70,7 +70,7 @@ func ExampleClient_IsAllowed() {
 
 // ExampleSubjectCtx_IsAllowed demonstrates how to use the subject context for multiple checks.
 func ExampleSubjectCtx_IsAllowed() {
-	c, err := authzen.NewClient("https://pdp.example.com:3592")
+	c, err := authzen.NewHTTPClient("https://pdp.example.com:3592")
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -93,7 +93,7 @@ func ExampleSubjectCtx_IsAllowed() {
 
 // ExampleClient_AccessEvaluations demonstrates how to evaluate multiple access requests in a batch.
 func ExampleClient_AccessEvaluations() {
-	c, err := authzen.NewClient("https://pdp.example.com:3592")
+	c, err := authzen.NewHTTPClient("https://pdp.example.com:3592")
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -139,10 +139,10 @@ func ExampleClient_AccessEvaluations() {
 	}
 }
 
-// ExampleNewGRPCClient demonstrates how to create a gRPC client for AuthZEN.
-func ExampleNewGRPCClient() {
+// ExampleClient demonstrates how to create a gRPC client for AuthZEN.
+func ExampleNewClient() {
 	// Create a gRPC client with TLS (default)
-	c, err := authzen.NewGRPCClient("localhost:3593", cerbos.WithTLSInsecure())
+	c, err := authzen.NewClient("localhost:3593", cerbos.WithTLSInsecure())
 	if err != nil {
 		log.Fatalf("Failed to create gRPC client: %v", err)
 	}
@@ -162,10 +162,10 @@ func ExampleNewGRPCClient() {
 	log.Printf("Is john allowed to view leave_request XX125: %t", allowed)
 }
 
-// ExampleNewGRPCClient_plaintext demonstrates how to create a gRPC client without TLS.
-func ExampleNewGRPCClient_plaintext() {
+// ExampleNewClient_plaintext demonstrates how to create a gRPC client without TLS.
+func ExampleNewClient_plaintext() {
 	// Create a gRPC client without TLS (plaintext)
-	c, err := authzen.NewGRPCClient("localhost:3593", cerbos.WithPlaintext())
+	c, err := authzen.NewClient("localhost:3593", cerbos.WithPlaintext())
 	if err != nil {
 		log.Fatalf("Failed to create gRPC client: %v", err)
 	}
@@ -185,9 +185,9 @@ func ExampleNewGRPCClient_plaintext() {
 	log.Printf("Is john allowed to view leave_request XX125: %t", allowed)
 }
 
-// ExampleNewGRPCClient_withOptions demonstrates how to configure the gRPC client with various options.
-func ExampleNewGRPCClient_withOptions() {
-	c, err := authzen.NewGRPCClient(
+// ExampleNewClient_withOptions demonstrates how to configure the gRPC client with various options.
+func ExampleNewClient_withOptions() {
+	c, err := authzen.NewClient(
 		"localhost:3593",
 		cerbos.WithTLSInsecure(),
 		cerbos.WithConnectTimeout(5*time.Second),

@@ -139,7 +139,7 @@ func mergeWithReqOpts(ctx context.Context, evalContext *Context, opts *internal.
 	return evalContext.Data()
 }
 
-func NewGRPCClient(address string, opts ...cerbos.Opt) (*Client, error) {
+func NewClient(address string, opts ...cerbos.Opt) (*Client, error) {
 	conf := internalgrpc.NewConfig(address)
 
 	for _, o := range opts {
@@ -154,9 +154,9 @@ func NewGRPCClient(address string, opts ...cerbos.Opt) (*Client, error) {
 	return &Client{stub: svcv1.NewAuthorizationServiceClient(grpcConn)}, nil
 }
 
-// NewClient creates a new AuthZEN HTTP client.
+// NewHTTPClient creates a new AuthZEN HTTP client.
 // The baseURL should be the full URL to the Cerbos server (e.g., "https://pdp.example.com:3592").
-func NewClient(baseURL string, opts ...Opt) (*Client, error) {
+func NewHTTPClient(baseURL string, opts ...Opt) (*Client, error) {
 	if baseURL == "" {
 		return nil, fmt.Errorf("baseURL cannot be empty")
 	}

@@ -45,7 +45,7 @@ func TestGetMetadata(t *testing.T) {
 	require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
 
 	httpURL := "http://" + s.HTTPAddr()
-	client, err := authzen.NewClient(httpURL)
+	client, err := authzen.NewHTTPClient(httpURL)
 	require.NoError(t, err)
 
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
@@ -83,7 +83,7 @@ func TestIsAllowed(t *testing.T) {
 	require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
 
 	httpURL := "http://" + s.HTTPAddr()
-	client, err := authzen.NewClient(httpURL, authzen.WithTLSInsecure())
+	client, err := authzen.NewHTTPClient(httpURL, authzen.WithTLSInsecure())
 	require.NoError(t, err)
 
 	// Generate JWT token for auxData
@@ -153,7 +153,7 @@ func TestIsAllowedGRPC(t *testing.T) {
 				defer cancel()
 				require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
 
-				client, err := authzen.NewGRPCClient(s.GRPCAddr(), tc.opts...)
+				client, err := authzen.NewClient(s.GRPCAddr(), tc.opts...)
 				require.NoError(t, err)
 
 				runIsAllowedGRPCTest(t, client)
@@ -189,7 +189,7 @@ func TestIsAllowedGRPC(t *testing.T) {
 				}, 1*time.Minute, 100*time.Millisecond)
 
 				addr := fmt.Sprintf("unix://%s", socketPath)
-				client, err := authzen.NewGRPCClient(addr, tc.opts...)
+				client, err := authzen.NewClient(addr, tc.opts...)
 				require.NoError(t, err)
 
 				runIsAllowedGRPCTest(t, client)
@@ -250,7 +250,7 @@ func TestAccessEvaluation(t *testing.T) {
 
 	httpURL := "http://" + s.HTTPAddr()
 	// httpURL := "http://localhost:3592"
-	client, err := authzen.NewClient(httpURL, authzen.WithTLSInsecure())
+	client, err := authzen.NewHTTPClient(httpURL, authzen.WithTLSInsecure())
 	require.NoError(t, err)
 
 	// Generate JWT token for auxData
@@ -375,7 +375,7 @@ func TestAccessEvaluationsScoped(t *testing.T) {
 	require.NoError(t, s.WaitForReady(ctx), "Server failed to start")
 
 	httpURL := "http://" + s.HTTPAddr()
-	client, err := authzen.NewClient(httpURL)
+	client, err := authzen.NewHTTPClient(httpURL)
 	require.NoError(t, err)
 
 	// Create subject with scope
