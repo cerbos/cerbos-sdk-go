@@ -14,6 +14,16 @@ import (
 	"github.com/cerbos/cerbos-sdk-go/internal"
 )
 
+const (
+	cerbosPrefix        = "cerbos."
+	cerbosRequestID     = cerbosPrefix + "requestId"
+	cerbosAuxData       = cerbosPrefix + "auxData"
+	cerbosIncludeMeta   = cerbosPrefix + "includeMeta"
+	cerbosPolicyVersion = cerbosPrefix + "policyVersion"
+	cerbosRoles         = cerbosPrefix + "roles"
+	cerbosScope         = cerbosPrefix + "scope"
+)
+
 type Subject struct {
 	Obj *authorizationv1.Subject
 	err error
@@ -73,17 +83,17 @@ func (s *Subject) WithPropertyValue(key string, value *structpb.Value) *Subject 
 
 // WithCerbosRoles appends the set of roles to subject's existing roles.
 func (s *Subject) WithCerbosRoles(roles ...string) *Subject {
-	return s.WithProperty("cerbos.roles", roles)
+	return s.WithProperty(cerbosRoles, roles)
 }
 
 // WithCerbosPolicyVersion sets the policy version for this principal.
 func (s *Subject) WithCerbosPolicyVersion(version string) *Subject {
-	return s.WithProperty("cerbos.policyVersion", version)
+	return s.WithProperty(cerbosPolicyVersion, version)
 }
 
 // WithCerbosScope sets the scope this subject belongs to.
 func (s *Subject) WithCerbosScope(scope string) *Subject {
-	return s.WithProperty("cerbos.scope", scope)
+	return s.WithProperty(cerbosScope, scope)
 }
 
 func (s *Subject) ID() string {
@@ -296,7 +306,7 @@ func (c *Context) WithPropertyValue(key string, value *structpb.Value) *Context 
 }
 
 func (c *Context) WithRequestID(id string) *Context {
-	return c.WithProperty("cerbos.requestId", id)
+	return c.WithProperty(cerbosRequestID, id)
 }
 
 func (c *Context) WithAuxData(auxData *requestv1.AuxData) *Context {
@@ -314,11 +324,11 @@ func (c *Context) WithAuxData(auxData *requestv1.AuxData) *Context {
 }
 
 func (c *Context) WithAuxDataMap(auxData map[string]any) *Context {
-	return c.WithProperty("cerbos.auxData", auxData)
+	return c.WithProperty(cerbosAuxData, auxData)
 }
 
 func (c *Context) WithIncludeMeta(include bool) *Context {
-	return c.WithProperty("cerbos.includeMeta", include)
+	return c.WithProperty(cerbosIncludeMeta, include)
 }
 
 func (c *Context) Data() map[string]*structpb.Value {
