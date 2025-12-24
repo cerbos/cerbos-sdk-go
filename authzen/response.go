@@ -48,22 +48,22 @@ func (r *AccessEvaluationResult) GetCerbosResponse() (*responsev1.CheckResources
 		return nil, fmt.Errorf("response is nil")
 	}
 
-	contextVal, ok := r.GetContextValue("cerbos.response")
+	contextVal, ok := r.GetContextValue(CerbosResponse)
 	if !ok {
 		return nil, fmt.Errorf("cerbos.response not found in context")
 	}
 
 	structVal := contextVal.GetStructValue()
 	if structVal == nil {
-		return nil, fmt.Errorf("cerbos.response is not a struct")
+		return nil, fmt.Errorf("%s is not a struct", CerbosResponse)
 	}
 	jsonBytes, err := protojson.Marshal(structVal)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal cerbos.response: %w", err)
+		return nil, fmt.Errorf("failed to marshal %s: %w", CerbosResponse, err)
 	}
 	var cerbosResp responsev1.CheckResourcesResponse
 	if err := protojson.Unmarshal(jsonBytes, &cerbosResp); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal cerbos.response: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal %s: %w", CerbosResponse, err)
 	}
 	return &cerbosResp, nil
 }

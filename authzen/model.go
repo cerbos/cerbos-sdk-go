@@ -22,6 +22,7 @@ const (
 	CerbosPolicyVersion = CerbosPrefix + "policyVersion"
 	CerbosRoles         = CerbosPrefix + "roles"
 	CerbosScope         = CerbosPrefix + "scope"
+	CerbosResponse      = CerbosPrefix + "response"
 )
 
 type Subject struct {
@@ -177,11 +178,11 @@ func (r *Resource) WithPropertyValue(key string, value *structpb.Value) *Resourc
 }
 
 func (r *Resource) WithCerbosPolicyVersion(version string) *Resource {
-	return r.WithProperty("cerbos.policyVersion", version)
+	return r.WithProperty(CerbosPolicyVersion, version)
 }
 
 func (r *Resource) WithCerbosScope(scope string) *Resource {
-	return r.WithProperty("cerbos.scope", scope)
+	return r.WithProperty(CerbosScope, scope)
 }
 
 func (r *Resource) ID() string {
