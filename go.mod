@@ -5,8 +5,8 @@ go 1.24.4
 require (
 	buf.build/go/protovalidate v1.1.0
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/cerbos/cerbos/api/genpb v0.49.0
-	github.com/cerbos/cloud-api v0.1.68
+	github.com/cerbos/cerbos/api/genpb v0.50.0
+	github.com/cerbos/cloud-api v0.1.69
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3
@@ -16,12 +16,12 @@ require (
 	github.com/rs/xid v1.6.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/multierr v1.11.0
-	google.golang.org/grpc v1.77.0
+	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
 )
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.10-20251209175733-2a1774d88802.1 // indirect
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20251209175733-2a1774d88802.1 // indirect
 	cel.dev/expr v0.24.0 // indirect
 	connectrpc.com/connect v1.19.1 // indirect
 	connectrpc.com/otelconnect v0.8.0 // indirect
@@ -39,7 +39,7 @@ require (
 	github.com/docker/docker v28.3.3+incompatible // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/failsafe-go/failsafe-go v0.9.3 // indirect
+	github.com/failsafe-go/failsafe-go v0.9.4 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
@@ -84,13 +84,13 @@ require (
 	go.opentelemetry.io/otel v1.38.0 // indirect
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
-	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/crypto v0.46.0 // indirect
 	golang.org/x/exp v0.0.0-20250813145105-42675adae3e6 // indirect
-	golang.org/x/net v0.47.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
-	golang.org/x/text v0.31.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20251202230838-ff82c1b0f217 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
+	golang.org/x/net v0.48.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/text v0.32.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20251213004720-97cd9d5aeac2 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251213004720-97cd9d5aeac2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
