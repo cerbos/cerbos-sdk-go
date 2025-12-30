@@ -97,6 +97,16 @@ func (p *Principal) WithAttr(key string, value any) *Principal {
 	return p
 }
 
+func (p *Principal) WithAttrValue(k string, v *structpb.Value) *Principal {
+	if p.Obj.Attr == nil {
+		p.Obj.Attr = make(map[string]*structpb.Value)
+	}
+
+	p.Obj.Attr[k] = v
+
+	return p
+}
+
 // ID returns the principal ID.
 func (p *Principal) ID() string {
 	return p.Obj.GetId()
@@ -160,6 +170,17 @@ func (r *Resource) WithAttributes(attr map[string]any) *Resource {
 		r.Obj.Attr[k] = pbVal
 	}
 
+	return r
+}
+
+// WithAttrValue adds a new attribute to the resource.
+// It will overwrite any existing attribute having the same key.
+func (r *Resource) WithAttrValue(key string, value *structpb.Value) *Resource {
+	if r.Obj.Attr == nil {
+		r.Obj.Attr = make(map[string]*structpb.Value)
+	}
+
+	r.Obj.Attr[key] = value
 	return r
 }
 

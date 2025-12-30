@@ -13,12 +13,14 @@ import (
 	"github.com/cerbos/cloud-api/credentials"
 	"github.com/cerbos/cloud-api/hub"
 	"github.com/cerbos/cloud-api/store"
+
+	internalgrpc "github.com/cerbos/cerbos-sdk-go/internal/grpc"
 )
 
 var errMissingCredentials = errors.New("missing credentials: either set the CERBOS_HUB_CLIENT_ID and CERBOS_HUB_CLIENT_SECRET environment variables or use the WithCredentials option when creating the client")
 
 type hubConfig struct {
-	advancedConf *config
+	advancedConf *internalgrpc.Config
 	credentials  hubCredentials
 	apiEndpoint  string
 }
@@ -48,7 +50,7 @@ func WithHubCredentials(clientID, clientSecret string) HubOpt {
 // WithAdvancedOptions is only used for internal testing purposes. Don't use in production.
 func WithAdvancedOptions(opts ...Opt) HubOpt {
 	return func(hubConf *hubConfig) {
-		hubConf.advancedConf = &config{}
+		hubConf.advancedConf = &internalgrpc.Config{}
 		for _, o := range opts {
 			o(hubConf.advancedConf)
 		}
@@ -90,7 +92,7 @@ func NewHubClient(opts ...HubOpt) (*HubClient, error) {
 	baseConf.SetDefaults()
 
 	if hubConf.advancedConf != nil {
-		baseConf.TLS, err = mkTLSConfig(hubConf.advancedConf)
+		baseConf.TLS, err = internalgrpc.MkTLSConfig(hubConf.advancedConf)
 		if err != nil {
 			return nil, fmt.Errorf("failed to build TLS config: %w", err)
 		}

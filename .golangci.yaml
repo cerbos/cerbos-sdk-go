@@ -93,6 +93,7 @@ linters:
           - goconst
           - govet
           - mnd
+          - unused
         path: _test\.go
 
       - linters:

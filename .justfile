@@ -1,7 +1,6 @@
 set dotenv-load := true
 
 export TOOLS_BIN_DIR := join(env_var_or_default("XDG_CACHE_HOME", join(env_var("HOME") , ".cache")), "cerbos-sdk-go/bin")
-export CERBOS_TEST_CONTAINER_TAG := "dev"
 export CERBOS_TEST_DEBUG := "true"
 
 tools_mod_dir := join(justfile_directory(), "tools")
