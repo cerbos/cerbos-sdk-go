@@ -62,10 +62,17 @@ func TestAdminClient(t *testing.T) {
 		"principal.donald_duck.vdefault/acme":        "principal_policies/policy_02_acme.yaml",
 		"principal.donald_duck.vdefault/acme.hr":     "principal_policies/policy_02_acme.hr.yaml",
 		"resource.leave_request.v20210210":           "resource_policies/policy_01.yaml",
+		"resource.album_object.vdefault":             "resource_policies/policy_04.yaml",
 		"resource.leave_request.vdefault":            "resource_policies/policy_05.yaml",
 		"resource.leave_request.vdefault/acme":       "resource_policies/policy_05_acme.yaml",
 		"resource.leave_request.vdefault/acme.hr":    "resource_policies/policy_05_acme.hr.yaml",
 		"resource.leave_request.vdefault/acme.hr.uk": "resource_policies/policy_05_acme.hr.uk.yaml",
+	}
+
+	deleteFromPolicies := func(ids ...string) {
+		for _, id := range ids {
+			delete(policies, id)
+		}
 	}
 
 	schemas := map[string]string{
@@ -83,6 +90,85 @@ func TestAdminClient(t *testing.T) {
 
 		err := ac.AddOrUpdatePolicy(context.Background(), ps)
 		require.NoError(t, err, "Failed to add or update policies")
+	})
+
+	t.Run("DisablePolicy", func(t *testing.T) {
+		testCases := []struct {
+			name                 string
+			ids                  []string
+			wantErr              bool
+			wantDisabledPolicies uint32
+		}{
+			{
+				name:    "BreaksScopeChain",
+				ids:     []string{"resource.leave_request.vdefault/acme.hr"},
+				wantErr: true,
+			},
+			{
+				name:    "RequiredByOtherPolicies",
+				ids:     []string{"derived_roles.apatr_common_roles"},
+				wantErr: true,
+			},
+			{
+				name:                 "Success",
+				ids:                  []string{"resource.album_object.vdefault"},
+				wantDisabledPolicies: 1,
+			},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				have, err := ac.DisablePolicy(context.Background(), tc.ids...)
+				if tc.wantErr {
+					require.Error(t, err, "Expected error but got none")
+				} else {
+					require.NoError(t, err, "Expected no error but got one")
+					require.Equal(t, tc.wantDisabledPolicies, have)
+
+					have, err = ac.EnablePolicy(context.Background(), tc.ids...)
+					require.NoError(t, err, "Failed to enable disabled policies")
+					require.Equal(t, tc.wantDisabledPolicies, have)
+				}
+			})
+		}
+	})
+
+	t.Run("DeletePolicy", func(t *testing.T) {
+		testCases := []struct {
+			name                string
+			ids                 []string
+			wantErr             bool
+			wantDeletedPolicies uint32
+		}{
+			{
+				name:    "BreaksScopeChain",
+				ids:     []string{"resource.leave_request.vdefault/acme.hr"},
+				wantErr: true,
+			},
+			{
+				name:    "RequiredByOtherPolicies",
+				ids:     []string{"derived_roles.apatr_common_roles"},
+				wantErr: true,
+			},
+			{
+				name:                "Success",
+				ids:                 []string{"resource.album_object.vdefault"},
+				wantDeletedPolicies: 1,
+			},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				have, err := ac.DeletePolicy(context.Background(), tc.ids...)
+				if tc.wantErr {
+					require.Error(t, err, "Expected error but got none")
+				} else {
+					require.NoError(t, err, "Expected no error but got one")
+					require.Equal(t, tc.wantDeletedPolicies, have)
+					deleteFromPolicies(tc.ids...)
+				}
+			})
+		}
 	})
 
 	t.Run("ListPolicies", func(t *testing.T) {

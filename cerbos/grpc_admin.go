@@ -237,6 +237,22 @@ func (c *GRPCAdminClient) GetPolicy(ctx context.Context, ids ...string) ([]*poli
 	return res.Policies, nil
 }
 
+func (c *GRPCAdminClient) DeletePolicy(ctx context.Context, ids ...string) (uint32, error) {
+	req := &requestv1.DeletePolicyRequest{
+		Id: ids,
+	}
+	if err := internal.Validate(req); err != nil {
+		return 0, fmt.Errorf("could not validate delete policy request: %w", err)
+	}
+
+	resp, err := c.client.DeletePolicy(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds))
+	if err != nil {
+		return 0, fmt.Errorf("could not delete policy: %w", err)
+	}
+
+	return resp.GetDeletedPolicies(), nil
+}
+
 func (c *GRPCAdminClient) DisablePolicy(ctx context.Context, ids ...string) (uint32, error) {
 	req := &requestv1.DisablePolicyRequest{
 		Id: ids,
