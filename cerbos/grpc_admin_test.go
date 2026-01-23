@@ -345,4 +345,16 @@ func TestAdminClient(t *testing.T) {
 			require.Contains(t, schemas, hs, "Schema %s does not exist in list", hs)
 		}
 	})
+
+	t.Run("PurgeStoreRevisions", func(t *testing.T) {
+		have, err := ac.PurgeStoreRevisions(context.Background(), 2)
+		require.NoError(t, err)
+		require.Equal(t, uint32(2), have)
+
+		t.Run("keepLast", func(t *testing.T) {
+			have, err = ac.PurgeStoreRevisions(context.Background(), 0)
+			require.NoError(t, err)
+			require.Equal(t, uint32(15), have)
+		})
+	})
 }

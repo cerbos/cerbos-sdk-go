@@ -55,6 +55,7 @@ type AdminClient interface {
 	DeleteSchema(ctx context.Context, ids ...string) (uint32, error)
 	ListSchemas(ctx context.Context) ([]string, error)
 	GetSchema(ctx context.Context, ids ...string) ([]*schemav1.Schema, error)
+	PurgeStoreRevisions(ctx context.Context, keepLast uint32) (uint32, error)
 	ReloadStore(ctx context.Context, wait bool) error
 }
 

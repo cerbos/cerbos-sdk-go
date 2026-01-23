@@ -345,6 +345,22 @@ func (c *GRPCAdminClient) GetSchema(ctx context.Context, ids ...string) ([]*sche
 	return res.Schemas, nil
 }
 
+func (c *GRPCAdminClient) PurgeStoreRevisions(ctx context.Context, keepLast uint32) (uint32, error) {
+	req := &requestv1.PurgeStoreRevisionsRequest{
+		KeepLast: keepLast,
+	}
+	if err := internal.Validate(req); err != nil {
+		return 0, fmt.Errorf("could not validate purge store revisions request: %w", err)
+	}
+
+	res, err := c.client.PurgeStoreRevisions(metadata.AppendToOutgoingContext(ctx, c.headers...), req, grpc.PerRPCCredentials(c.creds))
+	if err != nil {
+		return 0, fmt.Errorf("could not purge store revisions: %w", err)
+	}
+
+	return res.AffectedRows, nil
+}
+
 func (c *GRPCAdminClient) ReloadStore(ctx context.Context, wait bool) error {
 	req := &requestv1.ReloadStoreRequest{
 		Wait: wait,
