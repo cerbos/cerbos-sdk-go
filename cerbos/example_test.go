@@ -5,6 +5,7 @@ package cerbos_test
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/cerbos/cerbos-sdk-go/cerbos"
@@ -75,6 +76,48 @@ func ExampleClient_CheckResources() {
 	}
 
 	resXX125 := result.GetResource("XX125", cerbos.MatchResourcePolicyVersion("20210210"))
+	if resXX125.IsAllowed("view:public") {
+		log.Println("Action view:public is allowed on resource XX125")
+	}
+}
+
+// ExampleClient_CheckResources_withBatchingAdapter demonstrates how to make a CheckResources API request with batching.
+func ExampleClient_CheckResources_withBatchingAdapter() {
+	c, err := cerbos.New("dns:///cerbos.ns.svc.cluster.local:3593", cerbos.WithTLSCACert("/path/to/ca.crt"))
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
+
+	batchingClient := cerbos.NewBatchingAdapter(c)
+
+	cc := batchingClient.WithPrincipal(cerbos.NewPrincipal("john").
+		WithRoles("employee").
+		WithPolicyVersion("20210210").
+		WithAttributes(map[string]any{
+			"department": "marketing",
+			"geography":  "GB",
+			"team":       "design",
+		}))
+
+	resources := cerbos.NewResourceBatch()
+
+	// Add any number of resources to the batch
+	for i := range 100 {
+		resources.Add(cerbos.NewResource("leave_request", fmt.Sprintf("resource-%d", i)).WithPolicyVersion("20210210").WithAttributes(map[string]any{
+			"department": "engineering",
+			"geography":  "GB",
+			"id":         "XX225",
+			"owner":      "mary",
+			"team":       "frontend",
+		}), "approve")
+	}
+
+	result, err := cc.CheckResources(context.TODO(), resources)
+	if err != nil {
+		log.Fatalf("Request failed: %v", err)
+	}
+
+	resXX125 := result.GetResource("resource-64", cerbos.MatchResourcePolicyVersion("20210210"))
 	if resXX125.IsAllowed("view:public") {
 		log.Println("Action view:public is allowed on resource XX125")
 	}
