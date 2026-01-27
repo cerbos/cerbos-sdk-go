@@ -8,15 +8,19 @@ import (
 
 	"google.golang.org/grpc/metadata"
 
-	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
 	"github.com/rs/xid"
+
+	auditv1 "github.com/cerbos/cerbos/api/genpb/cerbos/audit/v1"
+	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
 )
 
 type ReqOpt struct {
-	AuxData            *requestv1.AuxData
-	Metadata           metadata.MD
-	RequestIDGenerator func(context.Context) string
-	IncludeMeta        bool
+	AuxData              *requestv1.AuxData
+	Metadata             metadata.MD
+	RequestIDGenerator   func(context.Context) string
+	RequestContext       *auditv1.RequestContext
+	IncludeMeta          bool
+	AllowPartialRequests bool
 }
 
 func (o *ReqOpt) Context(ctx context.Context) context.Context {
@@ -34,4 +38,8 @@ func (o *ReqOpt) RequestID(ctx context.Context) string {
 
 	reqID := xid.New()
 	return reqID.String()
+}
+
+func (o *ReqOpt) ShouldValidate() bool {
+	return o == nil || !o.AllowPartialRequests
 }

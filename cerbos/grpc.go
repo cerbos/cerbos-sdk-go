@@ -154,10 +154,6 @@ type GRPCClient struct {
 }
 
 func (c *GRPCClient) PlanResources(ctx context.Context, principal *Principal, resource *Resource, actions ...string) (*PlanResourcesResponse, error) {
-	if err := internal.IsValid(principal); err != nil {
-		return nil, fmt.Errorf("invalid principal: %w", err)
-	}
-
 	// ResourceQueryPlan.Resource object doesn't have an ID field, since it doesn't describe a concrete instance,
 	// but a set of resources. To workaround resource validation we assign a dummyID to resource.r.Id field,
 	// in case it is empty.
@@ -165,8 +161,14 @@ func (c *GRPCClient) PlanResources(ctx context.Context, principal *Principal, re
 		resource.Obj.Id = "dummyID"
 	}
 
-	if err := internal.IsValid(resource); err != nil {
-		return nil, fmt.Errorf("invalid resource: %w", err)
+	if c.opts.ShouldValidate() {
+		if err := internal.IsValid(principal); err != nil {
+			return nil, fmt.Errorf("invalid principal: %w", err)
+		}
+
+		if err := internal.IsValid(resource); err != nil {
+			return nil, fmt.Errorf("invalid resource: %w", err)
+		}
 	}
 
 	req := &requestv1.PlanResourcesRequest{
@@ -184,6 +186,7 @@ func (c *GRPCClient) PlanResources(ctx context.Context, principal *Principal, re
 	if c.opts != nil {
 		req.AuxData = c.opts.AuxData
 		req.IncludeMeta = c.opts.IncludeMeta
+		req.RequestContext = c.opts.RequestContext
 	}
 
 	result, err := c.stub.PlanResources(c.opts.Context(ctx), req)
@@ -195,12 +198,14 @@ func (c *GRPCClient) PlanResources(ctx context.Context, principal *Principal, re
 }
 
 func (c *GRPCClient) CheckResources(ctx context.Context, principal *Principal, resourceBatch *ResourceBatch) (*CheckResourcesResponse, error) {
-	if err := internal.IsValid(principal); err != nil {
-		return nil, fmt.Errorf("invalid principal: %w", err)
-	}
+	if c.opts.ShouldValidate() {
+		if err := internal.IsValid(principal); err != nil {
+			return nil, fmt.Errorf("invalid principal: %w", err)
+		}
 
-	if err := internal.IsValid(resourceBatch); err != nil {
-		return nil, fmt.Errorf("invalid resource batch; %w", err)
+		if err := internal.IsValid(resourceBatch); err != nil {
+			return nil, fmt.Errorf("invalid resource batch; %w", err)
+		}
 	}
 
 	req := &requestv1.CheckResourcesRequest{
@@ -212,6 +217,7 @@ func (c *GRPCClient) CheckResources(ctx context.Context, principal *Principal, r
 	if c.opts != nil {
 		req.AuxData = c.opts.AuxData
 		req.IncludeMeta = c.opts.IncludeMeta
+		req.RequestContext = c.opts.RequestContext
 	}
 
 	result, err := c.stub.CheckResources(c.opts.Context(ctx), req)
@@ -223,12 +229,14 @@ func (c *GRPCClient) CheckResources(ctx context.Context, principal *Principal, r
 }
 
 func (c *GRPCClient) IsAllowed(ctx context.Context, principal *Principal, resource *Resource, action string) (bool, error) {
-	if err := internal.IsValid(principal); err != nil {
-		return false, fmt.Errorf("invalid principal: %w", err)
-	}
+	if c.opts.ShouldValidate() {
+		if err := internal.IsValid(principal); err != nil {
+			return false, fmt.Errorf("invalid principal: %w", err)
+		}
 
-	if err := internal.IsValid(resource); err != nil {
-		return false, fmt.Errorf("invalid resource: %w", err)
+		if err := internal.IsValid(resource); err != nil {
+			return false, fmt.Errorf("invalid resource: %w", err)
+		}
 	}
 
 	req := &requestv1.CheckResourcesRequest{
@@ -242,6 +250,7 @@ func (c *GRPCClient) IsAllowed(ctx context.Context, principal *Principal, resour
 	if c.opts != nil {
 		req.AuxData = c.opts.AuxData
 		req.IncludeMeta = c.opts.IncludeMeta
+		req.RequestContext = c.opts.RequestContext
 	}
 
 	result, err := c.stub.CheckResources(c.opts.Context(ctx), req)

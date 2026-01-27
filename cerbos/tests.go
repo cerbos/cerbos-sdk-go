@@ -12,6 +12,8 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/testing/protocmp"
 	"google.golang.org/protobuf/types/known/structpb"
 
@@ -29,6 +31,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			AuxDataJWT(token, ""),
 			IncludeMeta(true),
 			Headers("wibble", "wobble"),
+			AddAnnotations(map[string]*structpb.Value{"cerbos.dev/foo": structpb.NewStringValue("bar")}),
 		)
 
 		t.Run("CheckResources", func(t *testing.T) {
@@ -90,9 +93,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			}
 
 			t.Run("Direct", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-				defer cancelFunc()
-
+				ctx := timeoutCtx(t)
 				have, err := c.CheckResources(ctx, principal, resources)
 				check(t, have, err)
 
@@ -100,9 +101,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			})
 
 			t.Run("WithPrincipal", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-				defer cancelFunc()
-
+				ctx := timeoutCtx(t)
 				have, err := c.WithPrincipal(principal).CheckResources(ctx, resources)
 				check(t, have, err)
 
@@ -110,9 +109,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			})
 
 			t.Run("TestRequestIDGenerator", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-				defer cancelFunc()
-
+				ctx := timeoutCtx(t)
 				have, err := c.With(RequestIDGenerator(func(_ context.Context) string {
 					return "foo"
 				})).CheckResources(ctx, principal, resources)
@@ -175,17 +172,13 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			}
 
 			t.Run("Direct", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-				defer cancelFunc()
-
+				ctx := timeoutCtx(t)
 				have, err := c.CheckResources(ctx, principal, resources)
 				check(t, have, err)
 			})
 
 			t.Run("WithPrincipal", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-				defer cancelFunc()
-
+				ctx := timeoutCtx(t)
 				have, err := c.WithPrincipal(principal).CheckResources(ctx, resources)
 				check(t, have, err)
 			})
@@ -248,17 +241,13 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			}
 
 			t.Run("Direct", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-				defer cancelFunc()
-
+				ctx := timeoutCtx(t)
 				have, err := c.CheckResources(ctx, principal, resources)
 				check(t, have, err)
 			})
 
 			t.Run("WithPrincipal", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-				defer cancelFunc()
-
+				ctx := timeoutCtx(t)
 				have, err := c.WithPrincipal(principal).CheckResources(ctx, resources)
 				check(t, have, err)
 			})
@@ -285,18 +274,14 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 				})
 
 			t.Run("Direct", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-				defer cancelFunc()
-
+				ctx := timeoutCtx(t)
 				have, err := c.IsAllowed(ctx, principal, resource, "defer")
 				require.NoError(t, err)
 				require.True(t, have)
 			})
 
 			t.Run("WithPrincipal", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-				defer cancelFunc()
-
+				ctx := timeoutCtx(t)
 				have, err := c.WithPrincipal(principal).IsAllowed(ctx, resource, "defer")
 				require.NoError(t, err)
 				require.True(t, have)
@@ -334,25 +319,19 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			}
 
 			t.Run("Direct", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-				defer cancelFunc()
-
+				ctx := timeoutCtx(t)
 				have, err := cc.PlanResources(ctx, principal, resource, "approve")
 				check(t, have, err)
 			})
 
 			t.Run("WithPrincipal", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-				defer cancelFunc()
-
+				ctx := timeoutCtx(t)
 				have, err := cc.WithPrincipal(principal).PlanResources(ctx, resource, "approve")
 				check(t, have, err)
 			})
 
 			t.Run("TestRequestIDGenerator", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-				defer cancelFunc()
-
+				ctx := timeoutCtx(t)
 				have, err := cc.With(RequestIDGenerator(func(_ context.Context) string {
 					return "foo"
 				})).PlanResources(ctx, principal, resource, "approve")
@@ -361,9 +340,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			})
 
 			t.Run("MultipleActions", func(t *testing.T) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
-				defer cancelFunc()
-
+				ctx := timeoutCtx(t)
 				have, err := cc.PlanResources(ctx, principal, resource, "approve", "view")
 				require.NoError(t, err)
 				require.NotEmpty(t, have.GetRequestId())
@@ -375,5 +352,55 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 				require.Equal(t, "eq", expression.GetOperands()[0].GetExpression().GetOperator())
 			})
 		})
+
+		t.Run("PartialRequests", func(t *testing.T) {
+			principal := NewPrincipal("john")
+			resource := NewResource("leave_request", "").
+				WithPolicyVersion("20210210")
+
+			t.Run("Disabled", func(t *testing.T) {
+				ctx := timeoutCtx(t)
+				// The returned error wouldn't be a gRPC error because it's intercepted locally.
+				_, err := c.CheckResources(ctx, principal, NewResourceBatch().Add(resource))
+				require.Error(t, err)
+				require.Equal(t, codes.Unknown, status.Code(err))
+			})
+
+			t.Run("Enabled", func(t *testing.T) {
+				cc := c.With(AllowPartialRequests(), SetAnnotations(map[string]*structpb.Value{"cerbos.dev/foo": structpb.NewStringValue("bar")}))
+				requireGRPCErr := func(t *testing.T, err error) {
+					t.Helper()
+					require.Error(t, err)
+					// The returned error would be a gRPC error because it goes all the way to the server.
+					require.Equal(t, codes.InvalidArgument, status.Code(err))
+				}
+
+				t.Run("CheckResources", func(t *testing.T) {
+					ctx := timeoutCtx(t)
+					_, err := cc.CheckResources(ctx, principal, NewResourceBatch().Add(resource))
+					requireGRPCErr(t, err)
+				})
+
+				t.Run("IsAllowed", func(t *testing.T) {
+					ctx := timeoutCtx(t)
+					_, err := cc.IsAllowed(ctx, principal, resource, "run")
+					requireGRPCErr(t, err)
+				})
+
+				t.Run("PlanResources", func(t *testing.T) {
+					ctx := timeoutCtx(t)
+					_, err := cc.PlanResources(ctx, principal, resource)
+					requireGRPCErr(t, err)
+				})
+			})
+		})
 	}
+}
+
+func timeoutCtx(t *testing.T) context.Context {
+	t.Helper()
+
+	ctx, cancel := context.WithTimeout(t.Context(), timeout)
+	t.Cleanup(cancel)
+	return ctx
 }
