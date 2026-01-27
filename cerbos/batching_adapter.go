@@ -39,18 +39,20 @@ func (c *BatchingAdapter) WithPrincipal(p *Principal) *BatchingPrincipalCtx {
 }
 
 func (c *BatchingAdapter) CheckResources(ctx context.Context, principal *Principal, resourceBatch *ResourceBatch) (*CheckResourcesResponse, error) {
+	if c.opts.ShouldValidate() {
+		if err := internal.IsValid(principal); err != nil {
+			return nil, fmt.Errorf("invalid principal: %w", err)
+		}
+
+		if err := internal.IsValid(resourceBatch); err != nil {
+			return nil, fmt.Errorf("invalid resource batch; %w", err)
+		}
+	}
+
 	requestID := c.opts.RequestID(ctx)
 	checkResponseProto := &responsev1.CheckResourcesResponse{
 		RequestId: requestID,
 		Results:   make([]*responsev1.CheckResourcesResponse_ResultEntry, 0, len(resourceBatch.Batch)),
-	}
-
-	if err := internal.IsValid(principal); err != nil {
-		return nil, fmt.Errorf("invalid principal: %w", err)
-	}
-
-	if err := internal.IsValid(resourceBatch); err != nil {
-		return nil, fmt.Errorf("invalid resource batch; %w", err)
 	}
 
 	for batch := range slices.Chunk(resourceBatch.Batch, checkResourcesBatchSizeLimit) {
@@ -63,6 +65,7 @@ func (c *BatchingAdapter) CheckResources(ctx context.Context, principal *Princip
 		if c.opts != nil {
 			req.AuxData = c.opts.AuxData
 			req.IncludeMeta = c.opts.IncludeMeta
+			req.RequestContext = c.opts.RequestContext
 		}
 
 		resp, err := c.stub.CheckResources(c.opts.Context(ctx), req)
