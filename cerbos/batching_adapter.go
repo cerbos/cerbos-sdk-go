@@ -30,16 +30,16 @@ func NewBatchingAdapter(client *GRPCClient) *BatchingAdapter {
 	return &BatchingAdapter{GRPCClient: client}
 }
 
-func (c *BatchingAdapter) With(reqOpts ...RequestOpt) *BatchingAdapter {
-	return &BatchingAdapter{GRPCClient: c.GRPCClient.With(reqOpts...)}
+func (ba *BatchingAdapter) With(reqOpts ...RequestOpt) *BatchingAdapter {
+	return &BatchingAdapter{GRPCClient: ba.GRPCClient.With(reqOpts...)}
 }
 
-func (c *BatchingAdapter) WithPrincipal(p *Principal) *BatchingPrincipalCtx {
-	return &BatchingPrincipalCtx{client: c, principal: p}
+func (ba *BatchingAdapter) WithPrincipal(p *Principal) *BatchingPrincipalCtx {
+	return &BatchingPrincipalCtx{client: ba, principal: p}
 }
 
-func (c *BatchingAdapter) CheckResources(ctx context.Context, principal *Principal, resourceBatch *ResourceBatch) (*CheckResourcesResponse, error) {
-	if c.opts.ShouldValidate() {
+func (ba *BatchingAdapter) CheckResources(ctx context.Context, principal *Principal, resourceBatch *ResourceBatch) (*CheckResourcesResponse, error) {
+	if ba.opts.ShouldValidate() {
 		if err := internal.IsValid(principal); err != nil {
 			return nil, fmt.Errorf("invalid principal: %w", err)
 		}
@@ -49,7 +49,7 @@ func (c *BatchingAdapter) CheckResources(ctx context.Context, principal *Princip
 		}
 	}
 
-	requestID := c.opts.RequestID(ctx)
+	requestID := ba.opts.RequestID(ctx)
 	checkResponseProto := &responsev1.CheckResourcesResponse{
 		RequestId: requestID,
 		Results:   make([]*responsev1.CheckResourcesResponse_ResultEntry, 0, len(resourceBatch.Batch)),
@@ -62,13 +62,13 @@ func (c *BatchingAdapter) CheckResources(ctx context.Context, principal *Princip
 			Resources: batch,
 		}
 
-		if c.opts != nil {
-			req.AuxData = c.opts.AuxData
-			req.IncludeMeta = c.opts.IncludeMeta
-			req.RequestContext = c.opts.RequestContext
+		if ba.opts != nil {
+			req.AuxData = ba.opts.AuxData
+			req.IncludeMeta = ba.opts.IncludeMeta
+			req.RequestContext = ba.opts.RequestContext
 		}
 
-		resp, err := c.stub.CheckResources(c.opts.Context(ctx), req)
+		resp, err := ba.stub.CheckResources(ba.opts.Context(ctx), req)
 		if err != nil {
 			return nil, fmt.Errorf("request failed: %w", err)
 		}

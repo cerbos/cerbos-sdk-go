@@ -361,7 +361,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 			t.Run("Disabled", func(t *testing.T) {
 				ctx := timeoutCtx(t)
 				// The returned error wouldn't be a gRPC error because it's intercepted locally.
-				_, err := c.CheckResources(ctx, principal, NewResourceBatch().Add(resource))
+				_, err := c.CheckResources(ctx, principal, NewResourceBatch().Add(resource, "run"))
 				require.Error(t, err)
 				require.Equal(t, codes.Unknown, status.Code(err))
 			})
@@ -377,7 +377,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 
 				t.Run("CheckResources", func(t *testing.T) {
 					ctx := timeoutCtx(t)
-					_, err := cc.CheckResources(ctx, principal, NewResourceBatch().Add(resource))
+					_, err := cc.CheckResources(ctx, principal, NewResourceBatch().Add(resource, "run"))
 					requireGRPCErr(t, err)
 				})
 
