@@ -25,7 +25,6 @@ type Client[C any, P PrincipalContext] interface {
 	// PlanResources creates a query plan for performing the given action on a set of resources of the given kind.
 	PlanResources(ctx context.Context, principal *Principal, resource *Resource, actions ...string) (*PlanResourcesResponse, error)
 	// WithPrincipal sets the principal to be used for subsequent API calls.
-	// WithPrincipal sets the principal to be used for subsequent API calls.
 	WithPrincipal(principal *Principal) P
 }
 
