@@ -5,7 +5,7 @@ go 1.24.4
 require (
 	buf.build/go/protovalidate v1.1.0
 	github.com/cenkalti/backoff/v5 v5.0.3
-	github.com/cerbos/cerbos/api/genpb v0.50.1-0.20260130074401-bfe7b69b5c56
+	github.com/cerbos/cerbos/api/genpb v0.51.0
 	github.com/cerbos/cloud-api v0.1.69
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
