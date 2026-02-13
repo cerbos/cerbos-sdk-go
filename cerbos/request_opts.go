@@ -5,10 +5,13 @@ package cerbos
 
 import (
 	"context"
+	"maps"
 
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/cerbos/cerbos-sdk-go/internal"
+	auditv1 "github.com/cerbos/cerbos/api/genpb/cerbos/audit/v1"
 	requestv1 "github.com/cerbos/cerbos/api/genpb/cerbos/request/v1"
 )
 
@@ -51,5 +54,50 @@ func Headers(keyValues ...string) RequestOpt {
 func RequestIDGenerator(generator func(context.Context) string) RequestOpt {
 	return func(opt *internal.ReqOpt) {
 		opt.RequestIDGenerator = generator
+	}
+}
+
+// AllowPartialRequests enables sending incomplete requests via the SDK.
+// This is to be used in situations where the requests go through an extra layer for enrichment before hitting the PDP.
+func AllowPartialRequests() RequestOpt {
+	return func(c *internal.ReqOpt) {
+		c.AllowPartialRequests = true
+	}
+}
+
+// AddAnnotations adds key-value pairs of metadata to the request context field of Check/Plan requests.
+// These annotations are captured by the PDP audit logs and can be used to attach extra context for log analysis.
+// This method is cumulative: previously added annotations are preserved unless they are overwritten. Use SetAnnotations to clear old values.
+func AddAnnotations(annotations map[string]*structpb.Value) RequestOpt {
+	return func(c *internal.ReqOpt) {
+		if c.RequestContext == nil {
+			c.RequestContext = &auditv1.RequestContext{Annotations: maps.Clone(annotations)}
+			return
+		}
+
+		if c.RequestContext.GetAnnotations() == nil {
+			c.RequestContext.Annotations = make(map[string]*structpb.Value, len(annotations))
+		}
+
+		maps.Insert(c.RequestContext.GetAnnotations(), maps.All(annotations))
+	}
+}
+
+// SetAnnotations adds key-value pairs of metadata to the request context field of Check/Plan requests.
+// These annotations are captured by the PDP audit logs and can be used to attach extra context for log analysis.
+// This method clears any existing annotations. Use AddAnnotations if you want to preserve existing values.
+func SetAnnotations(annotations map[string]*structpb.Value) RequestOpt {
+	return func(c *internal.ReqOpt) {
+		if len(annotations) == 0 {
+			c.RequestContext = nil
+			return
+		}
+
+		if c.RequestContext == nil {
+			c.RequestContext = &auditv1.RequestContext{Annotations: maps.Clone(annotations)}
+			return
+		}
+
+		c.RequestContext.Annotations = maps.Clone(annotations)
 	}
 }

@@ -258,11 +258,6 @@ func (rb *ResourceBatch) Add(resource *Resource, actions ...string) *ResourceBat
 		Resource: resource.Obj,
 	}
 
-	if err := internal.Validate(entry); err != nil {
-		rb.err = multierr.Append(rb.err, fmt.Errorf("invalid resource '%s': %w", resource.Obj.Id, err))
-		return rb
-	}
-
 	rb.Batch = append(rb.Batch, entry)
 	return rb
 }
