@@ -3,7 +3,7 @@ module github.com/cerbos/cerbos-sdk-go
 go 1.24.4
 
 require (
-	buf.build/go/protovalidate v1.1.0
+	buf.build/go/protovalidate v1.1.1
 	github.com/cenkalti/backoff/v5 v5.0.3
 	github.com/cerbos/cerbos/api/genpb v0.51.0
 	github.com/cerbos/cloud-api v0.1.69
