@@ -385,7 +385,7 @@ func (c *Client) doRequest(ctx context.Context, method, path string, reqBody, re
 		req.Header.Set(k, v)
 	}
 
-	resp, err := c.httpClient.Do(req) //nolint:gosec
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("HTTP request failed: %w", err)
 	}
