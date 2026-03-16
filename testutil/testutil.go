@@ -179,7 +179,7 @@ func (csl *CerbosServerLauncher) Launch(conf LaunchConf) (*CerbosServerInstance,
 	}
 
 	if debug {
-		ctx, cancelFunc := context.WithCancel(context.Background()) //nolint:gosec
+		ctx, cancelFunc := context.WithCancel(context.Background())
 		go func() {
 			if err := csl.pool.Client.Logs(docker.LogsOptions{
 				Context:      ctx,
