@@ -13,6 +13,7 @@ import (
 	"github.com/cerbos/cloud-api/credentials"
 	"github.com/cerbos/cloud-api/hub"
 	"github.com/cerbos/cloud-api/store"
+	"golang.org/x/oauth2"
 
 	internalgrpc "github.com/cerbos/cerbos-sdk-go/internal/grpc"
 )
@@ -28,6 +29,7 @@ type hubConfig struct {
 type hubCredentials struct {
 	clientID     string
 	clientSecret string
+	tokenSource  oauth2.TokenSource
 }
 
 type HubOpt func(*hubConfig)
@@ -44,6 +46,13 @@ func WithHubAPIEndpoint(endpoint string) HubOpt {
 func WithHubCredentials(clientID, clientSecret string) HubOpt {
 	return func(hubConf *hubConfig) {
 		hubConf.credentials = hubCredentials{clientID: clientID, clientSecret: clientSecret}
+	}
+}
+
+// WithHubTokenSource sets the token source for authentication.
+func WithHubTokenSource(tokenSource oauth2.TokenSource) HubOpt {
+	return func(hubConf *hubConfig) {
+		hubConf.credentials = hubCredentials{tokenSource: tokenSource}
 	}
 }
 
@@ -76,18 +85,25 @@ func NewHubClient(opts ...HubOpt) (*HubClient, error) {
 		opt(hubConf)
 	}
 
-	if hubConf.credentials.clientID == "" || hubConf.credentials.clientSecret == "" {
-		return nil, errMissingCredentials
+	var creds *credentials.Credentials
+	var err error
+	switch {
+	case hubConf.credentials.clientID != "" && hubConf.credentials.clientSecret != "":
+		creds, err = credentials.New(hubConf.credentials.clientID, hubConf.credentials.clientSecret, "")
+	case hubConf.credentials.tokenSource != nil:
+
+		creds = credentials.NewFromTokenSource(hubConf.credentials.tokenSource)
+	default:
+		err = errMissingCredentials
 	}
 
-	credentials, err := credentials.New(hubConf.credentials.clientID, hubConf.credentials.clientSecret, "")
 	if err != nil {
 		return nil, err
 	}
 
 	baseConf := base.ClientConf{
 		APIEndpoint: hubConf.apiEndpoint,
-		Credentials: credentials,
+		Credentials: creds,
 	}
 	baseConf.SetDefaults()
 
