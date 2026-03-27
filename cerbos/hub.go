@@ -11,9 +11,9 @@ import (
 	localhub "github.com/cerbos/cerbos-sdk-go/cerbos/hub"
 	"github.com/cerbos/cloud-api/base"
 	"github.com/cerbos/cloud-api/credentials"
+	authv1 "github.com/cerbos/cloud-api/genpb/cerbos/cloud/auth/v1"
 	"github.com/cerbos/cloud-api/hub"
 	"github.com/cerbos/cloud-api/store"
-	"golang.org/x/oauth2"
 
 	internalgrpc "github.com/cerbos/cerbos-sdk-go/internal/grpc"
 )
@@ -27,9 +27,9 @@ type hubConfig struct {
 }
 
 type hubCredentials struct {
-	clientID     string
-	clientSecret string
-	tokenSource  oauth2.TokenSource
+	clientID         string
+	clientSecret     string
+	savedCredentials *authv1.SavedCredentials
 }
 
 type HubOpt func(*hubConfig)
@@ -49,10 +49,10 @@ func WithHubCredentials(clientID, clientSecret string) HubOpt {
 	}
 }
 
-// WithHubTokenSource sets the token source for authentication.
-func WithHubTokenSource(tokenSource oauth2.TokenSource) HubOpt {
+// WithSavedCredentials uses saved credentials for authentication.
+func WithSavedCredentials(credentials *authv1.SavedCredentials) HubOpt {
 	return func(hubConf *hubConfig) {
-		hubConf.credentials = hubCredentials{tokenSource: tokenSource}
+		hubConf.credentials = hubCredentials{savedCredentials: credentials}
 	}
 }
 
@@ -90,9 +90,8 @@ func NewHubClient(opts ...HubOpt) (*HubClient, error) {
 	switch {
 	case hubConf.credentials.clientID != "" && hubConf.credentials.clientSecret != "":
 		creds, err = credentials.New(hubConf.credentials.clientID, hubConf.credentials.clientSecret, "")
-	case hubConf.credentials.tokenSource != nil:
-
-		creds = credentials.NewFromTokenSource(hubConf.credentials.tokenSource)
+	case hubConf.credentials.savedCredentials != nil:
+		creds, err = credentials.NewFromSavedCredentials(hubConf.credentials.savedCredentials)
 	default:
 		err = errMissingCredentials
 	}
