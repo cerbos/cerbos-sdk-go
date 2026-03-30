@@ -27,9 +27,9 @@ type hubConfig struct {
 }
 
 type hubCredentials struct {
+	savedCredentials *authv1.SavedCredentials
 	clientID         string
 	clientSecret     string
-	savedCredentials *authv1.SavedCredentials
 }
 
 type HubOpt func(*hubConfig)
