@@ -11,6 +11,7 @@ import (
 	localhub "github.com/cerbos/cerbos-sdk-go/cerbos/hub"
 	"github.com/cerbos/cloud-api/base"
 	"github.com/cerbos/cloud-api/credentials"
+	authv1 "github.com/cerbos/cloud-api/genpb/cerbos/cloud/auth/v1"
 	"github.com/cerbos/cloud-api/hub"
 	"github.com/cerbos/cloud-api/store"
 
@@ -26,8 +27,9 @@ type hubConfig struct {
 }
 
 type hubCredentials struct {
-	clientID     string
-	clientSecret string
+	savedCredentials *authv1.SavedCredentials
+	clientID         string
+	clientSecret     string
 }
 
 type HubOpt func(*hubConfig)
@@ -44,6 +46,13 @@ func WithHubAPIEndpoint(endpoint string) HubOpt {
 func WithHubCredentials(clientID, clientSecret string) HubOpt {
 	return func(hubConf *hubConfig) {
 		hubConf.credentials = hubCredentials{clientID: clientID, clientSecret: clientSecret}
+	}
+}
+
+// WithSavedCredentials uses saved credentials for authentication.
+func WithSavedCredentials(credentials *authv1.SavedCredentials) HubOpt {
+	return func(hubConf *hubConfig) {
+		hubConf.credentials = hubCredentials{savedCredentials: credentials}
 	}
 }
 
@@ -76,18 +85,24 @@ func NewHubClient(opts ...HubOpt) (*HubClient, error) {
 		opt(hubConf)
 	}
 
-	if hubConf.credentials.clientID == "" || hubConf.credentials.clientSecret == "" {
-		return nil, errMissingCredentials
+	var creds *credentials.Credentials
+	var err error
+	switch {
+	case hubConf.credentials.clientID != "" && hubConf.credentials.clientSecret != "":
+		creds, err = credentials.New(hubConf.credentials.clientID, hubConf.credentials.clientSecret, "")
+	case hubConf.credentials.savedCredentials != nil:
+		creds, err = credentials.NewFromSavedCredentials(hubConf.credentials.savedCredentials)
+	default:
+		err = errMissingCredentials
 	}
 
-	credentials, err := credentials.New(hubConf.credentials.clientID, hubConf.credentials.clientSecret, "")
 	if err != nil {
 		return nil, err
 	}
 
 	baseConf := base.ClientConf{
 		APIEndpoint: hubConf.apiEndpoint,
-		Credentials: credentials,
+		Credentials: creds,
 	}
 	baseConf.SetDefaults()
 
