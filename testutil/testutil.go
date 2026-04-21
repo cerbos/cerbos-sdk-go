@@ -106,7 +106,7 @@ type LaunchConf struct {
 }
 
 // NewCerbosServerLauncher creates a launcher for Cerbos containers.
-// By default it launches ghcr.io/cerbos/cerbos:latest. The image and/or tag can be overridden with environment variables.
+// By default it launches ghcr.io/cerbos/cerbos:dev. The image and/or tag can be overridden with environment variables.
 // CERBOS_TEST_CONTAINER_REPO overrides the default container image repository.
 // CERBOS_TEST_CONTAINER_TAG overrides the default container tag.
 // CERBOS_TEST_DEBUG if set to true, configures the launcher to output container logs to stdout and stderr.
