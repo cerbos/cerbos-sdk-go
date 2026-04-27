@@ -11,8 +11,8 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3
 	github.com/jdx/go-netrc v1.0.0
-	github.com/lestrrat-go/jwx/v3 v3.0.13
-	github.com/ory/dockertest/v3 v3.12.0
+	github.com/lestrrat-go/jwx/v4 v4.0.0
+	github.com/ory/dockertest/v4 v4.0.0
 	github.com/rs/xid v1.6.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/multierr v1.11.0
