@@ -31,6 +31,14 @@
             "groupSlug": "go-deps"
         },
         {
+            "matchPackageNames": [
+                "cerbos/actions",
+                "github.com/cerbos/actions"
+            ],
+            "groupName": "cerbos/actions",
+            "groupSlug": "cerbos-actions"
+        },
+        {
             "description": "github.com/lestrrat-go/jwx/v4 requires Go 1.26 with GOEXPERIMENT=jsonv2",
             "matchPackageNames": ["github.com/lestrrat-go/jwx/v3"],
             "matchUpdateTypes": ["major"],

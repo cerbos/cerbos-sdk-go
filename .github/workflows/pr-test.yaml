@@ -4,10 +4,7 @@ on:
   pull_request:
     branches:
       - main
-env:
-  GOTOOLCHAIN: local
-permissions:
-  contents: read
+permissions: {}
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -30,7 +27,9 @@ jobs:
           check-latest: true
 
       - name: Install just
-        uses: ./.github/actions/setup-just
+        uses: cerbos/actions/install-tools@043c4c2f16da4bc1366f362cc41c288b8e48a3ae # main
+        with:
+          tools: just
 
       - name: Test
         env:
@@ -40,7 +39,7 @@ jobs:
           CERBOS_HUB_STORE_ID: "${{ secrets.CERBOS_HUB_STORE_ID }}"
         run: just test
 
-  golangci:
+  lint:
     name: Lint
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -52,18 +51,23 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
-          go-version: 1.26.x
-          check-latest: true
-          cache: false
+          go-version-file: go.mod
 
       - name: Install just
-        uses: ./.github/actions/setup-just
+        uses: cerbos/actions/install-tools@043c4c2f16da4bc1366f362cc41c288b8e48a3ae # main
+        with:
+          tools: just
+
+      - name: Tidy dependencies
+        run: just deps
 
       - name: modernize
         run: just lint-modernize
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
+        uses: cerbos/actions/golangci-lint@043c4c2f16da4bc1366f362cc41c288b8e48a3ae # main
         with:
-          version: latest
           args: "--config=.golangci.yaml -v"
+
+      - name: Check repo status
+        uses: cerbos/actions/check-repo-status@043c4c2f16da4bc1366f362cc41c288b8e48a3ae # main

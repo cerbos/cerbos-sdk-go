@@ -7,6 +7,7 @@
 package tools
 
 import (
-	_ "github.com/golangci/golangci-lint/v2/cmd/golangci-lint"
+	_ "github.com/cerbos/actions/cmd/install-tools"
+	_ "golang.org/x/tools/go/analysis/passes/modernize/cmd/modernize"
 	_ "gotest.tools/gotestsum"
 )
