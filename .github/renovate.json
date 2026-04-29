@@ -32,7 +32,7 @@
         },
         {
             "description": "github.com/lestrrat-go/jwx/v4 requires Go 1.26 with GOEXPERIMENT=jsonv2",
-            "matchPackageNames": "github.com/lestrrat-go/jwx",
+            "matchPackageNames": ["github.com/lestrrat-go/jwx/v3"],
             "matchUpdateTypes": ["major"],
             "enabled": false
         }
