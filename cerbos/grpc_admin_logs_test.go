@@ -10,7 +10,6 @@ import (
 	"errors"
 	"io"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -18,14 +17,6 @@ import (
 	auditv1 "github.com/cerbos/cerbos/api/genpb/cerbos/audit/v1"
 	responsev1 "github.com/cerbos/cerbos/api/genpb/cerbos/response/v1"
 	svcv1 "github.com/cerbos/cerbos/api/genpb/cerbos/svc/v1"
-)
-
-const (
-	adminUsername = "cerbos"
-	adminPassword = "cerbosAdmin"
-
-	connectTimeout = 1 * time.Second
-	readyTimeout   = 5 * time.Second
 )
 
 func TestCollectLogs(t *testing.T) {

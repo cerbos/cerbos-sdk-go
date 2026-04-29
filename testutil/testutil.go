@@ -14,8 +14,9 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v5"
-	"github.com/ory/dockertest/v3"
-	"github.com/ory/dockertest/v3/docker"
+	"github.com/moby/moby/api/pkg/stdcopy"
+	mobyclient "github.com/moby/moby/client"
+	"github.com/ory/dockertest/v4"
 )
 
 const (
@@ -30,14 +31,14 @@ const (
 var errNotReady = errors.New("server not ready")
 
 type CerbosServerLauncher struct {
-	pool *dockertest.Pool
+	pool dockertest.Pool
 	repo string
 	tag  string
 }
 
 type CerbosServerInstance struct {
-	resource *dockertest.Resource
-	pool     *dockertest.Pool
+	resource dockertest.Resource
+	pool     dockertest.Pool
 	Stop     func() error
 	Host     string
 	GRPCPort string
@@ -48,33 +49,31 @@ func (csi *CerbosServerInstance) IsHealthy() (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
-	container, err := csi.pool.Client.InspectContainerWithContext(csi.resource.Container.ID, ctx)
+	inspect, err := csi.pool.Client().ContainerInspect(ctx, csi.resource.Container().ID, mobyclient.ContainerInspectOptions{})
 	if err != nil {
 		return false, fmt.Errorf("failed to inspect container: %w", err)
 	}
 
+	container := inspect.Container
+
 	if !container.State.Running {
-		if !container.State.FinishedAt.IsZero() {
-			return false, backoff.Permanent(fmt.Errorf("container state is %s", container.State.StateString()))
+		if container.State.FinishedAt != "" {
+			return false, backoff.Permanent(fmt.Errorf("container state is %s", container.State.Status))
 		}
 
-		return false, fmt.Errorf("container state is %s", container.State.StateString())
+		return false, fmt.Errorf("container state is %s", container.State.Status)
 	}
 
-	exitCode, err := csi.resource.Exec([]string{"/cerbos", "healthcheck", "--insecure"}, dockertest.ExecOptions{Env: container.Config.Env})
+	exec, err := csi.resource.Exec(ctx, []string{"/cerbos", "healthcheck", "--insecure"})
 	if err != nil {
 		return false, fmt.Errorf("failed to execute healthcheck command: %w", err)
 	}
 
-	return exitCode == 0, nil
+	return exec.ExitCode == 0, nil
 }
 
 func (csi *CerbosServerInstance) WaitForReady(ctx context.Context) error {
-	return csi.pool.Retry(func() error {
-		if err := ctx.Err(); err != nil {
-			return backoff.Permanent(err)
-		}
-
+	return csi.pool.Retry(ctx, 0, func() error {
 		ready, err := csi.IsHealthy()
 		if err != nil {
 			return err
@@ -118,7 +117,7 @@ func NewCerbosServerLauncher() (*CerbosServerLauncher, error) {
 }
 
 func NewCerbosServerLauncherFromImage(repo, tag string) (*CerbosServerLauncher, error) {
-	pool, err := dockertest.NewPool("")
+	pool, err := dockertest.NewPool(context.Background(), "")
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to Docker daemon: %w", err)
 	}
@@ -127,12 +126,8 @@ func NewCerbosServerLauncherFromImage(repo, tag string) (*CerbosServerLauncher, 
 }
 
 func (csl *CerbosServerLauncher) Launch(conf LaunchConf) (*CerbosServerInstance, error) {
-	options := &dockertest.RunOptions{
-		Repository: csl.repo,
-		Tag:        csl.tag,
-		Cmd:        conf.Cmd,
-		Env:        append([]string{"CERBOS_NO_TELEMETRY=1"}, conf.Env...),
-	}
+	var mounts []string
+	env := append([]string{"CERBOS_NO_TELEMETRY=1"}, conf.Env...)
 
 	if conf.ConfFilePath != "" {
 		confDir, err := filepath.Abs(filepath.Dir(conf.ConfFilePath))
@@ -140,8 +135,9 @@ func (csl *CerbosServerLauncher) Launch(conf LaunchConf) (*CerbosServerInstance,
 			return nil, fmt.Errorf("failed to determine absolute path to %q: %w", conf.ConfFilePath, err)
 		}
 		confFile := filepath.Base(conf.ConfFilePath)
-		options.Mounts = append(options.Mounts, fmt.Sprintf("%s:/conf", confDir))
-		options.Env = append(options.Env, "CERBOS_CONFIG=/conf/"+confFile)
+
+		mounts = append(mounts, fmt.Sprintf("%s:/conf", confDir))
+		env = append(env, "CERBOS_CONFIG=/conf/"+confFile)
 	}
 
 	if conf.PolicyDir != "" {
@@ -149,14 +145,19 @@ func (csl *CerbosServerLauncher) Launch(conf LaunchConf) (*CerbosServerInstance,
 		if policyMountPoint == "" {
 			policyMountPoint = "/policies"
 		}
-		options.Mounts = append(options.Mounts, fmt.Sprintf("%s:%s", conf.PolicyDir, policyMountPoint))
+		mounts = append(mounts, fmt.Sprintf("%s:%s", conf.PolicyDir, policyMountPoint))
 	}
 
 	if len(conf.AdditionalMounts) > 0 {
-		options.Mounts = append(options.Mounts, conf.AdditionalMounts...)
+		mounts = append(mounts, conf.AdditionalMounts...)
 	}
 
-	resource, err := csl.pool.RunWithOptions(options)
+	resource, err := csl.pool.Run(context.Background(), csl.repo,
+		dockertest.WithTag(csl.tag),
+		dockertest.WithCmd(conf.Cmd),
+		dockertest.WithMounts(mounts),
+		dockertest.WithEnv(env),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start Cerbos server: %w", err)
 	}
@@ -164,7 +165,7 @@ func (csl *CerbosServerLauncher) Launch(conf LaunchConf) (*CerbosServerInstance,
 	instance := &CerbosServerInstance{
 		resource: resource,
 		pool:     csl.pool,
-		Stop:     func() error { return csl.pool.Purge(resource) },
+		Stop:     func() error { return resource.Close(context.Background()) },
 		Host:     "localhost",
 		GRPCPort: resource.GetPort("3593/tcp"),
 		HTTPPort: resource.GetPort("3592/tcp"),
@@ -181,22 +182,22 @@ func (csl *CerbosServerLauncher) Launch(conf LaunchConf) (*CerbosServerInstance,
 	if debug {
 		ctx, cancelFunc := context.WithCancel(context.Background())
 		go func() {
-			if err := csl.pool.Client.Logs(docker.LogsOptions{
-				Context:      ctx,
-				Container:    resource.Container.ID,
-				OutputStream: os.Stdout,
-				ErrorStream:  os.Stderr,
-				Stdout:       true,
-				Stderr:       true,
-				Follow:       true,
-			}); err != nil {
+			logs, err := csl.pool.Client().ContainerLogs(ctx, resource.Container().ID, mobyclient.ContainerLogsOptions{
+				ShowStdout: true,
+				ShowStderr: true,
+				Follow:     true,
+			})
+			if err != nil {
 				cancelFunc()
+				return
 			}
+
+			_, _ = stdcopy.StdCopy(os.Stdout, os.Stderr, logs)
 		}()
 
 		instance.Stop = func() error {
 			cancelFunc()
-			return csl.pool.Purge(resource)
+			return resource.Close(context.Background())
 		}
 	}
 
