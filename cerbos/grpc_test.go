@@ -133,7 +133,7 @@ func TestGRPCClient(t *testing.T) {
 				c, err := cerbos.New(addr, tc.opts...)
 				require.NoError(t, err)
 
-				t.Run("grpc", cerbos.TestClient[cerbos.PrincipalCtx, *cerbos.GRPCClient](c))
+				t.Run("grpc", cerbos.TestClient(c))
 			})
 		})
 	}

@@ -29,6 +29,12 @@
             ],
             "groupName": "Go deps",
             "groupSlug": "go-deps"
+        },
+        {
+            "description": "github.com/lestrrat-go/jwx/v4 requires Go 1.26 with GOEXPERIMENT=jsonv2",
+            "matchPackageNames": "github.com/lestrrat-go/jwx",
+            "matchUpdateTypes": ["major"],
+            "enabled": false
         }
     ],
     "labels": [
