@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v5"
-	"github.com/moby/moby/api/pkg/stdcopy"
 	mobyclient "github.com/moby/moby/client"
 	"github.com/ory/dockertest/v4"
 )
@@ -182,17 +181,7 @@ func (csl *CerbosServerLauncher) Launch(conf LaunchConf) (*CerbosServerInstance,
 	if debug {
 		ctx, cancelFunc := context.WithCancel(context.Background())
 		go func() {
-			logs, err := csl.pool.Client().ContainerLogs(ctx, resource.Container().ID, mobyclient.ContainerLogsOptions{
-				ShowStdout: true,
-				ShowStderr: true,
-				Follow:     true,
-			})
-			if err != nil {
-				cancelFunc()
-				return
-			}
-
-			_, _ = stdcopy.StdCopy(os.Stdout, os.Stderr, logs)
+			_ = resource.FollowLogs(ctx, os.Stdout, os.Stderr)
 		}()
 
 		instance.Stop = func() error {
