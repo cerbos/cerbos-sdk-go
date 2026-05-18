@@ -5,7 +5,7 @@ go 1.25.5
 toolchain go1.26.2
 
 require (
-	github.com/cerbos/actions v0.0.0-20260505190950-b65bfbd7621d
+	github.com/cerbos/actions v0.0.0-20260515102558-e0522b0533b6
 	golang.org/x/tools v0.44.0
 	gotest.tools/gotestsum v1.13.0
 )
@@ -26,7 +26,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/mod v0.35.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/sys v0.44.0 // indirect
 	golang.org/x/term v0.42.0 // indirect
 	golang.org/x/text v0.36.0 // indirect
 )
