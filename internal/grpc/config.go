@@ -130,11 +130,11 @@ func mkDialOpts(conf *Config) ([]grpc.DialOption, error) {
 
 	defaultCallOptions := []grpc.CallOption{grpc.UseCompressor(gzip.Name)}
 	if conf.MaxRecvMsgSizeBytes > 0 {
-		defaultCallOptions = append(defaultCallOptions, grpc.MaxCallRecvMsgSize(int(conf.MaxRecvMsgSizeBytes))) //nolint:gosec
+		defaultCallOptions = append(defaultCallOptions, grpc.MaxCallRecvMsgSize(int(conf.MaxRecvMsgSizeBytes)))
 	}
 
 	if conf.MaxSendMsgSizeBytes > 0 {
-		defaultCallOptions = append(defaultCallOptions, grpc.MaxCallSendMsgSize(int(conf.MaxSendMsgSizeBytes))) //nolint:gosec
+		defaultCallOptions = append(defaultCallOptions, grpc.MaxCallSendMsgSize(int(conf.MaxSendMsgSizeBytes)))
 	}
 
 	dialOpts = append(dialOpts, grpc.WithDefaultCallOptions(defaultCallOptions...))

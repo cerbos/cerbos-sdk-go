@@ -94,7 +94,11 @@ linters:
           - govet
           - mnd
           - unused
-        path: _test\.go
+        path: '_test\.go'
+
+      - linters:
+          - goconst
+        path: "tests.go"
 
       - linters:
           - errcheck
