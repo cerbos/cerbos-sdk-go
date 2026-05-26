@@ -1,7 +1,7 @@
 github.com/bitfield/gotestdox v0.2.2 h1:x6RcPAbBbErKLnapz1QeAlf3ospg8efBsedU93CDsnE=
 github.com/bitfield/gotestdox v0.2.2/go.mod h1:D+gwtS0urjBrzguAkTM2wodsTQYFHdpx8eqRJ3N+9pY=
-github.com/cerbos/actions v0.0.0-20260515102558-e0522b0533b6 h1:wCwPJflxb7n25PTiBVRZA00ucbpysPjlW++BCMJdzf0=
-github.com/cerbos/actions v0.0.0-20260515102558-e0522b0533b6/go.mod h1:eExHaISF7LBw4Q0GkGL5Xj8ac6l7V7m910yRnj2Mx4c=
+github.com/cerbos/actions v0.0.0-20260525162116-46d5ebb4863c h1:LMge+U87pGMt9D41WLkIW22YQdymZnNr9p7BrvbmA8E=
+github.com/cerbos/actions v0.0.0-20260525162116-46d5ebb4863c/go.mod h1:XCveH9gEaqWxhsZvpFRgnRwfvlGXZNNez5THdsxdycc=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dnephin/pflag v1.0.7 h1:oxONGlWxhmUct0YzKTgrpQv9AUA1wtPBn7zuSjJqptk=
