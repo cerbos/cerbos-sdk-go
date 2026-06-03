@@ -28,6 +28,16 @@ import (
 
 const apiVersion = "api.cerbos.dev/v1"
 
+var ErrNoSuchOutput = errors.New("no such output")
+
+type OutputEvaluationError struct {
+	message string
+}
+
+func (oee *OutputEvaluationError) Error() string {
+	return oee.message
+}
+
 // Principal is a container for principal data.
 type Principal struct {
 	Obj *enginev1.Principal
@@ -290,7 +300,7 @@ func (rb *ResourceBatch) Validate() error {
 type ResourceResult struct {
 	*responsev1.CheckResourcesResponse_ResultEntry
 	err        error
-	outputMap  map[string]*structpb.Value
+	outputMap  map[string]*enginev1.OutputEntry
 	outputOnce sync.Once
 }
 
@@ -314,20 +324,37 @@ func (rr *ResourceResult) buildOutputMap() {
 			return
 		}
 
-		rr.outputMap = make(map[string]*structpb.Value, len(rr.Outputs))
+		rr.outputMap = make(map[string]*enginev1.OutputEntry, len(rr.Outputs))
 		for _, o := range rr.Outputs {
-			rr.outputMap[o.GetSrc()] = o.GetVal()
+			rr.outputMap[o.GetSrc()] = o
 		}
 	})
 }
 
-func (rr *ResourceResult) Output(key string) *structpb.Value {
+// Output returns the value of a policy output expression for the given source ("policy-id#rule-name").
+// It returns [ErrNoSuchOutput] if there is no output for the source, or an *[OutputEvaluationError] if the server failed to evaluate the output expression.
+func (rr *ResourceResult) Output(source string) (*structpb.Value, error) {
 	if rr == nil {
-		return nil
+		return nil, ErrNoSuchOutput
 	}
 
 	rr.buildOutputMap()
-	return rr.outputMap[key]
+
+	output, ok := rr.outputMap[source]
+	if !ok {
+		return nil, ErrNoSuchOutput
+	}
+
+	if message := output.GetError(); message != "" {
+		return nil, &OutputEvaluationError{message: message}
+	}
+
+	val := output.GetVal()
+	if val == nil { // PDP < 0.54
+		return nil, &OutputEvaluationError{message: "output evaluation failed"}
+	}
+
+	return val, nil
 }
 
 // MatchResource is a function that returns true if the given resource is of interest.
