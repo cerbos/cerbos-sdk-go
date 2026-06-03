@@ -202,7 +202,7 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 						"id":         "XX125",
 						"owner":      "john",
 						"team":       "design",
-					}), "view:public", "approve", "create",
+					}), "view:public", "approve", "create", "error",
 			)
 
 			check := func(t *testing.T, have *CheckResourcesResponse, err error) {
@@ -232,12 +232,22 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 				})
 				require.NoError(t, err, "Failed to create wanted output")
 				wantOutput1 := structpb.NewStructValue(wantStruct)
-				haveOutput1 := haveXX125.Output("resource.equipment_request.vdefault#public-view")
+				haveOutput1, err := haveXX125.Output("resource.equipment_request.vdefault#public-view")
+				require.NoError(t, err, "Failed to get output")
 				require.Empty(t, cmp.Diff(wantOutput1, haveOutput1, protocmp.Transform()))
 
 				wantOutput2 := structpb.NewStringValue("create_allowed:john")
-				haveOutput2 := haveXX125.Output("resource.equipment_request.vdefault/acme#rule-001")
+				haveOutput2, err := haveXX125.Output("resource.equipment_request.vdefault/acme#rule-001")
+				require.NoError(t, err, "Failed to get output")
 				require.Empty(t, cmp.Diff(wantOutput2, haveOutput2, protocmp.Transform()))
+
+				_, err = haveXX125.Output("resource.equipment_request.vdefault#no-such-rule")
+				require.ErrorIs(t, err, ErrNoSuchOutput)
+
+				_, err = haveXX125.Output("resource.equipment_request.vdefault#output-error")
+				var outputErr *OutputEvaluationError
+				require.ErrorAs(t, err, &outputErr)
+				require.Equal(t, "division by zero", outputErr.Error())
 			}
 
 			t.Run("Direct", func(t *testing.T) {
