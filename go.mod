@@ -2,12 +2,12 @@ module github.com/cerbos/cerbos-sdk-go
 
 go 1.25.5
 
-toolchain go1.26.3
+toolchain go1.26.4
 
 require (
 	buf.build/go/protovalidate v1.2.0
 	github.com/cenkalti/backoff/v5 v5.0.3
-	github.com/cerbos/cerbos/api/genpb v0.53.1-0.20260602120402-cf85ce6cd99e
+	github.com/cerbos/cerbos/api/genpb v0.53.1-0.20260608060702-9f7b8bba6896
 	github.com/cerbos/cloud-api v0.1.74
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
