@@ -30,8 +30,8 @@ github.com/brianvoe/gofakeit/v6 v6.28.0 h1:Xib46XXuQfmlLS2EXRuJpqcw8St6qSZz75OUo
 github.com/brianvoe/gofakeit/v6 v6.28.0/go.mod h1:Xj58BMSnFqcn/fAQeSK+/PLtC5kSb7FJIq4JyGa8vEs=
 github.com/cenkalti/backoff/v5 v5.0.3 h1:ZN+IMa753KfX5hd8vVaMixjnqRZ3y8CuJKRKj1xcsSM=
 github.com/cenkalti/backoff/v5 v5.0.3/go.mod h1:rkhZdG3JZukswDf7f0cwqPNk4K0sa+F97BxZthm/crw=
-github.com/cerbos/cerbos/api/genpb v0.53.1-0.20260615033322-72a094b6be50 h1:xtMRTVjM6CkzdgI0a+ndEoPz/7A9TQ9oNsfn1I6tUQs=
-github.com/cerbos/cerbos/api/genpb v0.53.1-0.20260615033322-72a094b6be50/go.mod h1:jrnE0A2Sl7IBc/7crPVGTr2T2sEbknMhZ1GIFugp7Mo=
+github.com/cerbos/cerbos/api/genpb v0.53.1-0.20260619063021-2acd6f274cd9 h1:9/Nu6+cOzkQqU1vgQjSdt6YAIV0GLYJsv9Olmlhhvno=
+github.com/cerbos/cerbos/api/genpb v0.53.1-0.20260619063021-2acd6f274cd9/go.mod h1:jrnE0A2Sl7IBc/7crPVGTr2T2sEbknMhZ1GIFugp7Mo=
 github.com/cerbos/cloud-api v0.1.75 h1:A20yXhztWmLhpW9QSkbvZQwHj0Stq6t06xd0e7GywKM=
 github.com/cerbos/cloud-api v0.1.75/go.mod h1:UqRuclIHRGov9WWM5GOxTtNsJrcBqJbBtX6VE8lDFqA=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
