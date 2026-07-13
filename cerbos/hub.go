@@ -89,7 +89,7 @@ func NewHubClient(opts ...HubOpt) (*HubClient, error) {
 	var err error
 	switch {
 	case hubConf.credentials.clientID != "" && hubConf.credentials.clientSecret != "":
-		creds, err = credentials.New(hubConf.credentials.clientID, hubConf.credentials.clientSecret, "")
+		creds, err = credentials.New(hubConf.credentials.clientID, hubConf.credentials.clientSecret)
 	case hubConf.credentials.savedCredentials != nil:
 		creds, err = credentials.NewFromSavedCredentials(hubConf.credentials.savedCredentials)
 	default:
