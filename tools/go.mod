@@ -5,7 +5,7 @@ go 1.25.5
 toolchain go1.26.4
 
 require (
-	github.com/cerbos/actions v0.0.0-20260630142352-d2c46d81505b
+	github.com/cerbos/actions v0.0.0-20260707071607-52f1500fb4d5
 	golang.org/x/tools v0.47.0
 	gotest.tools/gotestsum v1.13.0
 )
