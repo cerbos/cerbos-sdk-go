@@ -6,7 +6,7 @@ toolchain go1.26.5
 
 require (
 	buf.build/go/protovalidate v1.2.0
-	github.com/cenkalti/backoff/v5 v5.0.3
+	github.com/cenkalti/backoff/v7 v7.0.0
 	github.com/cerbos/cerbos/api/genpb v0.53.1-0.20260706072259-a9322b666597
 	github.com/cerbos/cloud-api v0.2.3
 	github.com/ghodss/yaml v1.0.0
@@ -31,6 +31,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/bits-and-blooms/bitset v1.24.4 // indirect
+	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect

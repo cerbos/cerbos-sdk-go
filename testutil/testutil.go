@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cenkalti/backoff/v5"
+	"github.com/cenkalti/backoff/v7"
 	mobyclient "github.com/moby/moby/client"
 	"github.com/ory/dockertest/v4"
 )
