@@ -16,7 +16,7 @@ import (
 type StoreRPCError = store.RPCError
 
 type StoreClient struct {
-	client *store.Client
+	client store.Client
 }
 
 type InvalidRequestError struct {
@@ -41,7 +41,7 @@ func (ire InvalidRequestError) Unwrap() error {
 	return ire.underlying
 }
 
-func NewStoreClient(client *store.Client) *StoreClient {
+func NewStoreClient(client store.Client) *StoreClient {
 	return &StoreClient{client: client}
 }
 
