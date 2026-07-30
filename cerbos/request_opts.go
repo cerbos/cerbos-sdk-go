@@ -31,6 +31,30 @@ func AuxDataJWT(token, keySetID string) RequestOpt {
 
 		opts.AuxData.Jwt.Token = token
 		opts.AuxData.Jwt.KeySetId = keySetID
+		opts.AuxData.Jwts = nil
+	}
+}
+
+type JWT struct {
+	Token    string
+	KeySetID string
+}
+
+// AuxDataJWTs sets named JWTs to be used as auxiliary data for the request.
+func AuxDataJWTs(tokens map[string]JWT) RequestOpt {
+	return func(opts *internal.ReqOpt) {
+		if opts.AuxData == nil {
+			opts.AuxData = &requestv1.AuxData{}
+		}
+
+		if opts.AuxData.Jwts == nil {
+			opts.AuxData.Jwts = make(map[string]*requestv1.AuxData_JWT, len(tokens))
+		}
+
+		opts.AuxData.Jwt = nil
+		for name, jwt := range tokens {
+			opts.AuxData.Jwts[name] = &requestv1.AuxData_JWT{Token: jwt.Token, KeySetId: jwt.KeySetID}
+		}
 	}
 }
 
