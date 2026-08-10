@@ -7,8 +7,8 @@ toolchain go1.26.5
 require (
 	buf.build/go/protovalidate v1.2.0
 	github.com/cenkalti/backoff/v7 v7.0.0
-	github.com/cerbos/cerbos/api/genpb v0.54.1-0.20260806070105-459cd4624c2e
-	github.com/cerbos/cloud-api v0.2.4
+	github.com/cerbos/cerbos/api/genpb v0.54.1-0.20260807071335-69bed7f7dfe7
+	github.com/cerbos/cloud-api v0.2.5
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3
@@ -19,7 +19,7 @@ require (
 	github.com/rs/xid v1.6.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/multierr v1.11.0
-	google.golang.org/grpc v1.82.1
+	google.golang.org/grpc v1.83.0
 	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af
 )
 
@@ -43,7 +43,7 @@ require (
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/failsafe-go/failsafe-go v0.9.6 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/go-logr/logr v1.4.3 // indirect
+	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/goccy/go-json v0.10.6 // indirect
 	github.com/godbus/dbus/v5 v5.2.2 // indirect
