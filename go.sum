@@ -1,7 +1,7 @@
 buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20260709200747-435963d16310.1 h1:fXh8CsdNpjRr8R5vFdqtIxPt/Lno2IIJlYOdZBIZn0w=
 buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20260709200747-435963d16310.1/go.mod h1:tvtbpgaVXZX4g6Pn+AnzFycuRK3MOz5HJfEGeEllXYM=
-buf.build/go/protovalidate v1.2.0 h1:DQVrUWkmGTBij+kOYv/x2LLxwcLaGKMdzShj1/6/3H0=
-buf.build/go/protovalidate v1.2.0/go.mod h1:7rYiQEhqvAipoazpVNBBH2S2f8bjG4huMVy1V2Yofn4=
+buf.build/go/protovalidate v1.3.0 h1:8ITcnZGkAHx6TyhZvro+iET/AyqU8gEWQJK2WsT62ms=
+buf.build/go/protovalidate v1.3.0/go.mod h1:82s5g+rFRj1CZPiLv6OTA31jBu2fpq7mLXHwa9mZfEs=
 cel.dev/expr v0.25.2 h1:K6j46C81hXtZQfuX60cVWQFBJahKSE2gfRbNuvr5bFs=
 cel.dev/expr v0.25.2/go.mod h1:hrXvqGP6G6gyx8UAHSHJ5RGk//1Oj5nXQ2NI02Nrsg4=
 connectrpc.com/connect v1.20.0 h1:6TNDAB+WeNd2uolWNlYczB5E0KNNaVMNUEx8JEUsPmQ=
@@ -26,8 +26,8 @@ github.com/cenkalti/backoff/v5 v5.0.3 h1:ZN+IMa753KfX5hd8vVaMixjnqRZ3y8CuJKRKj1x
 github.com/cenkalti/backoff/v5 v5.0.3/go.mod h1:rkhZdG3JZukswDf7f0cwqPNk4K0sa+F97BxZthm/crw=
 github.com/cenkalti/backoff/v7 v7.0.0 h1:ZP+QAaaOnVUHo+ufFpZ835hbT3x2fy+h2lecVEosZ6A=
 github.com/cenkalti/backoff/v7 v7.0.0/go.mod h1:qcKBGwsu4hpxHtQ8tWYsQ+ifzx2+sS+Xx/3jfe30lI8=
-github.com/cerbos/cerbos/api/genpb v0.54.1-0.20260807071335-69bed7f7dfe7 h1:WALrTd60RWJaRNq8W1bakk+BjQXJMhAVRtAFGM7kMEM=
-github.com/cerbos/cerbos/api/genpb v0.54.1-0.20260807071335-69bed7f7dfe7/go.mod h1:cdaXrWDR1Lj4Vkl2vRPVYo+lD2akYCKyuX53dfA0/ro=
+github.com/cerbos/cerbos/api/genpb v0.55.0 h1:b7MQrsr7RjklFpyPLqkR8cpLlA5ou4YJiovkBqecT9I=
+github.com/cerbos/cerbos/api/genpb v0.55.0/go.mod h1:MZrtj82qdFvQMUIDo2a2tG6WVg6kEIheyUjaGfCvhhg=
 github.com/cerbos/cloud-api v0.2.5 h1:P4NjcnCXEKE6U5MgnIJBHxIePGYGGP9C+peXR6+LDXE=
 github.com/cerbos/cloud-api v0.2.5/go.mod h1:K21dm0KBzIFKBsUAYBN8lDeUGxzk7abh77bTc3rs1vc=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
@@ -130,8 +130,8 @@ github.com/opencontainers/image-spec v1.1.1 h1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJw
 github.com/opencontainers/image-spec v1.1.1/go.mod h1:qpqAh3Dmcf36wStyyWU+kCeDgrGnAve2nCC8+7h8Q0M=
 github.com/ory/dockertest/v4 v4.0.0 h1:i19aFsO/VXE0VrMk4ifnKW4G/KIJ93PCjLOslxXoPME=
 github.com/ory/dockertest/v4 v4.0.0/go.mod h1:b5Ofu8VIxWNhXFvQcLu17pRNQdoUBKtXBW74G4Ygzx8=
-github.com/planetscale/vtprotobuf v0.6.1-0.20260702171159-42e4666be3fb h1:hPLHZl9x6u4qzoeqTQAd+nNd+ex449KUmFn2AwLVBkE=
-github.com/planetscale/vtprotobuf v0.6.1-0.20260702171159-42e4666be3fb/go.mod h1:lSFibFKBqOTeguVJ6ys4z1bEbvQnsLE0zEScpXgUnK4=
+github.com/planetscale/vtprotobuf v0.6.1-0.20260702190614-8ae5a48058df h1:x2ymdov8jnZLDPfI+VVcf/ZvzuZ2u36ieXTuQASMkWI=
+github.com/planetscale/vtprotobuf v0.6.1-0.20260702190614-8ae5a48058df/go.mod h1:araspv2uYKozbi5lrKaqpv1/Uei7eQSml8JCw2A3IRg=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
@@ -201,8 +201,8 @@ google.golang.org/genproto/googleapis/rpc v0.0.0-20260630182238-925bb5da69e7 h1:
 google.golang.org/genproto/googleapis/rpc v0.0.0-20260630182238-925bb5da69e7/go.mod h1:4Hqkh8ycfw05ld/3BWL7rJOSfebL2Q+DVDeRgYgxUU8=
 google.golang.org/grpc v1.83.0 h1:JeNZEKJFbQxArAMl+hiytHauacDNqJUllNfmIMmpqnQ=
 google.golang.org/grpc v1.83.0/go.mod h1:kDyl6SKsiHKt0uylY5gtn5cEjkrIOhQOGDgIc4JGwzQ=
-google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af h1:+5/Sw3GsDNlEmu7TfklWKPdQ0Ykja5VEmq2i817+jbI=
-google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af/go.mod h1:HTf+CrKn2C3g5S8VImy6tdcUvCska2kB7j23XfzDpco=
+google.golang.org/protobuf v1.36.12 h1:pJOKDDOyeXErUroCihFAd5LQuwXBSpVnKGrj5o/fwxc=
+google.golang.org/protobuf v1.36.12/go.mod h1:HTf+CrKn2C3g5S8VImy6tdcUvCska2kB7j23XfzDpco=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntNwaWcugrBjAiHlqqRiVk=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EVd6muEfDQjcINNoR0C8j2r3qZ4Q=

@@ -2,11 +2,11 @@ module github.com/cerbos/cerbos-sdk-go/tools
 
 go 1.25.8
 
-toolchain go1.26.5
+toolchain go1.26.6
 
 require (
 	github.com/cerbos/actions v0.0.0-20260817064154-5d22d281c9b3
-	golang.org/x/tools v0.48.0
+	golang.org/x/tools v0.49.0
 	gotest.tools/gotestsum v1.13.0
 )
 
