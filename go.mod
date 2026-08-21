@@ -1,13 +1,13 @@
 module github.com/cerbos/cerbos-sdk-go
 
-go 1.25.11
+go 1.26.6
 
-toolchain go1.26.5
+toolchain go1.26.7
 
 require (
-	buf.build/go/protovalidate v1.2.0
+	buf.build/go/protovalidate v1.3.0
 	github.com/cenkalti/backoff/v7 v7.0.0
-	github.com/cerbos/cerbos/api/genpb v0.54.1-0.20260807071335-69bed7f7dfe7
+	github.com/cerbos/cerbos/api/genpb v0.55.0
 	github.com/cerbos/cloud-api v0.2.5
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
@@ -20,7 +20,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/multierr v1.11.0
 	google.golang.org/grpc v1.83.0
-	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af
+	google.golang.org/protobuf v1.36.12
 )
 
 require (
@@ -64,7 +64,7 @@ require (
 	github.com/moby/moby/api v1.55.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
-	github.com/planetscale/vtprotobuf v0.6.1-0.20260702171159-42e4666be3fb // indirect
+	github.com/planetscale/vtprotobuf v0.6.1-0.20260702190614-8ae5a48058df // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.24.1 // indirect
 	github.com/rogpeppe/go-internal v1.15.0 // indirect
