@@ -1,6 +1,6 @@
 module github.com/cerbos/cerbos-sdk-go
 
-go 1.26.4
+go 1.26.7
 
 toolchain go1.26.6
 
