@@ -1,8 +1,8 @@
 module github.com/cerbos/cerbos-sdk-go/tools
 
-go 1.26.7
+go 1.26.6
 
-toolchain go1.26.6
+toolchain go1.26.7
 
 require (
 	github.com/cerbos/actions v0.0.0-20260817064154-5d22d281c9b3
