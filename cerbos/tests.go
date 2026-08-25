@@ -54,7 +54,8 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 							"id":         "XX125",
 							"owner":      "john",
 							"team":       "design",
-						}), "view:public", "defer").
+						}), "view:public", "defer",
+				).
 				Add(
 					NewResource("leave_request", "XX125").
 						WithPolicyVersion("20210210").
@@ -64,7 +65,8 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 							"id":         "XX125",
 							"owner":      "john",
 							"team":       "design",
-						}), "approve").
+						}), "approve",
+				).
 				Add(
 					NewResource("leave_request", "XX225").
 						WithPolicyVersion("20210210").
@@ -74,7 +76,8 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 							"id":         "XX225",
 							"owner":      "mary",
 							"team":       "frontend",
-						}), "approve")
+						}), "approve",
+				)
 
 			check := func(t *testing.T, have *CheckResourcesResponse, err error) {
 				t.Helper()
@@ -139,7 +142,8 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 							"id":         "XX125",
 							"owner":      "john",
 							"team":       "design",
-						}), "view:public", "delete", "create").
+						}), "view:public", "delete", "create",
+				).
 				Add(
 					NewResource("leave_request", "XX225").
 						WithScope("acme.hr").
@@ -149,7 +153,8 @@ func TestClient[P PrincipalContext, C Client[C, P]](c Client[C, P]) func(*testin
 							"id":         "XX225",
 							"owner":      "john",
 							"team":       "design",
-						}), "view:public", "delete", "create")
+						}), "view:public", "delete", "create",
+				)
 
 			check := func(t *testing.T, have *CheckResourcesResponse, err error) {
 				t.Helper()

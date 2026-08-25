@@ -1,11 +1,9 @@
 module github.com/cerbos/cerbos-sdk-go/tools
 
-go 1.26.6
-
-toolchain go1.26.7
+go 1.26.7
 
 require (
-	github.com/cerbos/actions v0.0.0-20260817064154-5d22d281c9b3
+	github.com/cerbos/actions v0.0.0-20260825150418-69bd18cfe715
 	golang.org/x/tools v0.49.0
 	gotest.tools/gotestsum v1.13.0
 )
@@ -24,7 +22,7 @@ require (
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/mod v0.39.0 // indirect
+	golang.org/x/mod v0.40.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/term v0.45.0 // indirect
