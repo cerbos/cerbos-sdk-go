@@ -13,8 +13,7 @@ import (
 func DefaultTLSConfig() *tls.Config {
 	// See https://wiki.mozilla.org/Security/Server_Side_TLS
 	return &tls.Config{
-		MinVersion:               tls.VersionTLS12,
-		PreferServerCipherSuites: true,
+		MinVersion: tls.VersionTLS12,
 		CurvePreferences: []tls.CurveID{
 			tls.CurveP256,
 			tls.X25519,
