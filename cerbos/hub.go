@@ -67,7 +67,7 @@ func WithAdvancedOptions(opts ...Opt) HubOpt {
 }
 
 type HubClient struct {
-	storeClient *store.Client
+	storeClient store.Client
 }
 
 // NewHubClient creates a client configured to interact with Cerbos Hub.

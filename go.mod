@@ -8,7 +8,7 @@ require (
 	buf.build/go/protovalidate v1.3.0
 	github.com/cenkalti/backoff/v7 v7.0.0
 	github.com/cerbos/cerbos/api/genpb v0.55.0
-	github.com/cerbos/cloud-api v0.2.6
+	github.com/cerbos/cloud-api v0.2.7
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3
@@ -40,7 +40,7 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/failsafe-go/failsafe-go v0.9.6 // indirect
+	github.com/failsafe-go/failsafe-go v0.9.7 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
