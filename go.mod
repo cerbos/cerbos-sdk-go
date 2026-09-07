@@ -2,16 +2,16 @@ module github.com/cerbos/cerbos-sdk-go
 
 go 1.26.7
 
-toolchain go1.27.0
+toolchain go1.27.1
 
 require (
-	buf.build/go/protovalidate v1.3.0
+	buf.build/go/protovalidate v1.4.0
 	github.com/cenkalti/backoff/v7 v7.0.0
 	github.com/cerbos/cerbos/api/genpb v0.55.0
 	github.com/cerbos/cloud-api v0.2.7
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
 	github.com/jdx/go-netrc v1.0.0
 	github.com/lestrrat-go/jwx/v3 v3.2.0
 	github.com/moby/moby/client v0.5.1
@@ -24,8 +24,9 @@ require (
 )
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20260709200747-435963d16310.1 // indirect
-	cel.dev/expr v0.25.2 // indirect
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.12-20260825204119-511051f7f437.1 // indirect
+	cel.dev/cel-go v0.32.0 // indirect
+	cel.dev/expr v0.25.3 // indirect
 	connectrpc.com/connect v1.20.0 // indirect
 	connectrpc.com/otelconnect v0.9.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
@@ -46,7 +47,6 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/goccy/go-json v0.10.6 // indirect
 	github.com/godbus/dbus/v5 v5.2.2 // indirect
-	github.com/google/cel-go v0.30.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.8 // indirect
@@ -77,11 +77,11 @@ require (
 	go.opentelemetry.io/otel/trace v1.44.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.55.0 // indirect
-	golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a // indirect
+	golang.org/x/exp v0.0.0-20260820142414-ca536658362e // indirect
 	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.41.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260706201446-f0a921348800 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260630182238-925bb5da69e7 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260819154853-08b0e4226688 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260819154853-08b0e4226688 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
