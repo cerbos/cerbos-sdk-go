@@ -3,7 +3,7 @@ module github.com/cerbos/cerbos-sdk-go/tools
 go 1.26.7
 
 require (
-	github.com/cerbos/actions v0.0.0-20260907061840-2982bc2c3b7a
+	github.com/cerbos/actions v0.0.0-20260907085500-0d9b5e1ccb07
 	golang.org/x/tools v0.50.0
 	gotest.tools/gotestsum v1.13.0
 )
