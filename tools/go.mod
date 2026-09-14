@@ -4,7 +4,7 @@ go 1.26.7
 
 require (
 	github.com/cerbos/actions v0.0.0-20260907061840-2982bc2c3b7a
-	golang.org/x/tools v0.49.0
+	golang.org/x/tools v0.50.0
 	gotest.tools/gotestsum v1.13.0
 )
 
@@ -22,9 +22,9 @@ require (
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/mod v0.40.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/mod v0.41.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/term v0.45.0 // indirect
 	golang.org/x/text v0.40.0 // indirect
 )
