@@ -27,7 +27,7 @@ jobs:
           check-latest: true
 
       - name: Install just
-        uses: cerbos/actions/install-tools@2982bc2c3b7a118fb59778962ef3de549f9aca30 # main
+        uses: cerbos/actions/install-tools@0d9b5e1ccb075eb3b6817a6f1718b9c189498c0a # main
         with:
           tools: just
 
@@ -54,7 +54,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Install just
-        uses: cerbos/actions/install-tools@2982bc2c3b7a118fb59778962ef3de549f9aca30 # main
+        uses: cerbos/actions/install-tools@0d9b5e1ccb075eb3b6817a6f1718b9c189498c0a # main
         with:
           tools: just
 
@@ -65,9 +65,9 @@ jobs:
         run: just lint-modernize
 
       - name: golangci-lint
-        uses: cerbos/actions/golangci-lint@2982bc2c3b7a118fb59778962ef3de549f9aca30 # main
+        uses: cerbos/actions/golangci-lint@0d9b5e1ccb075eb3b6817a6f1718b9c189498c0a # main
         with:
           args: "--config=.golangci.yaml -v"
 
       - name: Check repo status
-        uses: cerbos/actions/check-repo-status@2982bc2c3b7a118fb59778962ef3de549f9aca30 # main
+        uses: cerbos/actions/check-repo-status@0d9b5e1ccb075eb3b6817a6f1718b9c189498c0a # main
