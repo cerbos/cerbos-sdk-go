@@ -64,10 +64,11 @@ func NewAdminClientWithCredentials(address, username, password string, opts ...O
 		basicAuth = basicAuth.Insecure()
 	}
 
-	return &GRPCAdminClient{client: svcv1.NewCerbosAdminServiceClient(grpcConn), creds: basicAuth}, nil
+	return &GRPCAdminClient{conn: grpcConn, client: svcv1.NewCerbosAdminServiceClient(grpcConn), creds: basicAuth}, nil
 }
 
 type GRPCAdminClient struct {
+	conn    *grpc.ClientConn
 	client  svcv1.CerbosAdminServiceClient
 	creds   credentials.PerRPCCredentials
 	headers []string
@@ -375,4 +376,8 @@ func (c *GRPCAdminClient) ReloadStore(ctx context.Context, wait bool) error {
 	}
 
 	return nil
+}
+
+func (c *GRPCAdminClient) Close() error {
+	return c.conn.Close()
 }

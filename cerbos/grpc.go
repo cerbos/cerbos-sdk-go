@@ -145,10 +145,11 @@ func New(address string, opts ...Opt) (*GRPCClient, error) {
 		return nil, err
 	}
 
-	return &GRPCClient{stub: svcv1.NewCerbosServiceClient(grpcConn)}, nil
+	return &GRPCClient{conn: grpcConn, stub: svcv1.NewCerbosServiceClient(grpcConn)}, nil
 }
 
 type GRPCClient struct {
+	conn *grpc.ClientConn
 	stub svcv1.CerbosServiceClient
 	opts *internal.ReqOpt
 }
@@ -281,11 +282,15 @@ func (c *GRPCClient) With(reqOpts ...RequestOpt) *GRPCClient {
 		ro(opts)
 	}
 
-	return &GRPCClient{opts: opts, stub: c.stub}
+	return &GRPCClient{opts: opts, stub: c.stub, conn: c.conn}
 }
 
 func (c *GRPCClient) WithPrincipal(p *Principal) PrincipalCtx {
 	return PrincipalCtx{client: c, principal: p}
+}
+
+func (c *GRPCClient) Close() error {
+	return c.conn.Close()
 }
 
 type PrincipalCtx struct {
