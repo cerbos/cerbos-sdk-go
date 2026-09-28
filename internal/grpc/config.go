@@ -14,6 +14,7 @@ import (
 
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/retry"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
@@ -74,7 +75,7 @@ func mkDialOpts(conf *Config) ([]grpc.DialOption, error) {
 	}
 
 	if conf.ConnectTimeout > 0 {
-		dialOpts = append(dialOpts, grpc.WithConnectParams(grpc.ConnectParams{MinConnectTimeout: conf.ConnectTimeout}))
+		dialOpts = append(dialOpts, grpc.WithConnectParams(grpc.ConnectParams{MinConnectTimeout: conf.ConnectTimeout, Backoff: backoff.DefaultConfig}))
 	}
 
 	streamInterceptors := conf.StreamInterceptors
