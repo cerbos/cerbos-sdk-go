@@ -1252,12 +1252,12 @@ func (ev *ExportVariables) build() (*policyv1.Policy, error) {
 }
 
 // MatchExpr matches a single expression.
-func MatchExpr(expr string) match {
+func MatchExpr(expr string) match { //nolint:revive
 	return matchExpr(expr)
 }
 
 // MatchAllOf matches all of the expressions (logical AND).
-func MatchAllOf(m ...match) match {
+func MatchAllOf(m ...match) match { //nolint:revive
 	return matchList{
 		list: m,
 		cons: func(exprList []*policyv1.Match) *policyv1.Match {
@@ -1267,7 +1267,7 @@ func MatchAllOf(m ...match) match {
 }
 
 // MatchAnyOf  matches any of the expressions (logical OR).
-func MatchAnyOf(m ...match) match {
+func MatchAnyOf(m ...match) match { //nolint:revive
 	return matchList{
 		list: m,
 		cons: func(exprList []*policyv1.Match) *policyv1.Match {
@@ -1277,7 +1277,7 @@ func MatchAnyOf(m ...match) match {
 }
 
 // MatchNoneOf  matches none of the expressions (logical NOT).
-func MatchNoneOf(m ...match) match {
+func MatchNoneOf(m ...match) match { //nolint:revive
 	return matchList{
 		list: m,
 		cons: func(exprList []*policyv1.Match) *policyv1.Match {
