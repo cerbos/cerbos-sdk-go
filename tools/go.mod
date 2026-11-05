@@ -3,7 +3,7 @@ module github.com/cerbos/cerbos-sdk-go/tools
 go 1.26.10
 
 require (
-	github.com/cerbos/actions v0.0.0-20260928054752-a047f57c5d47
+	github.com/cerbos/actions v0.0.0-20261102065444-d175c7439326
 	golang.org/x/tools v0.52.0
 	gotest.tools/gotestsum v1.13.0
 )
@@ -15,7 +15,7 @@ require (
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/google/renameio/v2 v2.0.2 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
-	github.com/lmittmann/tint v1.2.0 // indirect
+	github.com/lmittmann/tint v1.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
