@@ -1,6 +1,6 @@
 module github.com/cerbos/cerbos-sdk-go
 
-go 1.27.3
+go 1.26.10
 
 require (
 	buf.build/go/protovalidate v1.4.0
