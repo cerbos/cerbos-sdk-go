@@ -4,8 +4,8 @@ go 1.26.10
 
 require (
 	buf.build/go/protovalidate v1.4.0
-	github.com/cenkalti/backoff/v7 v7.0.2
-	github.com/cerbos/cerbos/api/genpb v0.57.1-0.20261026115804-c8c7d5b03127
+	github.com/cenkalti/backoff/v7 v7.0.3
+	github.com/cerbos/cerbos/api/genpb v0.57.1-0.20261106093521-6340b1879cfb
 	github.com/cerbos/cloud-api v0.2.11
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
