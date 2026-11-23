@@ -5,14 +5,14 @@ go 1.26.10
 require (
 	buf.build/go/protovalidate v1.4.0
 	github.com/cenkalti/backoff/v7 v7.0.3
-	github.com/cerbos/cerbos/api/genpb v0.57.1-0.20261116062716-00d96d0e0926
+	github.com/cerbos/cerbos/api/genpb v0.57.1-0.20261119091315-14d4e31ab2ac
 	github.com/cerbos/cloud-api v0.2.11
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
 	github.com/jdx/go-netrc v1.0.0
 	github.com/lestrrat-go/jwx/v3 v3.4.0
-	github.com/moby/moby/client v0.6.2
+	github.com/moby/moby/client v0.6.3
 	github.com/ory/dockertest/v4 v4.0.1
 	github.com/rs/xid v1.6.0
 	github.com/stretchr/testify v1.12.1
@@ -58,7 +58,7 @@ require (
 	github.com/lestrrat-go/option/v2 v2.0.0 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
-	github.com/moby/moby/api v1.56.1 // indirect
+	github.com/moby/moby/api v1.57.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20260702190614-8ae5a48058df // indirect
